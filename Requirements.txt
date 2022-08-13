@@ -1,1 +1,7 @@
 Django~=4.0.6
+tabula-py~=2.4.0
+openpyxl
+gunicorn
+psycopg2
+django-cors-headers
+djangorestframework
