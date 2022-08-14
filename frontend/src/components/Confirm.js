@@ -23,12 +23,6 @@ export class Confirm extends Component {
     } = this.props;
     return (
       <MuiThemeProvider>
-        <>
-          <Dialog
-            open
-            fullWidth
-            maxWidth='sm'
-          >
             <AppBar title="Confirm User Data" />
             <List>
               <ListItem>
@@ -63,8 +57,6 @@ export class Confirm extends Component {
               variant="contained"
               onClick={this.continue}
             >Confirm & Continue</Button>
-          </Dialog>
-        </>
       </MuiThemeProvider>
     );
   }

@@ -20,12 +20,6 @@ export class FormPersonalDetails extends Component {
     const { values, handleChange } = this.props;
     return (
       <MuiThemeProvider>
-        <>
-          <Dialog
-            open
-            fullWidth
-            maxWidth='sm'
-          >
             <AppBar title="Enter Personal Details" />
             <TextField
               placeholder="Enter Your Occupation"
@@ -66,8 +60,6 @@ export class FormPersonalDetails extends Component {
               variant="contained"
               onClick={this.continue}
             >Continue</Button>
-          </Dialog>
-        </>
       </MuiThemeProvider>
     );
   }

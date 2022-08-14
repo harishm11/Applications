@@ -1,10 +1,10 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { UserForm } from './components/UserForm';
 
-function App() {
+const App = () => {
   return (
     <div className="App">
-        <h4> Hello World</h4>
+      <UserForm />
     </div>
   );
 }

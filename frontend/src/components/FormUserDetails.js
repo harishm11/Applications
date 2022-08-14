@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -15,12 +14,6 @@ export class FormUserDetails extends Component {
     const { values, handleChange } = this.props;
     return (
       <MuiThemeProvider>
-        <>
-          <Dialog
-            open
-            fullWidth
-            maxWidth='sm'
-          >
             <AppBar title="Enter User Details" />
             <TextField
               placeholder="Enter Your First Name"
@@ -54,8 +47,6 @@ export class FormUserDetails extends Component {
               variant="contained"
               onClick={this.continue}
             >Continue</Button>
-          </Dialog>
-        </>
       </MuiThemeProvider>
     );
   }
