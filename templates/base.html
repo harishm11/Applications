@@ -17,15 +17,15 @@
 <body>
 
 <h3>Welcome !!!! </h3>
-<!--<i class="fa fa-spinner fa-spin"></i>-->
+<!--&lt;!&ndash;<i class="fa fa-spinner fa-spin"></i>&ndash;&gt;-->
 
-    <form method="post" action ="/extractpdf" enctype="multipart/form-data">
-            {% csrf_token %}
-        <p>Select the File to extract tables:  <input type="file"  name="filingpdf" id="filingpdf" accept=".pdf" required/></p>
-        <p>enter the page range to extract tables from: <input type="text" id="prange" name="prange" value=""/></p>
-        <p><input type="submit" id="extract" name="submit" /></p>
+<!--    <form method="post" action ="/extractpdf" enctype="multipart/form-data">-->
+<!--            {% csrf_token %}-->
+<!--        <p>Select the File to extract tables:  <input type="file"  name="filingpdf" id="filingpdf" accept=".pdf" required/></p>-->
+<!--        <p>enter the page range to extract tables from: <input type="text" id="prange" name="prange" value=""/></p>-->
+<!--        <p><input type="submit" id="extract" name="submit" /></p>-->
 
-    </form><br>
+<!--    </form><br>-->
 
 {% block content %}
 {% endblock content %}

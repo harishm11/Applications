@@ -58,10 +58,10 @@ import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # 'DIRS': [BASE_DIR / 'templates'],
-        'DIRS': [
-            os.path.join(BASE_DIR,'frontend/build')
-        ],
+        'DIRS': [BASE_DIR / 'templates'],
+        # 'DIRS': [
+        #     os.path.join(BASE_DIR,'frontend/build')
+        # ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,6 +127,7 @@ USE_L10N = True
 USE_TZ = True
 
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 STATICFILES_FINDERS = (
 'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -136,6 +137,6 @@ STATICFILES_FINDERS = (
 STATIC_ROOT = "/Users/harishmurali/Pythonprojects/Project/static"
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS =[
-    os.path.join(BASE_DIR,'frontend/build/static'),
-                    ]
+# STATICFILES_DIRS =[
+#     os.path.join(BASE_DIR,'frontend/build/static'),
+#                     ]

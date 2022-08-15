@@ -1,8 +1,25 @@
 from django.forms import ModelForm
 from .models import *
 
-# Create the form class.
-class inputtdataForm(ModelForm):
+
+class driverForm(ModelForm):
     class Meta:
-       model = inputtdata
-       fields = ['zipcode',]
+       model = driverModel
+       exclude =[]
+
+class vehicleForm(ModelForm):
+    class Meta:
+       model = vehicleModel
+       exclude =[]
+
+
+class incidentForm(ModelForm):
+    class Meta:
+       model = incidentModel
+       exclude =[]
+
+
+class policyForm(ModelForm):
+    class Meta:
+       model = policyModel
+       exclude =['quoteNumber','policyNumber']
