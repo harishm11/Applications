@@ -3,6 +3,7 @@ import AppBar from '@material-ui/core/AppBar';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+// import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';  
 
 export class FormUserDetails extends Component {
   continue = e => {
@@ -14,7 +15,10 @@ export class FormUserDetails extends Component {
     const { values, handleChange } = this.props;
     return (
       <MuiThemeProvider>
-            <AppBar title="Enter User Details" />
+          <AppBar
+          fullWidth>
+          Personal Details
+          </AppBar>
             <TextField
               placeholder="Enter Your First Name"
               label="First Name"
@@ -33,14 +37,14 @@ export class FormUserDetails extends Component {
               fullWidth
             />
             <br />
-            <TextField
-              placeholder="Enter Your Email"
-              label="Email"
-              onChange={handleChange('email')}
-              defaultValue={values.email}
-              margin="normal"
-              fullWidth
-            />
+            {/* <DesktopDatePicker
+                label="Birth Date"
+                inputFormat="MM/dd/yyyy"
+                onChange={handleChange('birthDate')}
+                defaultValue={values.birthDate}
+                margin="normal"
+                fullWidth
+            /> */}
             <br />
             <Button
               color="primary"

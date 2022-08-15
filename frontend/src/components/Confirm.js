@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import { List, ListItem, ListItemText } from '@material-ui/core/';
@@ -19,11 +18,13 @@ export class Confirm extends Component {
 
   render() {
     const {
-      values: { firstName, lastName, email, occupation, city, bio }
+      values: { firstName, lastName, birthDate, maritalStatus, city, bio }
     } = this.props;
     return (
       <MuiThemeProvider>
-            <AppBar title="Confirm User Data" />
+          <AppBar>
+            Confirm User Data
+          </AppBar>
             <List>
               <ListItem>
                 <ListItemText primary="First Name" secondary={firstName} />
@@ -32,10 +33,10 @@ export class Confirm extends Component {
                 <ListItemText primary="Last Name" secondary={lastName} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Email" secondary={email} />
+                <ListItemText primary="Birth Date" secondary={birthDate} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Occupation" secondary={occupation} />
+                <ListItemText primary="Marital Status" secondary={maritalStatus} />
               </ListItem>
               <ListItem>
                 <ListItemText primary="City" secondary={city} />
@@ -47,7 +48,7 @@ export class Confirm extends Component {
             <br />
 
             <Button
-              color="secondary"
+              color="white"
               variant="contained"
               onClick={this.back}
             >Back</Button>
