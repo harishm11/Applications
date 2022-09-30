@@ -1,10 +1,18 @@
+import random
+
 from rest_framework import serializers
+from rest_framework.fields import ReadOnlyField
+
 from .models import *
 
 class driverSerializer(serializers.ModelSerializer):
+	quote = serializers.ReadOnlyField(source='quoteModel.quoteNumber')
 	class Meta:
 		model = driverModel
 		fields ='__all__'
+
+		def get_quote(self, obj):
+			return obj.quotemodel
 
 
 class vehicleSerializer(serializers.ModelSerializer):
@@ -13,12 +21,18 @@ class vehicleSerializer(serializers.ModelSerializer):
 		fields ='__all__'
 
 
-class policySerializer(serializers.ModelSerializer):
+class quoteSerializer(serializers.ModelSerializer):
 	class Meta:
-		model = policyModel
+		model = quoteModel
 		fields ='__all__'
+
 
 class incidentSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = incidentModel
+		fields ='__all__'
+
+class quoteSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = quoteModel
 		fields ='__all__'

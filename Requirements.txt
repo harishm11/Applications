@@ -4,4 +4,5 @@ openpyxl
 gunicorn
 psycopg2
 django-cors-headers
-djangorestframework
+django-crispy-forms
+

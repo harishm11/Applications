@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -39,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp1',
     'myapp2',
-    'rest_framework',
     'corsheaders',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
 ]
 
 ROOT_URLCONF = 'myproj.urls'
@@ -82,13 +82,13 @@ WSGI_APPLICATION = 'myproj.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        'NAME' :'postgres',
-        'USER' : 'postgres',
-        'PASSWORD': 'readonly',
-        'HOST': 'localhost',
-        'PORT' :'5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'NAME' :'postgres',
+        # 'USER' : 'postgres',
+        # 'PASSWORD': 'readonly',
+        # 'HOST': 'localhost',
+        # 'PORT' :'5432',
 
     }
 }
@@ -134,9 +134,9 @@ STATICFILES_FINDERS = (
 'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 )
 
-STATIC_ROOT = "/Users/harishmurali/Pythonprojects/Project/static"
-STATIC_URL = '/static/'
+STATIC_ROOT = "/Users/harishmurali/Pythonprojects/Project/"
+STATIC_URL = 'myapps2/static/'
 
-# STATICFILES_DIRS =[
-#     os.path.join(BASE_DIR,'frontend/build/static'),
-#                     ]
+STATICFILES_DIRS =[
+    os.path.join(BASE_DIR,'myapps2/static/'),
+                    ]

@@ -1,25 +1,12 @@
-from django.forms import ModelForm
 from .models import *
+from django import forms
 
 
-class driverForm(ModelForm):
+
+class feedbackpageform(forms.ModelForm):
     class Meta:
-       model = driverModel
+       model = feedbackpagemodel
        exclude =[]
-
-class vehicleForm(ModelForm):
-    class Meta:
-       model = vehicleModel
-       exclude =[]
-
-
-class incidentForm(ModelForm):
-    class Meta:
-       model = incidentModel
-       exclude =[]
-
-
-class policyForm(ModelForm):
-    class Meta:
-       model = policyModel
-       exclude =['quoteNumber','policyNumber']
+       widgets = {
+           'Username': forms.TextInput(attrs={'type':'hidden'})
+       }
