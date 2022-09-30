@@ -3,6 +3,7 @@ myvenv/
 .vscode/
 
 db.sqlite3
-**/DS_Store/
+**/.DS_Store/
 **/__pycache__/
 **/migrations/
+.DS_Store
