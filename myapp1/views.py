@@ -4,7 +4,7 @@ import tabula, os
 import pandas as pd
 
 def home(request):
-    return render(request, 'myapp1/base.html')
+    return render(request, 'base.html')
 
 def extractpdf(request):
     if True:
