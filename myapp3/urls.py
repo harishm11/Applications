@@ -4,7 +4,10 @@ from myapp3 import views
 
 
 urlpatterns = [
-	path('myapp3', views.home, name="home"),
+
+	path('openfiling/<str:data>', views.openfiling, name="openfiling"),
+	path('opentable', views.opentable, name="opentable"),
+	path('listtables', views.listtables, name="listtables"),
 
 	
 ]

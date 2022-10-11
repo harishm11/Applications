@@ -1,16 +1,33 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}
-    Rates Load
+    {{title}}
 {% endblock %}
 {% load crispy_forms_tags %}
 
 {% block content %}
 <div id="authen" class="w-50 ml-0 mr-0 mx-auto text-center border">
     {% if  request.user.is_authenticated %}
-        <h3>"Hello"</h3>
+        <div>
+        <h4>{{heading}}</h4>
+            <table id = "example" class = "cell-border">
+                <thead>
+                    <tr></tr>
+                </thead>
+                <tfoot id="tfooter1">
+                    <tr></tr>
+                </tfoot>
+                <tbody>
+                    <tr></tr>
+                </tbody>
+            </table>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
 
+{% block js%}
+         <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+         <script src ="{% static 'js/script.js' %}" type="text/javascript"></script>
+{% endblock js%}
 

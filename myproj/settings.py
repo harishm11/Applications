@@ -129,14 +129,14 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-STATICFILES_FINDERS = (
-'django.contrib.staticfiles.finders.FileSystemFinder',
-'django.contrib.staticfiles.finders.AppDirectoriesFinder'
-)
+# STATICFILES_FINDERS = (
+# 'django.contrib.staticfiles.finders.FileSystemFinder',
+# 'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+# )
 
-STATIC_ROOT = "/Users/harishmurali/Pythonprojects/Project/"
-STATIC_URL = 'myapps2/static/'
+#STATIC_ROOT = "/Users/harishmurali/Pythonprojects/Project/myapps3"
 
-STATICFILES_DIRS =[
-    os.path.join(BASE_DIR,'myapps2/static/'),
-                    ]
+
+
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]

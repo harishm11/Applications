@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {{title}}
+{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div id="authen" class="w-50 ml-0 mr-0 mx-auto text-center border">
+    {% if  request.user.is_authenticated %}
+        <div>
+        <h4>{{heading}}</h4><br>
+        {% for sheet in sheets %}
+            <a href="{%url 'openfiling' data=sheet %}">{{sheet}}</a> | 
+            {% if forloop.counter0|divisibleby:3 %}<br>
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block js%}
+         
+{% endblock js%}
+
