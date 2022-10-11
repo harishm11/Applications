@@ -6,8 +6,8 @@ from myapp3 import views
 urlpatterns = [
 
 	path('openfiling/<str:data>', views.openfiling, name="openfiling"),
-	path('opentable', views.opentable, name="opentable"),
-	path('listtables', views.listtables, name="listtables"),
+	path('openexhibit', views.openexhibit, name="openexhibit"),
+	path('exhibitlist', views.exhibitlist, name="exhibitlist"),
 
 	
 ]

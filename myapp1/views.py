@@ -9,22 +9,26 @@ def home(request):
 def extractpdf(request):
     if True:
         root = 'uploads'
-        filingpdf = request.FILES['filingpdf']
-        filepath = os.path.join(root,str(filingpdf.name))
-        fs = FileSystemStorage()
-        filename = fs.save(filepath, filingpdf)
-        pages = request.POST['prange']
+        # filingpdf = request.FILES['filingpdf']
+        # filepath = os.path.join(root,str(filingpdf.name))
+        # fs = FileSystemStorage()
+        # filename = fs.save(filepath, filingpdf)
+        # pages = request.POST['prange']
+
+        filingpdf='Rate Manual - Proposed (1).pdf'
+        filepath = os.path.join(root,str(filingpdf))
+        pages = '1-20'
         df = tabula.read_pdf(filepath, pages=pages,multiple_tables=False)
         # outpath = 'myapp1/downloads/RateFiling - equity.csv'
         # tabula.convert_into(filepath, outpath, output_format="csv", pages=pages)
-        uppath=os.path.join(os.getcwd(), 'uploads')
+        uppath=os.path.join(os.getcwd(), 'downloads')
         for f in os.listdir(uppath):
             os.remove(os.path.join(root, f))
         outpath = os.path.join(os.getcwd(), 'downloads')
         os.chdir(outpath)
         for i in range(len(df)):
             df[i].to_excel('table_' + str(i) + '.xlsx')
-        return render(request, 'myapp1/base.html')
+        return render(request, 'base.html')
 
 def combineexcls(request):
     outpath = os.path.join(os.getcwd(), 'downloads')

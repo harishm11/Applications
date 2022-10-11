@@ -7,7 +7,7 @@ import os
 import pandas as pd
 
 
-def listtables(request):
+def exhibitlist(request):
     root = 'uploads'
     file = 'ca initial rate manual.xlsx'
     filepath = os.path.join(root,Path(file))
@@ -24,9 +24,9 @@ def openfiling(request,data):
     filepath = os.path.join(root,Path(file))
     request.session['fp'] = str(filepath)
     request.session['sn'] = str(shtname)
-    return render(request,'myapp3/rates.html',{ 'title':file,'heading':shtname})
+    return render(request,'myapp3/exhibit.html',{ 'title':file,'heading':shtname})
 
-def opentable(request):
+def openexhibit(request):
     try: 
         root = ''
         os.chdir(os.path.dirname(os.path.abspath(__file__)))

@@ -4,7 +4,7 @@ $(document).ready(function() {
         columns,
         str,
         jqxhr = $.ajax({
-            url: '/myapp3/opentable',
+            url: '/myapp3/openexhibit',
             "error": function(jqXHR, status, thrownError) {
                 $('#loadingSpinner').hide();
                 alert("Page not found");
