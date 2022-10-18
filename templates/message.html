@@ -9,13 +9,7 @@
 <div id="authen" class="w-50 ml-0 mr-0 mx-auto text-center border">
     {% if  request.user.is_authenticated %}
         <div>
-        <h4>{{heading}}</h4><br>
-          {% for sheet in sheets%}
-            {% if forloop.counter|divisibleby:3 %}
-                <br>
-            {% endif %}
-            <a href="/myapp3/openfiling/{{sheet}}">{{sheet}}</a>|
-          {% endfor%}
+          <h4>{{msg}}</h4><br>
         </div>
     {% endif %}
 </div>

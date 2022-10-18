@@ -6,5 +6,6 @@ urlpatterns = [
     path('myapp1', views.home,name='home'),
     path('extractpdf', views.extractpdf,name='extractpdf'),
     path('combineexcls', views.combineexcls,name='combineexcls'),
+    path('quotesdata', views.quotesdata,name='quotesdata'),
 
 ]

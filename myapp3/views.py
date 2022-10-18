@@ -4,12 +4,31 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import os
+from jinja2 import FileSystemBytecodeCache
 import pandas as pd
 
+def uploadexhibit(request):
+    return render(request,'myapp3/uploadexhibit.html',{'heading':'Upload Exhibits file'})
+
+def uploadexhibitfile(request):
+    try:
+        upfile= request.FILES['file']
+        root ='uploads'
+        path = os.path.realpath(os.path.join(root,str(upfile.name)))
+        fileexists = False
+        if not fileexists:
+            filstg = FileSystemStorage()
+            upldfl = filstg.save(path,upfile)
+            upldfl_url = filstg.url(upldfl)
+        return render(request,'message.html',{'msg':'File uplaoded'})
+    except Exception as err:
+        return render(request,'message.html',{'msg':'File not uplaoded'})
+    
 
 def exhibitlist(request):
     root = 'uploads'
     file = 'ca initial rate manual.xlsx'
+    #file = 'CA Farmers Rating Factors.xlsx'
     filepath = os.path.join(root,Path(file))
     xl = pd.ExcelFile(filepath)
     sheets = xl.sheet_names  
@@ -24,7 +43,7 @@ def openfiling(request,data):
     filepath = os.path.join(root,Path(file))
     request.session['fp'] = str(filepath)
     request.session['sn'] = str(shtname)
-    return render(request,'myapp3/exhibit.html',{ 'title':file,'heading':shtname})
+    return render(request,'myapp3/exhibit.html',{ 'title':file.strip('xlsx'),'heading':shtname})
 
 def openexhibit(request):
     try: 

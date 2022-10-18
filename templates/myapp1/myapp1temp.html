@@ -8,13 +8,42 @@ Input
 
 
 {% block content %}
-<h3>Enter Zipcode</h3>
+<div id="authen" class="w-50 ml-0 mr-0 mx-auto text-center border">
+    {% if  request.user.is_authenticated %}
+        <div>
+        <h4>{{heading}}</h4>
+          <table id = "example" class = "cell-border">
+              {% for k in context %}
 
-<form action="/myapp2" method="post">
-    {% csrf_token %}
-<!--    {{ form }}-->
-    <p>enter zipcode: <input type="text" id="zipcode" name="zipcode" value=""/></p>
-    <input type="submit" value="Submit">
-</form>
+                  {% if forloop.first %}
+                    <thead>
+                    <tr>
+                      {% for item_1, item_2 in k.items %}
+                        <th>{{ item_1 }}</th>
+                      {% endfor %}
+                    </tr>
+                    </thead>
+                  {% endif %}
 
+                    <tfoot>
+                        <tr></tr>
+                    </tfoot>
+
+
+                    <tbody>
+                        <tr>
+                        {% for item_1, item_2 in k.items %}
+                              <td>{{ item_2 }}</td>
+                        {% endfor %}
+                        </tr>
+                    </tbody>
+              {% endfor %} 
+          </table>
+       </div>
+    {% endif %}
+</div>
 {% endblock content %}
+
+{% block js%}
+      <script src="{% static 'js/script.js' %}"></script>  
+{% endblock js%}

@@ -12,11 +12,8 @@ $(document).ready(function() {
         })
         .done(function() {
                 data = JSON.parse(jqxhr.responseText);
-                $.each(data.columns, function(k, colobj) {
-                        $('#tfooter tr').append('<td><input type="text" placeholder="Search ' + colobj.name + '" /> < /td>')
-                        }); 
-                        // Iterate each column and print table headers for Datatables 
-                        $.each(data.columns, function(k, col0bj) {
+
+                    $.each(data.columns, function(k, col0bj) {
                     str = '<th>' + col0bj.name + '</th>'; 
                     $(str).appendTo(tableName + '>thead>tr');
                     });
@@ -30,23 +27,38 @@ $(document).ready(function() {
                                     "data": data.data,
                                     "columns": data.columns,
                                     "searchHighlight": true,
-                                    "pageLength": 50,
+                                    "pageLength": 15,
                                     "deferRender": true,
                                     "orderClasses": false,
-                                    "dom": 'prftpBi', 
+                                    "dom": 'prftiB', 
                                     buttons: [ {
                                         "extend": 'excel',
                                         "text": 'Export to Excel',
-                                        "className": 'btn btn-secondary'
                                     }
 
                                 ],
-
                                     initComplete: function() {
 
                                             $('#searchFilter').on('keyup change clear', function() {
                                                 table.search(this.value).draw();
                                             });
+                                            this.api().columns().every(function () {
+                                                var column = this;
+                                                var select = $('<select><option value=""></option></select>')
+                                                    .appendTo($(column.header()))
+                                                    .on('change', function () {
+                                                        var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                                                        column.search(val ? '^' + val + '$' : '', true, false).draw();
+                                                    });
+                                                column
+                                                    .data()
+                                                    .unique()
+                                                    .sort()
+                                                    .each(function (d, j) {
+                                                        select.append('<option value="' + d + '">' + d + '</option>');
+                                                    });
+                                            });
+
 
                                             $(window).scroll(function() {
                                                 if ($(this).scrollTop()) {
@@ -75,25 +87,8 @@ $(document).ready(function() {
                                                 $('#loadingSpinner').hide();
 
                                                 var api = this.api();
-                                                if (api.rows().count() > 30) {
-                                                    api.buttons().disable();
-                                                }
-                                                    $('#clearsearchFilter').on('click', function() {
-                                                        $('input').val('');
-                                                        $('#searchFilter').val();
-                                                        api.search().draw();
-                                                        api.columns().search().draw();
-                                                    });
-                                                        
-                                                                    this.api().columns().every(function() {
-                                                                        var that =this;
-                                                                        $('input', this.footer()).on('keyup change clear', function() {
-                                                                            if (that.search() != this.value) {
-                                                                                that.search(this.value).draw();
+                                                
 
-                                                                            }
-                                                                        });
-                                                                    });
                                                                 }
                                                             });
 
