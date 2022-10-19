@@ -9,12 +9,8 @@ from django.db import connection
 def quotesdata(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM rate_factors" )
-        # rows = cursor.fetchall()
-        # columns = [col[0] for col in cursor.description]
         context = [ dict(zip([col[0] for col in cursor.description], row)) 
             for row in cursor.fetchall()  ] 
-
-    #return HttpResponse(JsonResponse(context))
     return render(request, 'myapp1/myapp1temp.html', {'context':context })    
     
 def home(request):

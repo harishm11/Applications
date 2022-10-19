@@ -4,11 +4,22 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import os
-from jinja2 import FileSystemBytecodeCache
+from django.db import connection
 import pandas as pd
 
+
+
 def uploadexhibit(request):
-    return render(request,'myapp3/uploadexhibit.html',{'heading':'Upload Exhibits file'})
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM states" )
+        states = [ dict(zip([col[0] for col in cursor.description], row)) 
+            for row in cursor.fetchall()  ] 
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM company_naics" )
+        comp = [ dict(zip([col[0] for col in cursor.description], row)) 
+            for row in cursor.fetchall()  ] 
+    return render(request, 'myapp3/uploadexhibit.html', {'heading':'Upload Exhibits file','states':states , 'comp':comp}) 
+
 
 def uploadexhibitfile(request):
     try:

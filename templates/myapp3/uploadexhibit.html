@@ -13,7 +13,16 @@
         
             <form method ="post" enctype="multipart/form-data" action="/myapp3/uploadexhibitfile" id="uploadform">
             {% csrf_token%}
-            
+                <select>
+                    {% for i in states %}
+                        <option value='{{i.state}}'>{{ i.state }}</option>
+                    {% endfor %}
+                </select>
+                <select>
+                    {% for i in comp %}
+                        <option value='{{i.company_name}}'>{{ i.company_name }}</option>
+                    {% endfor %}
+                </select>
                 <input type = "file" name="file" class="form-control-file" accept=".xlsx" required/>
                 <input type = "submit" name="submt" value = "uplaod" class ="btn btn-secondary"/>
             </form>
