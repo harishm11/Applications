@@ -1,5 +1,15 @@
+
+body{
+
+    height: 100%;
+}
 .center-div{
     display:flex;
     align-items: center;
     justify-content: center;
 }
+
+
+.navbar {
+    background-color: #f1f1f8; /* Set the background color to red */
+  }

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ratemanager',
     'authenticate',
+    'productconfigurator',
     'corsheaders',
     'crispy_forms',
 ]

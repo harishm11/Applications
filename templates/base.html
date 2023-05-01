@@ -2,14 +2,20 @@
 <html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <head>
-    <title>{% block title %} My Project {% endblock title %}</title>
+    <title>{% block title %} Configurator{% endblock title %}</title>
 
     <link
       rel="shortcut icon"
       type="image/png"
       href="{% static 'images/logo-color.ico' %}"
     />
+
     <!-- CSS only -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/style.css' %}"
+    />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -30,8 +36,6 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
 
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.8.0"></script>
 
     <!-- JQUERY -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -56,13 +60,13 @@
     />
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-light">
+    <nav class="navbar navbar-expand-lg p-3">
       <div class="container-fluid">
-        <a class="navbar-brand" href="http://127.0.0.1:8000/">
+        <a class="navbar-brand" href="http://127.0.0.1:9000/">
           <img
             src="{% static 'images/logo.png' %}"
             ,class="img"
-            width="100"
+            width="120"
             height="50"
           />
         </a>
@@ -79,12 +83,6 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">About</a>
-            </li>
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle"
@@ -93,7 +91,7 @@
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                Rate Input
+                Rate Manager
               </a>
               <ul class="dropdown-menu">
                 <li>
@@ -106,21 +104,11 @@
                     >Upload Exhibits</a
                   >
                 </li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="#">Services3</a></li>
               </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Contact</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/feedback">Feedback</a>
             </li>
-            {% if request.user.is_superuser %}
-            <li class="nav-item">
-              <a class="nav-link" href="#">Documents</a>
-            </li>
-            {% endif %}
           </ul>
           <form class="d-flex" role="search">
             {% if request.user.is_authenticated %}
@@ -136,22 +124,51 @@
               placeholder="Search"
               aria-label="Search"
             />
-            <button class="btn btn-outline-success" type="submit">
-              Search
+            <button type="submit">
+              <i class="fa fa-search"></i>
             </button>
           </form>
         </div>
       </div>
     </nav>
 
-    {% block content %}
-    <div id="authen" class="w-50 ml-0 mr-0 mx-auto text-center border">
-      {% for i in homepagemodel_list%}
-      <pre style="font-family: Open Sans, helvetica, sans-serif !important">
-{{i.content}}</pre
-      >
-      {% endfor%}
-    </div>
-    {% endblock content %} {% block js %} {% endblock js%}
+      <div class ="p-5">
+        {% block content %}
+        
+        <div  class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
+          {% for i in homepagemodel_list%}
+          <pre style="font-family: Open Sans, helvetica, sans-serif !important">
+              <h2>{{i.content}}</h2></pre
+          >
+          {% endfor%}
+        </div>  
+        {% endblock content %} 
+      </div>
+    
+    {% block js %} {% endblock js%}
   </body>
+
+  <footer>
+      <nav class="navbar navbar-expand-lg sticky-bottom p-3">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="#">About Us</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Jobs</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Privacy</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Terms of use</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Help</a>
+                </li>
+
+             </ul>
+      </nav>
+  </footer>
+
 </html>

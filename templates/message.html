@@ -6,7 +6,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div id="authen" class="w-50 ml-0 mr-0 mx-auto text-center border">
+<div class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
     {% if  request.user.is_authenticated %}
         <div>
           <h4>{{msg}}</h4><br>

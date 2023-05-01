@@ -1,3 +1,5 @@
+$("body").addClass("Loading");
+
 $(document).ready(function () {
   var data,
     tableName = "#example",
@@ -5,7 +7,7 @@ $(document).ready(function () {
     str,
     jqxhr = $.ajax({
       url: "/ratemanager/openexhibit",
-      error: function (jqXHR, status, thrownError) {
+      "error": function (jqXHR, status, thrownError) {
         $("#loadingSpinner").hide();
         alert("Page not found");
       },
@@ -24,10 +26,10 @@ $(document).ready(function () {
         data: data.data,
         columns: data.columns,
         searchHighlight: true,
-        pageLength: 15,
+        pageLength: 25,
         deferRender: true,
         orderClasses: false,
-        dom: "prftiB",
+        dom: "rftBip",
         buttons: [
           {
             extend: "excel",
