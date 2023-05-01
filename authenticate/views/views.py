@@ -10,22 +10,21 @@ from authenticate.models import homepagemodel
 
 @method_decorator(login_required, name='dispatch')
 class homeview(generic.ListView):
-	template_name = 'base.html'
-	def get_queryset (self):
-		return homepagemodel.objects.all()
+    template_name = 'base.html'
 
+    def get_queryset(self):
+        return homepagemodel.objects.all()
 
 
 def feedbackview(request):
-	if request.method == "POST":
-		form = feedbackpageform(request.POST)
-		if form.is_valid():
-			form.instance.Username = request.user
-			form.save()
-			return redirect('/')
-	else:
-		form = feedbackpageform()
-	context = {
-		"form": form}
-	return render(request, "myapp2/feedback.html", context)
-
+    if request.method == "POST":
+        form = feedbackpageform(request.POST)
+        if form.is_valid():
+            form.instance.Username = request.user
+            form.save()
+            return redirect('/')
+    else:
+        form = feedbackpageform()
+    context = {
+        "form": form}
+    return render(request, "feedback.html", context)
