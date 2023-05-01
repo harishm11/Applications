@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -36,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'myapp1',
-    'myapp2',
+    'ratemanager',
+    'authenticate',
     'corsheaders',
     'crispy_forms',
 ]
@@ -54,7 +55,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'myproj.urls'
-import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -82,13 +82,13 @@ WSGI_APPLICATION = 'myproj.wsgi.application'
 
 DATABASES = {
     'default': {
+        # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.postgresql',
-        #'NAME': BASE_DIR / 'db.sqlite3',
-        'NAME' :'postgres',
-        'USER' : 'postgres',
+        'NAME': 'postgres',
+        'USER': 'postgres',
         'PASSWORD': 'readonly',
         'HOST': 'localhost',
-        'PORT' :'5432',
+        'PORT': '5432',
 
     }
 }
@@ -134,8 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # 'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 # )
 
-#STATIC_ROOT = "/Users/harishmurali/Pythonprojects/Project/myapps3"
-
+# STATIC_ROOT = "/Users/harishmurali/Pythonprojects/Project/myapps3"
 
 
 STATIC_URL = 'static/'

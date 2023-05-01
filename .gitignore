@@ -1,9 +1,10 @@
 myvenv/
 .idea/
-.vscode/
+.vscode
 
 db.sqlite3
 **/.DS_Store/
 **/__pycache__/
 **/migrations/
 .DS_Store
+uploads/
