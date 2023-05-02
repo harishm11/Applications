@@ -1,1 +1,2 @@
-from .systemtables.product import *
+from .configtables import *
+from .validvaluetables import *
