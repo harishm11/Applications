@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def productpage(request):
+    return render(request, "productconfigurator/product.html", {'title': 'Product', 'heading': ''})

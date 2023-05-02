@@ -1,0 +1,1 @@
+from .systemtables.product import *

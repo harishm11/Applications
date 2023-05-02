@@ -1,8 +1,16 @@
-
-body{
-
-    height: 100%;
+.footer-shadow {
+  z-index: 100;
+  box-shadow: 0px 0px 15px rgba(64, 63, 63, 0.648);
+  height: 100px;
+  top: 0;
+  left: 0;
+  width: 100%;
 }
+
+.page{
+    min-height:79vh;
+   
+  }
 .center-div{
     display:flex;
     align-items: center;
