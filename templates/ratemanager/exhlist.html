@@ -1,16 +1,14 @@
 {% extends 'base.html' %} {% load static %} {% block title %} {{title}}
 {%endblock %} {% load crispy_forms_tags %} {% block content %}
-<div class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
+<div>
   {% if request.user.is_authenticated %}
 
-    <h5>{{heading}}</h5>
-    <br />
-    {% for sheet in sheets%} {% if forloop.counter|divisibleby:3 %}
-    <br />
-    {% endif %}
-    <a href="/ratemanager/openfiling/{{sheet}}">{{sheet}}</a> {% endfor%}
+  <h5>{{heading}}</h5>
+  <br />
+  {% for sheet in sheets%}
 
-  {% endif %}
+  <a href="/ratemanager/openfiling/{{sheet}}">{{sheet}}</a> {% endfor%} 
+  {%endif%}
 </div>
 {% endblock %} {% block js%}
 <script src="{% static 'js/script.js' %}"></script>

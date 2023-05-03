@@ -9,7 +9,7 @@
 <div class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
     {% if  request.user.is_authenticated %}
         <div>
-          <h4>{{msg}}</h4><br>
+          <h4>{{message}}</h4><br>
         </div>
     {% endif %}
 </div>
@@ -18,4 +18,3 @@
 {% block js%}
            <script src="{% static 'js/script.js' %}"></script>  
 {% endblock js%}
-

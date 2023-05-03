@@ -73,8 +73,7 @@
         </a>
 
         <form class="d-flex" role="search">
-          {% if request.user.is_authenticated %} 
-          {% if request.user.is_superuser%}
+          {% if request.user.is_authenticated %} {% if request.user.is_superuser%}
           <a class="nav-link px-2" href="/admin">Admin </a>
           {% endif %}
           <a class="nav-link px-2" href="/logout">Logout </a>
@@ -140,13 +139,13 @@
                   <div class="w-100"></div>
                   <li class="nav-item">
                     <a class="dropdown-item" href="/productconfigurator/product"
-                      >&nbsp;&nbsp;&nbsp;&nbsp;Coverages</a
+                      >Coverages</a
                     >
                   </li>
                   <div class="w-100"></div>
                   <li class="nav-item">
                     <a class="dropdown-item" href="/productconfigurator/product"
-                      >&nbsp;&nbsp;&nbsp;&nbsp;Discounts</a
+                      >Discounts</a
                     >
                   </li>
                 </ul>

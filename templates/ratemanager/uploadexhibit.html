@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {% load static %} {% block title %} {{title}}
 {%endblock %} {% load crispy_forms_tags %} {% block content %}
-<div class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
+<div>
   {% if request.user.is_authenticated %}
   <div>
     <h4>{{heading}}</h4>
@@ -15,12 +15,12 @@
       {% csrf_token%}
       <select>
         {% for i in states %}
-        <option value="{{i.state}}">{{ i.state }}</option>
+        <option value="{{i.StateName}}">{{ i.StateName }}</option>
         {% endfor %}
       </select>
       <select>
-        {% for i in comp %}
-        <option value="{{i.company_name}}">{{ i.company_name }}</option>
+        {% for i in carriers %}
+        <option value="{{i.CarrierName}}">{{ i.CarrierName }}</option>
         {% endfor %}
       </select>
       <input

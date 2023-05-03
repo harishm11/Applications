@@ -1,0 +1,50 @@
+{% extends 'base.html' %} {% load static %} {% load product_tags %} {% block title %} {{ title }} {% endblock %} {% load crispy_forms_tags %} {% block content%} {% if request.user.is_authenticated %}
+<div class="container">
+  <h4>Products</h4>
+  <div class="row">
+    <div class="col-md-10">
+      <div class="mb-3">
+        <a href="{% url 'product_add' %}">Add</a>
+      </div>
+    </div>
+    <div class="col-md-12">
+      <div class="table-responsive">
+        <table class="table table-bordered table-responsive-sm custom-table">
+          <thead>
+            <tr>
+              <th>Edit</th>
+              <th>Delete</th>
+              {% for field in product_fields %}
+              {% if field.name != 'id' %}
+              <th>{{ field.verbose_name }}</th>
+              {% endif %}
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+            <tr>
+              <td>
+                <a href="{% url 'product_edit' product.id %}"
+                  ><i class="fa fa-edit"></i
+                ></a>
+              </td>
+              <td>
+                <a href="{% url 'product_delete' product.id %}"
+                  ><i class="fa fa-trash"></i
+                ></a>
+              </td>
+              {% for field in product_fields %}
+              {% if field.name != 'id' %}
+              <td>{{ product|get_attribute:field.name }}</td>
+              {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% endblock %} {% block js%} {% endblock js%}

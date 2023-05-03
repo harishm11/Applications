@@ -8,4 +8,4 @@ class Carriermodel(models.Model):
     AmbestNumber = models.CharField(max_length=10)
 
     def __str__(self):
-        return self.CarrierName, self.NAICCode
+        return self.CarrierName
