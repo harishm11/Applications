@@ -1,8 +1,8 @@
-{% extends 'base.html' %} {% load static %} {% block title %} {{title}}
+{% extends 'base.html' %} {% load static %} {% block title %} Edit {{ verbose_name_plural }}
 {%endblock %} {% load crispy_forms_tags %} {% block content %} 
 {% if request.user.is_authenticated %}
 <div class="container p-3">
-  <h1>Edit {{ verbose_name_plural }}</h1>
+  <h1> </h1>
 
 <form method="post">
     {% csrf_token %}

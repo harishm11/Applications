@@ -7,7 +7,7 @@
         {% csrf_token %}
         {% load crispy_forms_tags %}
         {{ form | crispy}}
-        <input type="submit" value="Change my password">
+        <input class="form-control form-control-sm" type="submit" value="Change my password">
     </form>
 </div>
 {% endblock %}

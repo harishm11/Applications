@@ -59,9 +59,9 @@
   </head>
   <body>
     <!-- Header -->
-    <nav class="navbar navbar-expand-lg p-3 shadow">
+    <nav class="navbar navbar-expand-lg p-3 ">
       <div class="container-fluid">
-        <a class="navbar-brand" href="http://127.0.0.1:9000/">
+        <a class="navbar-brand" href="http://127.0.0.1:8000/">
           <img
             src="{% static 'images/logo.png' %}"
             ,class="img"
@@ -69,6 +69,98 @@
             height="60"
           />
         </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Product Configurator
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="/dt/datatable/productconfigurator/product/"
+                    >Product Page</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >Another Page</a
+                  > 
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                System Tables
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="/dt/datatable/productconfigurator/coverage/"
+                    >Coverages</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/dt/datatable/productconfigurator/state/"
+                    >State</a
+                  > 
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/dt/datatable/productconfigurator/carrier/"
+                    >Carrier</a
+                  > 
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Rate Manager
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="/ratemanager/exhibitlist"
+                    >Exhibit list</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/ratemanager/uploadexhibit"
+                    >Upload Exhibits</a
+                  > 
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/feedback">Feedback</a>
+            </li>
+             
+          </ul>
         <form class="d-flex" role="search">
           {% if request.user.is_authenticated %} 
           {% if          request.user.is_superuser%}
@@ -78,14 +170,7 @@
           {% else %}
           <a class="nav-link px-2" href="/login">Login </a>
           {% endif %}
-          <!-- <div class="input-group">
-                  <input type="text " placeholder="Search" />
-                  <div class="input-group-append mx-auto">
-                    <button class="btn btn-secondary px-2" type="button">
-                      <i class="fa fa-search"></i>
-                    </button>
-                  </div>
-                  </div> -->
+
         </form>
       </div>
     </nav>
@@ -93,66 +178,13 @@
     <div class="d-flex" id="wrapper">
       <div class="bg-light border-right" id="sidebar-wrapper">
         <div class="wrapper">
-          <nav id="sidebar">
-            <ul class="nav p-3" id="menu">
-              <li class="nav-item">
-                <a
-                  href="#rateSubmenu"
-                  data-bs-toggle="collapse"
-                  class="dropdown-toggle"
-                  >Rate Manager</a
-                >
-                <ul
-                  class="collapse nav list-unstyled breadcrumb show"
-                  id="rateSubmenu"
-                >
-                  <li class="nav-item">
-                    <a class="dropdown-item" href="/ratemanager/exhibitlist"
-                      ><span>Exhibit list</span></a
-                    >
-                  </li>
-                  <div class="w-100"></div>
-                  <li class="nav-item">
-                    <a class="dropdown-item" href="/ratemanager/uploadexhibit"
-                      >Upload Exhibits</a
-                    >
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a
-                  href="#productSubmenu"
-                  data-bs-toggle="collapse"
-                  class="dropdown-toggle"
-                  data-bs-auto-close="false"
-                  >Product Configurator</a
-                >
-                <ul class="collapse nav list-unstyled show" id="productSubmenu">
-                  <li class="nav-item">
-                    <a class="dropdown-item" href="/productconfigurator/product"
-                      >Product</a
-                    >
-                  </li>
-                  <div class="w-100"></div>
-                  <li class="nav-item">
-                    <a class="dropdown-item" href="/productconfigurator/product"
-                      >&nbsp;&nbsp;&nbsp;&nbsp;Coverages</a
-                    >
-                  </li>
-                  <div class="w-100"></div>
-                  <li class="nav-item">
-                    <a class="dropdown-item" href="/productconfigurator/product"
-                      >&nbsp;&nbsp;&nbsp;&nbsp;Discounts</a
-                    >
-                  </li>
-                </ul>
-              </li>
-            </ul>
+          <nav id="sidebar" class="col-md-3">
+            
           </nav>
         </div>
       </div>
       <!-- Page Content -->
-      <div class="page p-3">
+      <div class="page p-2">
         {% block content %}
         <div>
           {% for i in Homepagemodel_list %}

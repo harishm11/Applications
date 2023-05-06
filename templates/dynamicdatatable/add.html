@@ -1,6 +1,6 @@
-{% extends 'base.html' %} {% load static %} {% block title %}{{ title }}{% endblock %} {% load crispy_forms_tags %} {% block content %} {% if request.user.is_authenticated %}
+{% extends 'base.html' %} {% load static %} {% block title %}Add {{ verbose_name_plural }}{% endblock %} {% load crispy_forms_tags %} {% block content %} {% if request.user.is_authenticated %}
 <div class="container">
-<h1>Add New{{ verbose_name_plural }}</h1>
+
 
 <form method="post">
     {% csrf_token %}

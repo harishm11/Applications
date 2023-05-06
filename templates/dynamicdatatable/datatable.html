@@ -1,50 +1,67 @@
 {% extends 'base.html' %} {% load static %} {% load product_tags %} 
-{% block title %} {{ title }} {% endblock %} {% load crispy_forms_tags %} {% block content%} {% if request.user.is_authenticated %}
-<div class="container">
-  <h1>{{ verbose_name_plural_value }}</h1>
-  <div class="d-flex" id="wrapper">
-    <div class="bg-light border-right">
-      <a class="btn btn-secondary btn-wide mb-3" href="{% url 'add_object' app_label_value model_name_value %}">Add new</a>
-      <a class="btn btn-secondary btn-wide mb-3" href="{% url 'export_csv' app_label=app_label_value model_name=model_name_value %}">Export as CSV</a>
-      <a class="btn btn-secondary btn-wide mb-3" href="{% url 'import_csv' app_label=app_label_value model_name=model_name_value %}">Import from CSV</a>
-    </div>
+{% block title %} {{ verbose_name_plural_value }}{% endblock %} {% load crispy_forms_tags %} {% block content%} {% if request.user.is_authenticated %}
+
+     
+  
     <!-- Page Content -->
-    <div class="page p-3">
-      <form method="get" action="{% url 'datatable' app_label=app_label_value model_name=model_name_value %}">
-        <input type="text" name="search" value="{{ search_query }}">
-        <button class="btn btn-secondary" type="submit">Search</button>
-      </form>
-      <div class="col-md-12">
-        <div class="table-responsive table-outer-div" >
+    <div class="p-3">
+        <div class="row">
+            <div class="col mx-2">
+              <a class="nav-link" href="{% url 'add_object' app_label_value model_name_value %}"><b>Add</b></a>
+            </div>
+            <div class="col mx-2">
+              <a class="nav-link" href="{% url 'export_csv' app_label=app_label_value model_name=model_name_value %}"><b>Export as CSV</b></a>
+            </div>
+            <div class="col ml-3">
+              <a class="nav-link" href="{% url 'import_csv' app_label=app_label_value model_name=model_name_value %}"><b>Import from CSV</b></a>
+            </div>
+
+            <form method="get" action="{% url 'datatable' app_label=app_label_value model_name=model_name_value %}" class="p-3">
+              <input  type="text" name="search" value="{{ search_query }}">
+              <button class="btn btn-secondary" type="submit">Search</button>
+            </form>
+          </div>
+     
+      
+   
+        <div class="table-outer-div" >
           <table class="table table-bordered table-responsive-sm custom-table">
             <thead>
               <tr>
+                <th>Edit</th>
+                <th>Delete</th>
                 {% for field in model_fields %}
+                    {% if field != 'id' %}
                 <th>{{ field }}</th>
+                 {% endif %}
                 {% endfor %}
-                <th>Actions</th>
+                
               </tr>
             </thead>
             <tbody>
               {% for object in objects %}
               <tr>
-                {% for field in model_fields %}
-                <td>{{ object|get_attribute:field }}</td>
-                {% endfor %}
-                <td>
-                  <a href="{% url 'edit_object' app_label_value model_name_value object.pk %}">Edit</a>
-                  <a href="{% url 'delete_object' app_label_value model_name_value object.pk %}">Delete</a>
+              <td>
+                  <a href="{% url 'edit_object' app_label_value model_name_value object.pk %}"><i class="fa fa-edit"></i></a> 
+                  </td>
+                  <td>
+                    <a href="{% url 'delete_object' app_label_value model_name_value object.pk %}"><i class="fa fa-trash"></i></a>
                 </td>
+                {% for field in model_fields %}
+                {% if field != 'id' %}
+                <td>{{ object|get_attribute:field }}</td>
+                 {% endif %}
+                {% endfor %}
+                
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-      </div>
+     
     </div>
     <!-- /Page Content -->
-  </div>
-</div>
+
 
 
 
