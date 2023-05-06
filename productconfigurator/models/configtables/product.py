@@ -1,7 +1,9 @@
 from django.db import models
+# from django.apps import apps
+# coverage = apps.get_model('productconfigurator', 'coverage')
 
 
-class Productmodel(models.Model):
+class Product(models.Model):
     StateCode = models.CharField(max_length=2)
     Carrier = models.CharField(max_length=100)
     UwCompany = models.CharField(max_length=100)
@@ -16,6 +18,7 @@ class Productmodel(models.Model):
     OpenBookInd = models.BooleanField(null=True, blank=True)
     OpenBookStartDate = models.DateField(null=True, blank=True)
     CloseBookEndDate = models.DateField(null=True, blank=True)
+    # Coverages = models.ManyToManyField(coverage)
     CreateDate = models.DateField(auto_now_add=True, blank=True, null=True)
     UpdateDate = models.DateField(auto_now=True, blank=True, null=True)
 

@@ -5,6 +5,6 @@ from .models.configtables.product import *
 from .models import *
 
 
-admin.site.register(Productmodel)
-admin.site.register(Statemodel)
-admin.site.register(Carriermodel)
+admin.site.register(Product)
+admin.site.register(state)
+admin.site.register(carrier)

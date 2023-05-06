@@ -31,7 +31,7 @@
 
 
 .navbar {
-    background-color: #f1f1f8; /* Set the background color to red */
+    background-color: #f1f1f8; 
   }
 
   
@@ -45,11 +45,26 @@
     overflow: auto;
   }
 
+  .inside-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
   td {
     white-space: nowrap;
   }
 
-  .custom-table {
-    min-height: 600px; /* Adjust the value as per your requirements */
-    max-width: 1000px;
+  .table-outer-div{
+    max-width: 100vh; overflow-y: scroll;max-height: 70vh; overflow-x: scroll;
   }
+  .custom-table {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-width: 100vh; overflow-y: scroll;max-height: 70vh; overflow-x: scroll;
+  }
+
+
+  .btn-wide {
+    width: 200px; /* Adjust this value as needed */
+}

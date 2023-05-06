@@ -1,18 +1,17 @@
 from django import forms
 from django.apps import apps
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Field
 from django import forms
 
-Productmodel = apps.get_model('productconfigurator', 'Productmodel')
-Carriermodel = apps.get_model('productconfigurator', 'Carriermodel')
+Product = apps.get_model('productconfigurator', 'Product')
+carrier = apps.get_model('productconfigurator', 'carrier')
 
 
 class ProductForm(forms.ModelForm):
-    Carrier = forms.ModelChoiceField(queryset=Carriermodel.objects.all())
+    Carrier = forms.ModelChoiceField(queryset=carrier.objects.all())
 
     class Meta:
-        model = Productmodel
+        model = Product
         fields = '__all__'
         widgets = {
             'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),

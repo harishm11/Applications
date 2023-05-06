@@ -1,8 +1,8 @@
 from django.db import models
 
 
-class Statemodel(models.Model):
-    StateID = models.AutoField(primary_key=True)
+class state(models.Model):
+    StateID = models.IntegerField()
     StateName = models.CharField(max_length=100)
     StateCode = models.CharField(max_length=2)
     ZipMin = models.CharField(max_length=5)

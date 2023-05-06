@@ -6,6 +6,9 @@
       <div class="mb-3">
         <a href="{% url 'product_add' %}">Add</a>
       </div>
+      <div class="mb-3">
+        <a href="{% url 'product_add_coverages' %}">Add Coveages</a>
+      </div>
     </div>
     <div class="col-md-12">
       <div class="table-responsive">
@@ -24,19 +27,19 @@
           <tbody>
             {% for product in products %}
             <tr>
-              <td>
+              <td >
                 <a href="{% url 'product_edit' product.id %}"
                   ><i class="fa fa-edit"></i
                 ></a>
               </td>
-              <td>
+              <td >
                 <a href="{% url 'product_delete' product.id %}"
                   ><i class="fa fa-trash"></i
                 ></a>
               </td>
               {% for field in product_fields %}
               {% if field.name != 'id' %}
-              <td>{{ product|get_attribute:field.name }}</td>
+              <td contenteditable="true">{{ product|get_attribute:field.name }}</td>
               {% endif %}
               {% endfor %}
             </tr>

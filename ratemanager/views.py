@@ -28,11 +28,11 @@ def extractData(request):
 
 
 def uploadexhibit(request):
-    Statemodel = apps.get_model('productconfigurator', 'Statemodel')
-    states = Statemodel.objects.all()
+    state = apps.get_model('productconfigurator', 'state')
+    states = state.objects.all()
 
-    Carriermodel = apps.get_model('productconfigurator', 'Carriermodel')
-    carriers = Carriermodel.objects.all()
+    carrier = apps.get_model('productconfigurator', 'carrier')
+    carriers = carrier.objects.all()
     return render(request, 'ratemanager/uploadexhibit.html', {'heading': 'Upload Exhibits file', 'states': states, 'carriers': carriers})
 
 
