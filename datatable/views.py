@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.forms import modelform_factory
 from django import forms
+from productconfigurator.forms import *
 
 
 def datatable(request, app_label, model_name):
@@ -42,18 +43,23 @@ def add_object(request, app_label, model_name):
     try:
         Model = apps.get_model(app_label, model_name)
         # or use 'exclude' if needed
-        form = modelform_factory(Model, fields='__all__',  widgets={
-            'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
-            'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),
-            'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
-            'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
-        })
+
+        if model_name == 'product':
+            form_obj = ProductForm(request.POST)
+        else:
+            form_obj = modelform_factory(Model, fields='__all__', widgets={
+                'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
+                'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),
+                'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
+                'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
+            })
 
         if request.method == 'POST':
-            form = form(request.POST)
-            if form.is_valid():
-                form.save()
+            if form_obj.is_valid():
+                form_obj.save()
                 return redirect('datatable', app_label=app_label, model_name=model_name)
+        else:
+            form = form_obj
 
         context = {
             'form': form,
@@ -155,3 +161,7 @@ def import_csv(request, app_label, model_name):
         return render(request, 'dynamicdatatable/import_csv.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
+
+
+
+
