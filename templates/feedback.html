@@ -1,20 +1,14 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block title %}
-    Feedback
-{% endblock %}
-{% load crispy_forms_tags %}
+ {% load static %} 
+ {% block title %} Feedback {%endblock %} 
+ {% load crispy_forms_tags %} 
+ {% block content %}
+<div >
+ 
+  <form method="POST">
+    {% csrf_token %} {{ form | crispy}}
+    <input class="btn btn-secondary" type="submit" />
+  </form>
 
-{% block content %}
-<div class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
-    {% if  request.user.is_authenticated %}
-        <form method='POST'>
-            {% csrf_token %}
-            {{ form | crispy}}
-            <input type="submit">
-        </form>
-    {% endif %}
 </div>
 {% endblock %}
-
-

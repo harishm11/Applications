@@ -1,0 +1,20 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Add {{ verbose_name_plural }}{% endblock %} {% load crispy_forms_tags %} {% block content %} {% if request.user.is_authenticated %}
+<div class="container">
+
+
+<form method="post">
+    {% csrf_token %}
+      <table class="table table-responsive table-bordered">
+      {% for field in form %}
+      <tr>
+        <td>{{ field.label_tag }}</td>
+        <td>{{ field }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+
+    <button class="btn btn-secondary" type="submit">Save</button>
+</form>
+</div>
+{% endif %} {% endblock %} {% block js %} {% endblock js %}

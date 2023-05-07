@@ -1,17 +1,17 @@
-{% extends 'base.html' %}
-{% load crispy_forms_tags %} {% load static %}
-{% block title %}Sign Up{% endblock %}
-{% block content %}
-<div class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
-    {% if not request.user.is_authenticated %}
-        <form method='POST'>
-            {% csrf_token %}
-        {{ form |crispy}}
-        <button type='submit'>Register</button>
-        </form>
-        <p>Already have an account? Please <a href='/login'>Login</a></p>
-    {% else %}
-        <p>You're already logged in and cannot register. Would you like to <a href='/logout/'>logout</a>?</p>
-    {% endif %}
+{% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} 
+{%block title %}Sign Up{% endblock %} {% block content %}
+<div>
+  {% if not request.user.is_authenticated %}
+  <form method="POST">
+    {% csrf_token %} {{ form |crispy}}
+    <button class="btn btn-secondary" type="submit">Register</button>
+  </form>
+  <p>Already have an account? Please <a href="/login">Login</a></p>
+  {% else %}
+  <p>
+    You're already logged in and cannot register. Would you like to
+    <a href="/logout/">logout</a>?
+  </p>
+  {% endif %}
 </div>
 {% endblock %}

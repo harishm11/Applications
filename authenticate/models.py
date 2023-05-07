@@ -1,15 +1,21 @@
-from django.core.validators import MaxValueValidator
 from django.db import models
 
-class homepagemodel(models.Model):
-    content = models.CharField(max_length=2000,blank=False)
-    created_at = models.DateField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateField(auto_now=True, blank=True, null=True)
+
+class Homepagemodel(models.Model):
+    Content = models.CharField(max_length=2000, blank=False)
+    CreateDate = models.DateField(auto_now_add=True, blank=True, null=True)
+    UpdateDate = models.DateField(auto_now=True, blank=True, null=True)
+
+    def __str__(self):
+        return self.Content
 
 
-class feedbackpagemodel(models.Model):
-    Username = models.CharField(max_length=120,blank=True)
-    Email = models.EmailField(max_length=120,blank=False)
+class Feedbackmodel(models.Model):
+    Username = models.CharField(max_length=120, blank=True)
+    Email = models.EmailField(max_length=120, blank=False)
     Feedback = models.TextField()
-    created_at = models.DateField(auto_now_add=True,blank=True, null=True)
-    updated_at = models.DateField(auto_now=True, blank=True, null=True)
+    CreateDate = models.DateField(auto_now_add=True, blank=True, null=True)
+    UpdateDate = models.DateField(auto_now=True, blank=True, null=True)
+
+    def __str__(self):
+        return self.Email, self.Feedback

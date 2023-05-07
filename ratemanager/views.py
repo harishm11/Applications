@@ -8,6 +8,7 @@ from django.db import connection
 import pandas as pd
 import tabula
 from myproj.settings import BASE_DIR
+from django.apps import apps
 
 
 def extractData(request):
@@ -27,15 +28,12 @@ def extractData(request):
 
 
 def uploadexhibit(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM states")
-        states = [dict(zip([col[0] for col in cursor.description], row))
-                  for row in cursor.fetchall()]
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM company_naics")
-        comp = [dict(zip([col[0] for col in cursor.description], row))
-                for row in cursor.fetchall()]
-    return render(request, 'ratemanager/uploadexhibit.html', {'heading': 'Upload Exhibits file', 'states': states, 'comp': comp})
+    state = apps.get_model('productconfigurator', 'state')
+    states = state.objects.all()
+
+    carrier = apps.get_model('productconfigurator', 'carrier')
+    carriers = carrier.objects.all()
+    return render(request, 'ratemanager/uploadexhibit.html', {'heading': 'Upload Exhibits file', 'states': states, 'carriers': carriers})
 
 
 def uploadexhibitfile(request):

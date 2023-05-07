@@ -5,15 +5,16 @@ from ..forms import *
 from django.utils.decorators import method_decorator
 from django.views import generic
 
-from authenticate.models import homepagemodel
+from authenticate.models import Homepagemodel
 
 
 @method_decorator(login_required, name='dispatch')
 class homeview(generic.ListView):
     template_name = 'base.html'
+    data = Homepagemodel.objects.all()
 
     def get_queryset(self):
-        return homepagemodel.objects.all()
+        return Homepagemodel.objects.all()
 
 
 def feedbackview(request):
