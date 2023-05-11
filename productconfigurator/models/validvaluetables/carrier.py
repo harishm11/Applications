@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class carrier(models.Model):
+class Carrier(models.Model):
     CarrierName = models.CharField(max_length=100)
     NAICCode = models.CharField(max_length=10)
     FullCompanyName = models.CharField(max_length=200)

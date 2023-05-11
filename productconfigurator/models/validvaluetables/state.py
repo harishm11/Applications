@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class state(models.Model):
+class State(models.Model):
     StateID = models.IntegerField()
     StateName = models.CharField(max_length=100)
     StateCode = models.CharField(max_length=2)

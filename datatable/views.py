@@ -9,6 +9,14 @@ from django import forms
 from productconfigurator.forms import *
 
 
+def get_model_names(app_label):
+    models = []
+    for model in apps.get_app_config(app_label).get_models():
+        models.append(model.__name__)
+    modelnames = {'models': models}
+    return modelnames
+
+
 def datatable(request, app_label, model_name):
     try:
         Model = apps.get_model(app_label, model_name)
@@ -29,12 +37,15 @@ def datatable(request, app_label, model_name):
             'model_fields': model_fields,
             'objects': objects,
             'verbose_name_plural_value': verbose_name_plural,
-            'app_label_value': app_label,
-            'model_name_value': model_name,
+            'app_label': app_label,
+            'model_name': model_name,
             'search_query': search_query,
-        }
 
-        return render(request, 'dynamicdatatable/datatable.html', context)
+
+        }
+        context.update(get_model_names(app_label))
+
+        return render(request, 'datatable/datatable.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
@@ -53,7 +64,7 @@ def add_object(request, app_label, model_name):
                 'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
                 'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
             })
-
+        verbose_name_plural = Model._meta.verbose_name_plural
         if request.method == 'POST':
             if form_obj.is_valid():
                 form_obj.save()
@@ -65,9 +76,11 @@ def add_object(request, app_label, model_name):
             'form': form,
             'app_label': app_label,
             'model_name': model_name,
+            'verbose_name_plural_value': verbose_name_plural,
         }
+        context.update(get_model_names(app_label))
 
-        return render(request, 'dynamicdatatable/add.html', context)
+        return render(request, 'datatable/add.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
@@ -78,7 +91,7 @@ def edit_object(request, app_label, model_name, object_id):
         instance = get_object_or_404(Model, pk=object_id)
         # or use 'exclude' if needed
         form = modelform_factory(Model, fields='__all__')
-
+        verbose_name_plural = Model._meta.verbose_name_plural
         if request.method == 'POST':
             form = form(request.POST, instance=instance)
             if form.is_valid():
@@ -90,9 +103,10 @@ def edit_object(request, app_label, model_name, object_id):
             'app_label': app_label,
             'model_name': model_name,
             'object_id': object_id,
+            'verbose_name_plural_value': verbose_name_plural,
         }
 
-        return render(request, 'dynamicdatatable/edit.html', context)
+        return render(request, 'datatable/edit.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
@@ -101,14 +115,18 @@ def delete_object(request, app_label, model_name, object_id):
     try:
         Model = apps.get_model(app_label, model_name)
         model_instance = get_object_or_404(Model, pk=object_id)
-
+        verbose_name_plural = Model._meta.verbose_name_plural
         if request.method == 'POST':
             model_instance.delete()
             return redirect('datatable', app_label=app_label, model_name=model_name)
 
-        return render(request, 'dynamicdatatable/delete.html', {
-            'model_instance': model_instance
-        })
+        context = {
+            'model_instance': model_instance,
+            'app_label': app_label,
+            'verbose_name_plural_value': verbose_name_plural,
+        }
+        context.update(get_model_names(app_label))
+        return render(request, 'datatable/delete.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
@@ -138,7 +156,7 @@ def import_csv(request, app_label, model_name):
     try:
         Model = apps.get_model(app_label, model_name)
         model_fields = [field.name for field in Model._meta.fields]
-
+        verbose_name_plural = Model._meta.verbose_name_plural
         if request.method == 'POST' and request.FILES['csv_file']:
             csv_file = request.FILES['csv_file']
             reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
@@ -156,12 +174,9 @@ def import_csv(request, app_label, model_name):
         context = {
             'app_label': app_label,
             'model_name': model_name,
+            'verbose_name_plural_value': verbose_name_plural,
         }
 
-        return render(request, 'dynamicdatatable/import_csv.html', context)
+        return render(request, 'datatable/import_csv.html', context, get_model_names(app_label))
     except Exception as err:
         return render(request, 'error.html', {'message': err})
-
-
-
-

@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %} Logout{% endblock %}
 {% block content %}
-<div >
+<div  class="center-div">
 {% if request.user.is_authenticated %}
     <form method='POST'>
         {% csrf_token %}

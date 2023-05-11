@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} 
 {%block title %}Sign Up{% endblock %} {% block content %}
-<div>
+<div  class="center-div">
   {% if not request.user.is_authenticated %}
   <form method="POST">
     {% csrf_token %} {{ form |crispy}}

@@ -1,0 +1,17 @@
+{% extends 'body.html' %} {% load static %} {% block title %} Import
+{%endblock %} {% load crispy_forms_tags %} {% block sidebarcontent %} 
+        {% include 'sidebar.html' %}
+{% endblock  %}
+
+{% block maincontent %} 
+{% if request.user.is_authenticated %}
+<div class="container p-3">
+
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input class="form-control form-control-sm" type="file" name="csv_file" accept="text/csv, application/vnd.ms-excel"/>
+    <button class="btn btn-secondary mt-3"  type="submit">Import CSV</button>
+  </form>
+</div>
+{% endif %} {% endblock %} {% block js%} {% endblock js%}

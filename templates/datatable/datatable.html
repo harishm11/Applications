@@ -1,0 +1,82 @@
+{% extends 'body.html' %} {% load static %} {% load product_tags %} 
+{% block title %} {{ verbose_name_plural_value|capfirst }}{% endblock %} 
+{% load crispy_forms_tags%} 
+{% block sidebarcontent %} 
+    {% include 'sidebar.html' %}
+{% endblock  %}
+{% block maincontent%} {% if request.user.is_authenticated %}
+
+
+
+<div class="">
+  <div class="row">
+    <div class="col mx-2">
+      <a
+        class=""
+        href="{% url 'add_object' app_label model_name %}"
+        ><b>Add</b></a
+      >
+    </div>
+    <div class="col mx-2">
+      <a
+        class=""
+        href="{% url 'export_csv' app_label model_name %}"
+        ><b>Export as CSV</b></a
+      >
+    </div>
+    <div class="col ml-3">
+      <a
+        class=""
+        href="{% url 'import_csv' app_label model_name %}"
+        ><b>Import from CSV</b></a
+      >
+    </div>
+
+    <form
+      method="get"
+      action="{% url 'datatable' app_label model_name %}"
+      class="p-3"
+    >
+      <input type="text" name="search" value="{{ search_query }}" />
+      <button class="btn btn-secondary" type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="table-outer-div" > 
+    <table class="table table-bordered table-responsive-sm custom-table">
+      <thead>
+        <tr>
+          <th>Edit</th>
+          <th>Delete</th>
+          {% for field in model_fields %} {% if field != 'id' %}
+          <th>{{ field }}</th>
+          {% endif %} {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for object in objects %}
+        <tr>
+          <td>
+            <a
+              href="{% url 'edit_object' app_label model_name object.pk %}"
+              ><i class="fa fa-edit"></i
+            ></a>
+          </td>
+          <td>
+            <a
+              href="{% url 'delete_object' app_label model_name object.pk %}"
+              ><i class="fa fa-trash"></i
+            ></a>
+          </td>
+          {% for field in model_fields %} {% if field != 'id' %}
+          <td>{{ object|get_attribute:field }}</td>
+          {% endif %} {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+{% endif %} {% endblock %} {% block js%} {% endblock js%}

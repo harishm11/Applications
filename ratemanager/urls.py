@@ -10,6 +10,7 @@ urlpatterns = [
     path('exhibitlist', views.exhibitlist, name="exhibitlist"),
     path('uploadexhibit', views.uploadexhibit, name="uploadexhibit"),
     path('uploadexhibitfile', views.uploadexhibitfile, name="uploadexhibitfile"),
-    path('Homepage', views.Homepage, name="Homepage"),
+    path('', views.ratemanager,
+         name='ratemanager'),
 
 ]

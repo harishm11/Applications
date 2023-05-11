@@ -1,0 +1,60 @@
+{% load static %}
+
+    <nav class="navbar navbar-expand-lg p-3 ">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="http://127.0.0.1:9000/">
+          <img
+            src="{% static 'images/logo.png' %}"
+            ,class="img"
+            width="160"
+            height="60"
+          />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+            <li class="nav-item dropdown  {% if 'productconfigurator' in request.path%}active {% endif%} mx-3">
+              <a
+                class="nav-link"
+                href="/productconfigurator"
+         
+              >
+                Product Configurator
+              </a>
+            </li>
+
+            <li class="nav-item dropdown  {% if 'ratemanager' in request.path%}active {% endif%} mx-3">
+              <a
+                class="nav-link"
+                href="/ratemanager"
+              >
+                Rate Manager
+              </a>
+            </li>   
+
+          </ul>
+        <form class="d-flex" role="search">
+          {% if request.user.is_authenticated %} 
+          {% if          request.user.is_superuser%}
+          <a class="nav-link px-2" href="/admin">Admin </a>
+          {% endif %}
+          <a class="nav-link px-2" href="/logout">Logout </a>
+          {% else %}
+          <a class="nav-link px-2" href="/login">Login </a>
+          {% endif %}
+
+        </form>
+      </div>
+    </nav>
+    

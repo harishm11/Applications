@@ -1,9 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'body.html' %}
  {% load static %} 
  {% block title %} Feedback {%endblock %} 
  {% load crispy_forms_tags %} 
  {% block content %}
-<div >
+<div class='center-div p-3'>
  
   <form method="POST">
     {% csrf_token %} {{ form | crispy}}

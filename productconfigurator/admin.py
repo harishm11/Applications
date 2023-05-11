@@ -6,5 +6,6 @@ from .models import *
 
 
 admin.site.register(Product)
-admin.site.register(state)
-admin.site.register(carrier)
+admin.site.register(State)
+admin.site.register(Carrier)
+admin.site.register(DynamicModel)

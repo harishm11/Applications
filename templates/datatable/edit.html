@@ -1,5 +1,9 @@
-{% extends 'base.html' %} {% load static %} {% block title %} Edit {{ verbose_name_plural }}
-{%endblock %} {% load crispy_forms_tags %} {% block content %} 
+{% extends 'body.html' %} {% load static %} {% block title %} Edit{{ verbose_name_plural_value|capfirst }}
+{%endblock %} {% load crispy_forms_tags %} {% block sidebarcontent %} 
+        {% include 'sidebar.html' %}
+{% endblock  %}
+
+{% block maincontent %} 
 {% if request.user.is_authenticated %}
 <div class="container p-3">
   <h1> </h1>

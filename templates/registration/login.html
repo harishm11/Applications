@@ -4,7 +4,7 @@
 {% load crispy_forms_tags %}
 {% block title %} Login{% endblock %}
 {% block content %}
-<div  >
+<div  class="center-div">
     {% if not request.user.is_authenticated %}
         <form method='POST'>
             {% csrf_token %}
