@@ -1,0 +1,21 @@
+{% extends 'body.html' %} {% load static %} {% block title %} Delete {{ verbose_name_plural_value|capfirst }}
+{%endblock %} {% load crispy_forms_tags %} 
+    {% include 'sidebar.html' %}
+{% block sidebarcontent %} 
+ 
+{% endblock  %}
+
+
+{% block maincontent %} 
+{% if request.user.is_authenticated %}
+<div class="container p-3">
+
+
+<p>Are you sure you want to delete this record?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button class="btn btn-secondary"  type="submit">Delete</button>
+</form>
+</div>
+{% endif %} {% endblock %} {% block js%} {% endblock js%}

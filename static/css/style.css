@@ -28,8 +28,6 @@
     justify-content: center;
 }
 
-
-
 .navbar {
     background-color: #f1f1f8; 
   }
@@ -51,9 +49,9 @@
 
   .table-outer-div{
     min-height: 72vh;
-    min-width: 100vh;
-    max-width: 100vh; 
+    min-width: 140vh;
     overflow-y: scroll;
+    max-width: 140vh; 
     max-height: 72vh; 
     overflow-x: scroll;
   }
@@ -68,4 +66,11 @@
 
   .btn-wide {
     width: 200px; /* Adjust this value as needed */
+}
+
+.active{
+background-color: lightgrey;
+border-style: groove;
+box-shadow: 10px 10px grey;
+
 }

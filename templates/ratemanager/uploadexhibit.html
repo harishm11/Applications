@@ -1,5 +1,5 @@
-{% extends 'base.html' %} {% load static %} {% block title %} {{title}}
-{%endblock %} {% load crispy_forms_tags %} {% block content %}
+{% extends 'body.html' %} {% load static %} {% block title %} {{title}}
+{%endblock %} {% load crispy_forms_tags %} {% block maincontent %}
 <div>
   {% if request.user.is_authenticated %}
   <div>

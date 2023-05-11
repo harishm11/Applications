@@ -9,6 +9,6 @@ urlpatterns = [
     path('ratemanager/', include('ratemanager.urls')),
     path('productconfigurator/', include('productconfigurator.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('dt/', include('datatable.urls')),
+    path('datatable/', include('datatable.urls')),
 
 ]

@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class coverage(models.Model):
+class Coverage(models.Model):
     CoverageName = models.CharField(max_length=100)
     CoverageCode = models.CharField(max_length=50)
     CoverageType = models.CharField(max_length=50)

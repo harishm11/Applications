@@ -109,5 +109,5 @@ def openexhibit(request):
         return response
 
 
-def Homepage(request):
-    return render(request, "ratemanager/test.html", {"test": "test"})
+def ratemanager(request):
+    return render(request, "ratemanager/home.html")
