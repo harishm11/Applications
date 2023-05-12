@@ -6,7 +6,8 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('create_model/', views.create_model, name='create_model'),
+    path('create_model/',
+         views.create_model, name='create_model'),
     path('', views.productconfigurator,
          name='productconfigurator'),
 ]

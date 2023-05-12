@@ -1,4 +1,4 @@
-{% extends 'body.html' %} {% load static %} {% block title %} Edit{{ verbose_name_plural_value|capfirst }}
+{% extends 'body.html' %} {% load static %} {% block title %} Edit {{ model_name }}
 {%endblock %} {% load crispy_forms_tags %} {% block sidebarcontent %} 
         {% include 'sidebar.html' %}
 {% endblock  %}

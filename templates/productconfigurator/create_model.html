@@ -1,21 +1,10 @@
-{% extends "base.html" %} {% block content %}
-<h2>Create a new model</h2>
-<form method="post">
-  {% csrf_token %}
-  <label for="model_name">Model name:</label>
-  <input type="text" name="model_name" /><br />
+{% extends "base.html" %}
 
-  <label for="field_name">Field name:</label>
-  <input type="text" name="field_name" /><br />
-
-  <label for="field_type">Field type:</label>
-  <select name="field_type">
-    <option value="CharField">CharField</option>
-    <option value="IntegerField">IntegerField</option>
-    <option value="DateField">DateField</option>
-    <!-- Add other field types here --></select
-  ><br />
-
-  <input type="submit" value="Create model" />
-</form>
+{% block content %}
+  <h1>Create Model</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create</button>
+  </form>
 {% endblock %}

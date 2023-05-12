@@ -8,4 +8,3 @@ from .models import *
 admin.site.register(Product)
 admin.site.register(State)
 admin.site.register(Carrier)
-admin.site.register(DynamicModel)

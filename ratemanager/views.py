@@ -9,6 +9,7 @@ import pandas as pd
 import tabula
 from myproj.settings import BASE_DIR
 from django.apps import apps
+from django.urls import get_resolver
 
 
 def extractData(request):
@@ -110,4 +111,9 @@ def openexhibit(request):
 
 
 def ratemanager(request):
-    return render(request, "ratemanager/home.html")
+    options = []
+    for url_pattern in get_resolver().url_patterns:
+        if url_pattern.app_name == 'ratemanager':
+            options.append(url_pattern.url_patterns.__name__)
+    context = {'options': options, 'app_label': 'ratemanager'}
+    return render(request, "ratemanager/home.html", context)

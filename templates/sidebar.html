@@ -1,5 +1,5 @@
 <ul>
-{% for model in models %}
-    <li class = "nav-link p-3"><a href='/datatable/{{app_label}}/{{ model }}/'>{{ model }}</a></li>
+{% for option in options %}
+    <li class = "nav-link p-3"><a href='/datatable/{{app_label}}/{{ option }}/'>{{ option }}</a></li>
 {% endfor %}
 </ul>

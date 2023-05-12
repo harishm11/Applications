@@ -10,10 +10,10 @@ from productconfigurator.forms import *
 
 
 def get_model_names(app_label):
-    models = []
+    options = []
     for model in apps.get_app_config(app_label).get_models():
-        models.append(model.__name__)
-    modelnames = {'models': models}
+        options.append(model.__name__)
+    modelnames = {'options': options}
     return modelnames
 
 
@@ -123,6 +123,7 @@ def delete_object(request, app_label, model_name, object_id):
         context = {
             'model_instance': model_instance,
             'app_label': app_label,
+            'model_name': model_name,
             'verbose_name_plural_value': verbose_name_plural,
         }
         context.update(get_model_names(app_label))
