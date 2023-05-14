@@ -53,12 +53,10 @@ def datatable(request, app_label, model_name):
 def add_object(request, app_label, model_name):
     try:
         Model = apps.get_model(app_label, model_name)
-        # or use 'exclude' if needed
-
-        if model_name == 'product':
+        if model_name == 'Product':
             form_obj = ProductForm(request.POST)
         else:
-            form_obj = modelform_factory(Model, fields='__all__', widgets={
+            form_obj = modelform_factory(Model, exclude=('id',), widgets={
                 'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
                 'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),
                 'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
@@ -66,8 +64,12 @@ def add_object(request, app_label, model_name):
             })
         verbose_name_plural = Model._meta.verbose_name_plural
         if request.method == 'POST':
-            if form_obj.is_valid():
-                form_obj.save()
+            if model_name != 'Product':
+                form = form_obj(request.POST)
+            else:
+                form = form_obj
+            if form.is_valid():
+                form.save()
                 return redirect('datatable', app_label=app_label, model_name=model_name)
         else:
             form = form_obj
@@ -89,8 +91,15 @@ def edit_object(request, app_label, model_name, object_id):
     try:
         Model = apps.get_model(app_label, model_name)
         instance = get_object_or_404(Model, pk=object_id)
-        # or use 'exclude' if needed
-        form = modelform_factory(Model, fields='__all__')
+
+        form = modelform_factory(Model, exclude=('id',), widgets={
+            'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
+            'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),
+            'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
+            'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
+
+        })
+
         verbose_name_plural = Model._meta.verbose_name_plural
         if request.method == 'POST':
             form = form(request.POST, instance=instance)
@@ -167,7 +176,7 @@ def import_csv(request, app_label, model_name):
                 obj = Model()
                 for i, field in enumerate(model_fields):
                     setattr(obj, field, row[i-1])
-                obj.pk = j
+                # obj.pk = j
                 obj.save()
 
             return redirect('datatable', app_label=app_label, model_name=model_name)
@@ -177,7 +186,7 @@ def import_csv(request, app_label, model_name):
             'model_name': model_name,
             'verbose_name_plural_value': verbose_name_plural,
         }
-
-        return render(request, 'datatable/import_csv.html', context, get_model_names(app_label))
+        context.update(get_model_names(app_label))
+        return render(request, 'datatable/import_csv.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})

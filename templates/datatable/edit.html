@@ -10,7 +10,14 @@
 
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <table class="table table-responsive table-bordered">
+      {% for field in form %}
+      <tr>
+        <td>{{ field.label_tag }}</td>
+        <td>{{ field }}</td>
+      </tr>
+      {% endfor %}
+    </table>
     <button class="btn btn-secondary"  type="submit">Save</button>
 </form>
 </div>

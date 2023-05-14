@@ -1,6 +1,3 @@
-
-
-from django.core.management.commands.makemigrations import Command as MakeMigrationsCommand
 import os
 from django import forms
 from django.apps import apps
@@ -9,6 +6,10 @@ from django.core.management import call_command
 state = apps.get_model('productconfigurator', 'state')
 carrier = apps.get_model('productconfigurator', 'carrier')
 product = apps.get_model('productconfigurator', 'product')
+try:
+    uwcompany = apps.get_model('productconfigurator', 'uwcompany')
+except LookupError:
+    uwcompany = None
 
 
 class ProductForm(forms.ModelForm):
@@ -21,6 +22,11 @@ class ProductForm(forms.ModelForm):
         queryset=state.objects.all(),
         label='StateCode'
     )
+
+    # CompanyName = forms.ModelChoiceField(
+    #     queryset=uwcompany.objects.all(),
+    #     label='CompanyName'
+    # )
 
     class Meta:
         model = product
@@ -96,8 +102,10 @@ class CreateModelForm(forms.Form):
         filepath = os.path.join("Configuration/productconfigurator",
                                 "models/validvaluetables", filename)
 
-        with open(filepath, "w") as f:
-            f.write(model_code)
+        if not os.path.exists(filepath):
+            with open(filepath, "w") as f:
+                f.write(model_code)
+        apps.all_models['productconfigurator'][model_name] = model
 
         return model
 
