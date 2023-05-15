@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.forms import modelform_factory
 from django import forms
 from productconfigurator.forms import *
+from datetime import datetime
 
 
 def getModelNames(appLabel):
@@ -142,6 +143,44 @@ def deleteObject(request, appLabel, modelName, object_id):
         return render(request, 'error.html', {'message': err})
 
 
+def cloneObject(request, appLabel, modelName, object_id):
+    try:
+        Model = apps.get_model(appLabel, modelName)
+        instance = get_object_or_404(Model, pk=object_id)
+
+        verboseNamePlural = Model._meta.verbose_name_plural
+        form = modelform_factory(Model, exclude=('id',), widgets={
+            'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
+            'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),
+            'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
+            'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
+        })
+        if request.method == 'POST':
+
+            form = form(request.POST)
+            if form.is_valid():
+                cloned_instance = form.save(commit=False)
+                cloned_instance.id = None
+                cloned_instance.save()
+
+                return redirect('datatable', appLabel=appLabel, modelName=modelName)
+        else:
+
+            form = form(instance=instance)
+
+        context = {
+            'form': form,
+            'appLabel': appLabel,
+            'modelName': modelName,
+            'verboseNamePlural_value': verboseNamePlural,
+        }
+        context.update(getModelNames(appLabel))
+
+        return render(request, 'datatable/clone.html', context)
+    except Exception as err:
+        return render(request, 'error.html', {'message': err})
+
+
 def exportCsv(request, appLabel, modelName):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -166,19 +205,26 @@ def exportCsv(request, appLabel, modelName):
 def importCsv(request, appLabel, modelName):
     try:
         Model = apps.get_model(appLabel, modelName)
-        model_fields = [field.name for field in Model._meta.fields]
+        model_fields = [
+            field.name for field in Model._meta.fields if field.name != 'id' and field.name != 'EnableInd']
         verboseNamePlural = Model._meta.verbose_name_plural
+
         if request.method == 'POST' and request.FILES['csv_file']:
             csv_file = request.FILES['csv_file']
             reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
-            # next(reader)  # Skip header row
+            next(reader)  # Skip header row
 
-            for j, row in enumerate(reader, start=1):
+            for row in reader:
                 obj = Model()
                 for i, field in enumerate(model_fields):
-                    if field != 'EnableInd':
-                        setattr(obj, field, row[i-1])
-                # obj.pk = j
+                    if field in 'Date':
+                        # Convert date string to datetime object
+                        date_str = row[i]
+                        date_obj = datetime.strptime(
+                            date_str, '%m/%d/%y').date()
+                        setattr(obj, field, date_obj)
+                    else:
+                        setattr(obj, field, row[i])
                 obj.save()
 
             return redirect('datatable', appLabel=appLabel, modelName=modelName)
@@ -190,5 +236,6 @@ def importCsv(request, appLabel, modelName):
         }
         context.update(getModelNames(appLabel))
         return render(request, 'datatable/importCsv.html', context)
+
     except Exception as err:
         return render(request, 'error.html', {'message': err})

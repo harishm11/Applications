@@ -1,33 +1,20 @@
 {% extends 'body.html' %} {% load static %} {% load product_tags %} 
 {% block title %} {{ verboseNamePlural_value|capfirst }}{% endblock %} 
-{% load crispy_forms_tags%} 
-{% block sidebarcontent %} 
-    {% include 'sidebar.html' %}
-{% endblock  %}
-{% block maincontent%} {% if request.user.is_authenticated %}
-
-
+{% load crispy_forms_tags%} {% block sidebarcontent %} {% include 'sidebar.html' %}
+{%endblock %} {% block maincontent%} {% if request.user.is_authenticated %}
 
 <div class="">
   <div class="row">
     <div class="col mx-2">
-      <a
-        class=""
-        href="{% url 'addObject' appLabel modelName %}"
-        ><b>Add</b></a
-      >
+      <a class="" href="{% url 'addObject' appLabel modelName %}"><b>Add</b></a>
     </div>
     <div class="col mx-2">
-      <a
-        class=""
-        href="{% url 'exportCsv' appLabel modelName %}"
+      <a class="" href="{% url 'exportCsv' appLabel modelName %}"
         ><b>Export as CSV</b></a
       >
     </div>
     <div class="col ml-3">
-      <a
-        class=""
-        href="{% url 'importCsv' appLabel modelName %}"
+      <a class="" href="{% url 'importCsv' appLabel modelName %}"
         ><b>Import from CSV</b></a
       >
     </div>
@@ -42,10 +29,11 @@
     </form>
   </div>
 
-  <div class="table-outer-div" > 
+  <div class="table-outer-div">
     <table class="table table-bordered table-responsive-sm custom-table">
       <thead>
         <tr>
+          <th>Clone</th>
           <th>Edit</th>
           <th>Delete</th>
           {% for field in model_fields %} {% if field != 'id' %}
@@ -57,14 +45,17 @@
         {% for object in objects %}
         <tr>
           <td>
-            <a
-              href="{% url 'editObject' appLabel modelName object.pk %}"
+            <a href="{% url 'cloneObject' appLabel modelName object.pk %}"
+              ><i class="fa fa-clone"></i
+            ></a>
+          </td>
+          <td>
+            <a href="{% url 'editObject' appLabel modelName object.pk %}"
               ><i class="fa fa-edit"></i
             ></a>
           </td>
           <td>
-            <a
-              href="{% url 'deleteObject' appLabel modelName object.pk %}"
+            <a href="{% url 'deleteObject' appLabel modelName object.pk %}"
               ><i class="fa fa-trash"></i
             ></a>
           </td>
@@ -77,6 +68,5 @@
     </table>
   </div>
 </div>
-
 
 {% endif %} {% endblock %} {% block js%} {% endblock js%}
