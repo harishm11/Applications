@@ -115,5 +115,5 @@ def ratemanager(request):
     for url_pattern in get_resolver().url_patterns:
         if url_pattern.app_name == 'ratemanager':
             options.append(url_pattern.url_patterns.__name__)
-    context = {'options': options, 'app_label': 'ratemanager'}
+    context = {'options': options, 'appLabel': 'ratemanager'}
     return render(request, "ratemanager/home.html", context)

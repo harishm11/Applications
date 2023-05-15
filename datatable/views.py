@@ -9,20 +9,21 @@ from django import forms
 from productconfigurator.forms import *
 
 
-def get_model_names(app_label):
+def getModelNames(appLabel):
     options = []
-    for model in apps.get_app_config(app_label).get_models():
+    for model in apps.get_app_config(appLabel).get_models():
         options.append(model.__name__)
+
     modelnames = {'options': options}
     return modelnames
 
 
-def datatable(request, app_label, model_name):
+def datatable(request, appLabel, modelName):
     try:
-        Model = apps.get_model(app_label, model_name)
+        Model = apps.get_model(appLabel, modelName)
         model_fields = [field.name for field in Model._meta.fields]
 
-        verbose_name_plural = Model._meta.verbose_name_plural
+        verboseNamePlural = Model._meta.verbose_name_plural
         search_query = request.GET.get('search', '')
         if search_query:
             q_objects = Q()
@@ -36,24 +37,24 @@ def datatable(request, app_label, model_name):
             'Model': Model,
             'model_fields': model_fields,
             'objects': objects,
-            'verbose_name_plural_value': verbose_name_plural,
-            'app_label': app_label,
-            'model_name': model_name,
+            'verboseNamePlural_value': verboseNamePlural,
+            'appLabel': appLabel,
+            'modelName': modelName,
             'search_query': search_query,
 
 
         }
-        context.update(get_model_names(app_label))
+        context.update(getModelNames(appLabel))
 
         return render(request, 'datatable/datatable.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
 
-def add_object(request, app_label, model_name):
+def addObject(request, appLabel, modelName):
     try:
-        Model = apps.get_model(app_label, model_name)
-        if model_name == 'Product':
+        Model = apps.get_model(appLabel, modelName)
+        if modelName == 'Product':
             form_obj = ProductForm(request.POST)
         else:
             form_obj = modelform_factory(Model, exclude=('id',), widgets={
@@ -62,34 +63,34 @@ def add_object(request, app_label, model_name):
                 'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
                 'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
             })
-        verbose_name_plural = Model._meta.verbose_name_plural
+        verboseNamePlural = Model._meta.verbose_name_plural
         if request.method == 'POST':
-            if model_name != 'Product':
+            if modelName != 'Product':
                 form = form_obj(request.POST)
             else:
                 form = form_obj
             if form.is_valid():
                 form.save()
-                return redirect('datatable', app_label=app_label, model_name=model_name)
+                return redirect('datatable', appLabel=appLabel, modelName=modelName)
         else:
             form = form_obj
 
         context = {
             'form': form,
-            'app_label': app_label,
-            'model_name': model_name,
-            'verbose_name_plural_value': verbose_name_plural,
+            'appLabel': appLabel,
+            'modelName': modelName,
+            'verboseNamePlural_value': verboseNamePlural,
         }
-        context.update(get_model_names(app_label))
+        context.update(getModelNames(appLabel))
 
         return render(request, 'datatable/add.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
 
-def edit_object(request, app_label, model_name, object_id):
+def editObject(request, appLabel, modelName, object_id):
     try:
-        Model = apps.get_model(app_label, model_name)
+        Model = apps.get_model(appLabel, modelName)
         instance = get_object_or_404(Model, pk=object_id)
 
         form = modelform_factory(Model, exclude=('id',), widgets={
@@ -100,19 +101,19 @@ def edit_object(request, app_label, model_name, object_id):
 
         })
 
-        verbose_name_plural = Model._meta.verbose_name_plural
+        verboseNamePlural = Model._meta.verbose_name_plural
         if request.method == 'POST':
             form = form(request.POST, instance=instance)
             if form.is_valid():
                 form.save()
-                return redirect('datatable', app_label=app_label, model_name=model_name)
+                return redirect('datatable', appLabel=appLabel, modelName=modelName)
 
         context = {
             'form': form(instance=instance),
-            'app_label': app_label,
-            'model_name': model_name,
+            'appLabel': appLabel,
+            'modelName': modelName,
             'object_id': object_id,
-            'verbose_name_plural_value': verbose_name_plural,
+            'verboseNamePlural_value': verboseNamePlural,
         }
 
         return render(request, 'datatable/edit.html', context)
@@ -120,35 +121,35 @@ def edit_object(request, app_label, model_name, object_id):
         return render(request, 'error.html', {'message': err})
 
 
-def delete_object(request, app_label, model_name, object_id):
+def deleteObject(request, appLabel, modelName, object_id):
     try:
-        Model = apps.get_model(app_label, model_name)
+        Model = apps.get_model(appLabel, modelName)
         model_instance = get_object_or_404(Model, pk=object_id)
-        verbose_name_plural = Model._meta.verbose_name_plural
+        verboseNamePlural = Model._meta.verbose_name_plural
         if request.method == 'POST':
             model_instance.delete()
-            return redirect('datatable', app_label=app_label, model_name=model_name)
+            return redirect('datatable', appLabel=appLabel, modelName=modelName)
 
         context = {
             'model_instance': model_instance,
-            'app_label': app_label,
-            'model_name': model_name,
-            'verbose_name_plural_value': verbose_name_plural,
+            'appLabel': appLabel,
+            'modelName': modelName,
+            'verboseNamePlural_value': verboseNamePlural,
         }
-        context.update(get_model_names(app_label))
+        context.update(getModelNames(appLabel))
         return render(request, 'datatable/delete.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
 
-def export_csv(request, app_label, model_name):
+def exportCsv(request, appLabel, modelName):
     try:
-        Model = apps.get_model(app_label, model_name)
+        Model = apps.get_model(appLabel, modelName)
         model_fields = [field.name for field in Model._meta.fields]
         objects = Model.objects.all()
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{model_name}.csv"'
+        response['Content-Disposition'] = f'attachment; filename="{modelName}.csv"'
 
         writer = csv.writer(response)
         writer.writerow(model_fields)
@@ -162,11 +163,11 @@ def export_csv(request, app_label, model_name):
         return render(request, 'error.html', {'message': err})
 
 
-def import_csv(request, app_label, model_name):
+def importCsv(request, appLabel, modelName):
     try:
-        Model = apps.get_model(app_label, model_name)
+        Model = apps.get_model(appLabel, modelName)
         model_fields = [field.name for field in Model._meta.fields]
-        verbose_name_plural = Model._meta.verbose_name_plural
+        verboseNamePlural = Model._meta.verbose_name_plural
         if request.method == 'POST' and request.FILES['csv_file']:
             csv_file = request.FILES['csv_file']
             reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
@@ -175,18 +176,19 @@ def import_csv(request, app_label, model_name):
             for j, row in enumerate(reader, start=1):
                 obj = Model()
                 for i, field in enumerate(model_fields):
-                    setattr(obj, field, row[i-1])
+                    if field != 'EnableInd':
+                        setattr(obj, field, row[i-1])
                 # obj.pk = j
                 obj.save()
 
-            return redirect('datatable', app_label=app_label, model_name=model_name)
+            return redirect('datatable', appLabel=appLabel, modelName=modelName)
 
         context = {
-            'app_label': app_label,
-            'model_name': model_name,
-            'verbose_name_plural_value': verbose_name_plural,
+            'appLabel': appLabel,
+            'modelName': modelName,
+            'verboseNamePlural_value': verboseNamePlural,
         }
-        context.update(get_model_names(app_label))
-        return render(request, 'datatable/import_csv.html', context)
+        context.update(getModelNames(appLabel))
+        return render(request, 'datatable/importCsv.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})

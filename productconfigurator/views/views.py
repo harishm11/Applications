@@ -23,15 +23,15 @@ def productconfigurator(request):
     options = []
     for model in apps.get_app_config('productconfigurator').get_models():
         options.append(model.__name__)
-    context = {'options': options, 'app_label': 'productconfigurator'}
+    context = {'options': options, 'appLabel': 'productconfigurator'}
     return render(request, 'productconfigurator/home.html', context)
 
 
-def create_model(request):
+def createModel(request):
     if request.method == 'POST':
         form = CreateModelForm(request.POST)
         if form.is_valid():
-            form.save_model()
+            form.saveModel()
     else:
         form = CreateModelForm()
-    return render(request, 'productconfigurator/create_model.html', {'form': form})
+    return render(request, 'productconfigurator/createModel.html', {'form': form})

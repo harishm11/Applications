@@ -2,16 +2,16 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('<str:app_label>/<str:model_name>/',
+    path('<str:appLabel>/<str:modelName>/',
          datatable, name='datatable'),
-    path('<str:app_label>/<str:model_name>/add/',
-         add_object, name='add_object'),
-    path('<str:app_label>/<str:model_name>/edit/<int:object_id>/',
-         edit_object, name='edit_object'),
-    path('<str:app_label>/<str:model_name>/delete/<int:object_id>/',
-         delete_object, name='delete_object'),
-    path('export/<str:app_label>/<str:model_name>/',
-         export_csv, name='export_csv'),
-    path('import/<str:app_label>/<str:model_name>/',
-         import_csv, name='import_csv'),
+    path('<str:appLabel>/<str:modelName>/add/',
+         addObject, name='addObject'),
+    path('<str:appLabel>/<str:modelName>/edit/<int:object_id>/',
+         editObject, name='editObject'),
+    path('<str:appLabel>/<str:modelName>/delete/<int:object_id>/',
+         deleteObject, name='deleteObject'),
+    path('export/<str:appLabel>/<str:modelName>/',
+         exportCsv, name='exportCsv'),
+    path('import/<str:appLabel>/<str:modelName>/',
+         importCsv, name='importCsv'),
 ]

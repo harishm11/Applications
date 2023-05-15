@@ -1,11 +1,25 @@
 from django.contrib import admin
-from .models.validvaluetables.state import *
-from .models.validvaluetables.carrier import *
-from .models.configtables.product import *
-from .models import *
 
+from .models.state import State
+from .models.carrier import Carrier
+from .models.product import Product
+from .models.uwcompany import Uwcompany
+from .models.coverage import Coverage
+from .models.lineofbusiness import LineOfBusiness
+from .models.policysubtype import PolicySubType
+from .models.policytype import PolicyType
+from .models.policyterm import PolicyTerm
+from .models.productcode import ProductCode
+from .models.offering import Offering
 
 admin.site.register(Product)
 admin.site.register(State)
 admin.site.register(Carrier)
-
+admin.site.register(Coverage)
+admin.site.register(Uwcompany)
+admin.site.register(LineOfBusiness)
+admin.site.register(PolicyType)
+admin.site.register(PolicySubType)
+admin.site.register(PolicyTerm)
+admin.site.register(ProductCode)
+admin.site.register(Offering)
