@@ -62,7 +62,7 @@ class ProductForm(forms.ModelForm):
         label='OfferingName'
     )
     Policyterm = forms.ModelChoiceField(
-        queryset=policyterm.objects.none(),
+        queryset=policyterm.objects.all(),
         label='Policyterm'
     )
 
