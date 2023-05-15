@@ -6,7 +6,7 @@ class ProductconfiguratorConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'productconfigurator'
 
-    def create_model(self, name, fields=None, options=None, bases=None, **kwargs):
+    def createModel(self, name, fields=None, options=None, bases=None, **kwargs):
         """
         Create a Django model dynamically.
         """

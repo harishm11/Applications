@@ -6,6 +6,7 @@ class Carrier(models.Model):
     NAICCode = models.CharField(max_length=10)
     FullCompanyName = models.CharField(max_length=200)
     AmbestNumber = models.CharField(max_length=10)
+    EnableInd = models.BooleanField(default=True)
 
     def __str__(self):
         return self.CarrierName

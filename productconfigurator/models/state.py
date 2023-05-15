@@ -7,6 +7,7 @@ class State(models.Model):
     StateCode = models.CharField(max_length=2)
     ZipMin = models.CharField(max_length=5)
     ZipMax = models.CharField(max_length=5)
+    EnableInd = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.StateCode}"

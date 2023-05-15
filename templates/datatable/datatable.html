@@ -1,5 +1,5 @@
 {% extends 'body.html' %} {% load static %} {% load product_tags %} 
-{% block title %} {{ verbose_name_plural_value|capfirst }}{% endblock %} 
+{% block title %} {{ verboseNamePlural_value|capfirst }}{% endblock %} 
 {% load crispy_forms_tags%} 
 {% block sidebarcontent %} 
     {% include 'sidebar.html' %}
@@ -13,28 +13,28 @@
     <div class="col mx-2">
       <a
         class=""
-        href="{% url 'add_object' app_label model_name %}"
+        href="{% url 'addObject' appLabel modelName %}"
         ><b>Add</b></a
       >
     </div>
     <div class="col mx-2">
       <a
         class=""
-        href="{% url 'export_csv' app_label model_name %}"
+        href="{% url 'exportCsv' appLabel modelName %}"
         ><b>Export as CSV</b></a
       >
     </div>
     <div class="col ml-3">
       <a
         class=""
-        href="{% url 'import_csv' app_label model_name %}"
+        href="{% url 'importCsv' appLabel modelName %}"
         ><b>Import from CSV</b></a
       >
     </div>
 
     <form
       method="get"
-      action="{% url 'datatable' app_label model_name %}"
+      action="{% url 'datatable' appLabel modelName %}"
       class="p-3"
     >
       <input type="text" name="search" value="{{ search_query }}" />
@@ -58,13 +58,13 @@
         <tr>
           <td>
             <a
-              href="{% url 'edit_object' app_label model_name object.pk %}"
+              href="{% url 'editObject' appLabel modelName object.pk %}"
               ><i class="fa fa-edit"></i
             ></a>
           </td>
           <td>
             <a
-              href="{% url 'delete_object' app_label model_name object.pk %}"
+              href="{% url 'deleteObject' appLabel modelName object.pk %}"
               ><i class="fa fa-trash"></i
             ></a>
           </td>
