@@ -14,4 +14,6 @@ urlpatterns = [
          exportCsv, name='exportCsv'),
     path('import/<str:appLabel>/<str:modelName>/',
          importCsv, name='importCsv'),
+    path('<str:appLabel>/<str:modelName>/clone/<int:object_id>/',
+         cloneObject, name='cloneObject'),
 ]

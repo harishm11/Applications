@@ -1,5 +1,5 @@
-{% extends 'body.html' %} {% load static %} {% block title %} {{title}}
-{%endblock %} {% load crispy_forms_tags %} {% block maincontent %}
+{% extends 'base.html' %} {% load static %} {% block title %} {{title}}
+{%endblock %} {% load crispy_forms_tags %} {% block content %}
 <div>
   {% if request.user.is_authenticated %}
 
@@ -7,9 +7,7 @@
   <br />
   {% for sheet in sheets%}
 
-  <a href="/ratemanager/openfiling/{{sheet}}">{{sheet}}</a> {% endfor%} 
+  <a href="/ratemanager/openfiling/{{sheet}}">{{sheet}}</a><br/> {% endfor%} 
   {%endif%}
 </div>
-{% endblock %} {% block js%}
-<script src="{% static 'js/script.js' %}"></script>
-{% endblock js%}
+{% endblock %}

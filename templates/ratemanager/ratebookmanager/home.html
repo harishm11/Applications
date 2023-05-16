@@ -1,0 +1,43 @@
+{% extends 'body.html' %} {% load static %} {% block title %} {{title}}
+{%endblock %} {% load crispy_forms_tags %} {% block maincontent %}
+
+<h2> Ratebook Manager </h2>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="view-tab" data-toggle="tab" href="#view" role="tab" aria-controls="view" aria-selected="true">View Ratebook</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="create-tab" data-toggle="tab" href="#create" role="tab" aria-controls="create" aria-selected="false">Create Ratebook</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="export-tab" data-toggle="tab" href="#export" role="tab" aria-controls="export" aria-selected="false">Export Ratebook</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="import-tab" data-toggle="tab" href="#import" role="tab" aria-controls="import" aria-selected="false">Import Ratebook</a>
+  </li>
+</ul>
+</br>
+<!-- Tab panes -->
+<div class="tab-content">
+  <div class="tab-pane active" id="view" role="tabpanel" aria-labelledby="view-tab">{% include "./view_rb.html" %}</div>
+  <div class="tab-pane" id="create" role="tabpanel" aria-labelledby="create-tab">{% include "./create_rb.html" %}</div>
+  <div class="tab-pane" id="export" role="tabpanel" aria-labelledby="export-tab">{% include "./export_rb.html" %}</div>
+  <div class="tab-pane" id="import" role="tabpanel" aria-labelledby="import-tab">{% include "./uploadexhibit.html" %}</div>
+</div>
+
+<script>
+  $('#myTab a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+
+$('#myTab a[href="#view"]').tab('show')
+$('#myTab a[href="#create"]').tab('show')
+$('#myTab a[href="#export"]').tab('show')
+$('#myTab a[href="#import"]').tab('show')
+</script>
+
+{% endblock %}
+
