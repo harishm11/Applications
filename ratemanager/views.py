@@ -6,35 +6,24 @@ from django.shortcuts import render
 import os
 from django.db import connection
 import pandas as pd
-import tabula
 from myproj.settings import BASE_DIR
 from django.apps import apps
-from django.urls import get_resolver
+from .models import RatebookGroups, RateBooks, AllExhibits
 
 
 def extractData(request):
-    filepath = '/Users/harishmurali/insucompare/RateFiling doc1 - equity.pdf'
-    outpath = '/Users/harishmurali/insucompare/RateFiling doc1 - equity.csv'
-    tables = tabula.read_pdf(filepath, pages="all")
-
-    # folder_name = "tables"
-    # if not os.path.isdir(folder_name):
-    #     os.mkdir(folder_name)
-    # # iterate over extracted tables and export as excel individually
-    # for i, table in enumerate(tables, start=1):
-    #     table.to_excel(os.path.join(folder_name, f"table_{i}.xlsx"), index=False)
-
-    dfs = tabula.read_pdf(filepath, pages='all')
-    tabula.convert_into(filepath, outpath, output_format="csv", pages="all")
+    pass
 
 
 def uploadexhibit(request):
-    state = apps.get_model('productconfigurator', 'state')
-    states = state.objects.all()
+    return render(request, 'ratemanager/uploadexhibit.html', {'heading': 'Upload Exhibit as excel file'})
 
-    carrier = apps.get_model('productconfigurator', 'carrier')
-    carriers = carrier.objects.all()
-    return render(request, 'ratemanager/uploadexhibit.html', {'heading': 'Upload Exhibits file', 'states': states, 'carriers': carriers})
+
+def ratemanager(request):
+    options = ['ratebookmanager', 'filterbyfield', 'viewratebookstable']
+
+    context = {'options': options, 'appLabel': 'ratemanager'}
+    return render(request, 'ratemanager/home.html', context)
 
 
 def uploadexhibitfile(request):
@@ -47,14 +36,14 @@ def uploadexhibitfile(request):
             filstg = FileSystemStorage()
             upldfl = filstg.save(path, upfile)
             upldfl_url = filstg.url(upldfl)
-        return render(request, 'message.html', {'msg': 'File uplaoded'})
-    except Exception as err:
-        return render(request, 'message.html', {'msg': 'File not uplaoded'})
+        return render(request, 'ratemanager/uploadmessage.html', {'msg': 'File uploaded to ' + upldfl_url})
+    except Exception:
+        return render(request, 'ratemanager/uploadmessage.html', {'msg': 'File not uploaded'})
 
 
 def exhibitlist(request):
     root = BASE_DIR
-    file = 'uploads/CA Farmers Rating Factors (1).xlsx'
+    file = 'uploads/Farmers.xlsx'
     # file = 'CA Farmers Rating Factors(1).xlsx'
     filepath = os.path.join(root, Path(file))
     xl = pd.ExcelFile(filepath)
@@ -67,7 +56,7 @@ def openfiling(request, data):
     root = 'uploads'
     shtname = data
     # filepath = request.META['PATH_INFO']
-    file = 'CA Farmers Rating Factors (1).xlsx'
+    file = 'Farmers.xlsx'
     filepath = os.path.join(root, Path(file))
     request.session['fp'] = str(filepath)
     request.session['sn'] = str(shtname)
@@ -110,10 +99,69 @@ def openexhibit(request):
         return response
 
 
-def ratemanager(request):
-    options = []
-    for url_pattern in get_resolver().url_patterns:
-        if url_pattern.app_name == 'ratemanager':
-            options.append(url_pattern.url_patterns.__name__)
-    context = {'options': options, 'appLabel': 'ratemanager'}
-    return render(request, "ratemanager/home.html", context)
+def ratebookmanager(request):
+    bookgroup = RatebookGroups.objects.all()
+    state = bookgroup.values_list('state', flat=True).distinct()
+    business = []
+    company = []
+    product_group = []
+    product_type = []
+    product_name = []
+    ratebookgroupid = []
+    return render(request, "ratemanager/ratebookmanager/home.html", locals())
+
+
+def filterbyfield(request):
+    bookgroup = RatebookGroups.objects.all()
+    state = bookgroup.values_list('state', flat=True).distinct()
+    business = []
+    company = []
+    product_group = []
+    product_type = []
+    product_name = []
+    ratebookgroupid = []
+
+    stateid = request.GET.get('stateid')
+    businessid = request.GET.get('businessid')
+    companyid = request.GET.get('companyid')
+    product_groupid = request.GET.get('product_groupid')
+    product_typeid = request.GET.get('product_typeid')
+    product_nameid = request.GET.get('product_nameid')
+    book_groupid = request.GET.get('book_groupid')
+    if len(stateid) != 0:
+        business = RatebookGroups.objects.filter(
+            state=stateid).values_list('business', flat=True).distinct()
+        if len(businessid) != 0:
+            company = RatebookGroups.objects.filter(state=stateid,
+                                                    business=businessid).values_list('company', flat=True).distinct()
+            if len(companyid) != 0:
+                product_group = RatebookGroups.objects.filter(state=stateid,
+                                                              business=businessid,
+                                                              company=companyid).values_list('product_group', flat=True).distinct()
+                if len(product_groupid) != 0:
+                    product_type = RatebookGroups.objects.filter(state=stateid,
+                                                                 business=businessid,
+                                                                 company=companyid,
+                                                                 product_group=product_groupid).values_list('product_type', flat=True).distinct()
+                    if len(product_typeid) != 0:
+                        product_name = RatebookGroups.objects.filter(state=stateid,
+                                                                     business=businessid,
+                                                                     company=companyid,
+                                                                     product_group=product_groupid,
+                                                                     product_type=product_typeid).values_list('product_name', flat=True).distinct()
+                        if len(product_nameid) != 0:
+                            ratebookgroupid = RatebookGroups.objects.filter(state=stateid,
+                                                                            business=businessid,
+                                                                            company=companyid,
+                                                                            product_group=product_groupid,
+                                                                            product_type=product_typeid,
+                                                                            product_name=product_nameid).values_list('ratebookgroupid', flat=True).distinct()
+    return render(request, "ratemanager/ratebookmanager/home.html", locals())
+
+
+def viewratebookstable(request):
+    book_groupid = request.POST.get('ratebookgroupid')
+    print(book_groupid)
+    rb_list = RateBooks.objects.all().filter(ratebookgroupid=book_groupid)
+    print(rb_list)
+    return render(request, "ratemanager/ratebookmanager/rb_table.html", locals())

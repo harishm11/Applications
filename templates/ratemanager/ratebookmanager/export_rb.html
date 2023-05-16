@@ -1,0 +1,33 @@
+{% load static %} {% block title %} {{title}} {%endblock %}{% block content %}
+<div>
+  {% if request.user.is_authenticated %}
+  <div>
+    <h4>{{heading}}</h4>
+    <br />
+
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      action="/ratemanager/uploadexhibitfile"
+      id="uploadform"
+    >
+      {% csrf_token%}
+
+      <input
+        type="file"
+        name="file"
+        class="form-control-file"
+        accept=".xlsx"
+        required
+      />
+      <input
+        type="submit"
+        name="submt"
+        value="upload"
+        class="btn btn-secondary"
+      />
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,11 +1,11 @@
-{% extends 'body.html' %}
+{% extends 'base.html' %}
 {% load static %}
 {% block title %}
     {{title}}
 {% endblock %}
 {% load crispy_forms_tags %}
 
-{% block maincontent %}
+{% block content %}
     {% if  request.user.is_authenticated %}
         <h5>{{heading}}</h5>
             <table id = "example" class = "cell-border">
