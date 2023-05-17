@@ -1,0 +1,51 @@
+{% extends 'body.html' %} {% load static %} {% load product_tags %} 
+{% block title %} {{ verboseNamePlural_value|capfirst }}{% endblock %} 
+{% load crispy_forms_tags%} {% block sidebarcontent %} {% include 'productconfigurator/sidebar.html' %} {%endblock %} {% block maincontent%} 
+{% if  request.user.is_authenticated %}
+
+<h1>Create Product</h1>
+
+<form method="POST" action="{% url 'createproduct' %}">
+  {% csrf_token %} 
+  
+  {% csrf_token %}
+      <table class="table table-responsive table-bordered">
+      {% for field in product_form %}
+      <tr>
+        <td>{{ field.label_tag }}</td>
+        <td>{{ field }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    
+
+
+  <h2>Select Coverages</h2>
+  <table class="table table-responsive table-bordered">
+    {% for coverage in coverages %}
+    <tr>
+      <td><input type="checkbox" name="coverages" value="{{ coverage.id }}" /></td>
+      <td>{{ coverage.CoverageName }}  </td>  <td>{{ coverage.OptionValue }} </td>
+     </tr>
+    {% endfor %}
+  </table>
+
+  <button class="btn btn-secondary"  type="submit">Create Product</button>
+</form>
+
+{% if product_created %}
+
+          
+  <h2>Product Details</h2>
+  
+      {{ created_product.StateCode }}
+        {{ created_product.PolicyType }}
+          {{ created_product.PolicySubType }}
+  {{ created_product.ProductCode }}
+<h2>Selected Coverages</h2>
+<ul id="selected-coverages">
+  {% for coverage in selected_coverages %}
+  <li>{{ coverage.CoverageName }}</li>
+  {% endfor %}
+</ul>
+{% endif %} {% endif %} {% endblock %} {% block js%} {% endblock js%}

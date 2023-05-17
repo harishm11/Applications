@@ -8,9 +8,6 @@
 }
 
 
-#sidebar-wrapper {
-  width: 220px; 
-}
 .list-group{
   border: none;
 }
@@ -48,11 +45,11 @@
   }
 
   .table-outer-div{
-    min-height: 72vh;
+    min-height: 88vh;
     min-width: 140vh;
     overflow-y: scroll;
     max-width: 140vh; 
-    max-height: 72vh; 
+    max-height: 88vh; 
     overflow-x: scroll;
   }
 

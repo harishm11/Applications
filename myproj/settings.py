@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'ratemanager',
     'authenticate',
     'productconfigurator',
+    'systemtables',
     'corsheaders',
     'crispy_forms',
 
