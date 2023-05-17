@@ -1,5 +1,5 @@
 {% extends 'body.html' %} {% load static %} {% load product_tags %} 
-{% block title %} {{ verboseNamePlural_value|capfirst }}{% endblock %} 
+{% block title %} {{ title }}{% endblock %} 
 {% load crispy_forms_tags%} {% block sidebarcontent %} {% include 'productconfigurator/sidebar.html' %} {%endblock %} {% block maincontent%} 
 {% if  request.user.is_authenticated %}
 
@@ -20,14 +20,41 @@
 
 
   <h2>Select Coverages</h2>
-  <table class="table table-responsive table-bordered">
-    {% for coverage in coverages %}
-    <tr>
-      <td><input type="checkbox" name="coverages" value="{{ coverage.id }}" /></td>
-      <td>{{ coverage.CoverageName }}  </td>  <td>{{ coverage.OptionValue }} </td>
-     </tr>
-    {% endfor %}
-  </table>
+<table class="table table-responsive table-bordered">
+  {% for coverage in coverages %}
+    {% ifchanged coverage.CoverageName %}
+      <tr>
+        <td>
+          <label>
+            <input type="checkbox" name="coverages"  class="toggle-coverage" />
+            {{ coverage.CoverageName }}
+          </label>
+        </td>
+      </tr>
+      <tr class="coverage-options" style="display: none;">
+        <td colspan="3">
+          <table class="table table-responsive table-bordered">
+            <tbody>
+              {% for c in coverages %}
+                {% if c.CoverageName == coverage.CoverageName %}
+                  <tr>
+                   <td>
+                  <label>
+                  <input type="checkbox" name="options" value="{{ c.OptionValue}}" /></td>
+                   <td>{{ c.OptionValue }}
+                    </label>
+                    </td>
+                  </tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    {% endifchanged %}
+  {% endfor %}
+</table>
+
 
   <h2>Select Discounts</h2>
   <table class="table table-responsive table-bordered">
@@ -52,19 +79,11 @@
   <button class="btn btn-secondary"  type="submit">Create Product</button>
 </form>
 
-{% if product_created %}
 
-          
-  <h2>Product Details</h2>
-  
-      {{ created_product.StateCode }}
-        {{ created_product.PolicyType }}
-          {{ created_product.PolicySubType }}
-  {{ created_product.ProductCode }}
-<h2>Selected Coverages</h2>
-<ul id="selected-coverages">
-  {% for coverage in selected_coverages %}
-  <li>{{ coverage.CoverageName }}</li>
-  {% endfor %}
-</ul>
-{% endif %} {% endif %} {% endblock %} {% block js%} {% endblock js%}
+ {% endif %} {% endblock %} {% block js%} <script>
+  $(document).ready(function() {
+    $('.toggle-coverage').change(function() {
+      $(this).closest('tr').next('.coverage-options').toggle(this.checked);
+    });
+  });
+</script>{% endblock js%}

@@ -10,6 +10,9 @@ urlpatterns = [
          name='productconfigurator'),
     path('createproduct/', views.createProduct,
          name='createproduct'),
-         path('viewproduct/', views.viewProduct,
+    path('viewproduct/', views.viewProduct,
          name='viewproduct'),
+    path('updateproduct/<int:product_id>/', views.updateProduct,
+         name='updateproduct'),
+
 ]
