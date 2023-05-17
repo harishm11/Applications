@@ -1,6 +1,4 @@
 from django.db import models
-from django.apps import apps
-from systemtables.models.coverage import Coverage
 
 
 class Product(models.Model):
@@ -20,7 +18,6 @@ class Product(models.Model):
     CloseBookEndDate = models.DateField(null=True, blank=True)
     CreateTime = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     UpdateTime = models.DateTimeField(auto_now=True, blank=True, null=True)
-    coverages = models.ManyToManyField(Coverage)
 
     def __str__(self):
         return self.StateCode, self.Carrier, self.UwCompany, self.LineOfBusiness, self.PolicyType, self.PolicySubType

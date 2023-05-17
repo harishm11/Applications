@@ -1,37 +1,101 @@
-
-from ..forms import CreateModelForm
-from django.forms import formset_factory
-from django.http import HttpResponse
-from django.db import migrations, models
 from django.shortcuts import render
-from django.utils.text import camel_case_to_spaces
-from django.forms.models import model_to_dict
-from django import forms
-from django.db.models.base import ModelBase
-from django.apps import apps
-from django.http import HttpResponseRedirect
+from django.urls import get_resolver
+from ..forms import ProductForm
 from django.shortcuts import render, redirect
-from django.urls import reverse
-from django.db import models
-from django.db import connection, migrations, models, transaction
-from django.core.management import call_command
-from django.db import DEFAULT_DB_ALIAS, connections
-from django.core.management import execute_from_command_line
+from django.apps import apps
+from django.db.models import Q
+from django.shortcuts import render,  redirect
 
+
+from productconfigurator.forms import *
+
+coverage = apps.get_model('systemtables', 'coverage')
+
+
+# def productconfigurator(request):
+#     options = []
+#     for model in apps.get_app_config('productconfigurator').get_models():
+#         options.append(model.__name__)
+#     context = {'options': options, 'appLabel': 'productconfigurator'}
+#     return render(request, 'productconfigurator/home.html', context)
 
 def productconfigurator(request):
-    options = []
-    for model in apps.get_app_config('productconfigurator').get_models():
-        options.append(model.__name__)
-    context = {'options': options, 'appLabel': 'productconfigurator'}
+
+    view_functions = ['createproduct', 'viewproduct']
+    context = {'options': view_functions, 'appLabel': 'productconfigurator'}
     return render(request, 'productconfigurator/home.html', context)
 
 
-def createModel(request):
-    if request.method == 'POST':
-        form = CreateModelForm(request.POST)
-        if form.is_valid():
-            form.saveModel()
-    else:
-        form = CreateModelForm()
-    return render(request, 'productconfigurator/createModel.html', {'form': form})
+def getModelNames(appLabel):
+    options = []
+    for model in apps.get_app_config(appLabel).get_models():
+        options.append(model.__name__)
+
+    modelnames = {'options': options}
+    return modelnames
+
+
+def createProduct(request):
+    try:
+        product_created = False
+        created_product = None
+        selected_coverages = []
+
+        if request.method == 'POST':
+            product_form = ProductForm(request.POST)
+
+            if product_form.is_valid():
+                product = product_form.save(commit=False)
+                selected_coverages_ids = request.POST.getlist('coverages')
+                selected_coverages = coverage.objects.filter(
+                    id__in=selected_coverages_ids)
+                product.save()
+                product.coverages.set(selected_coverages)
+
+                product_created = True
+                created_product = product
+
+                return redirect('viewproduct')
+            else:
+                coverages = coverage.objects.all()
+        else:
+            product_form = ProductForm()
+            coverages = coverage.objects.all()
+
+        return render(request, 'productconfigurator/createproduct.html', {
+            'product_form': product_form,
+            'coverages': coverages,
+            'product_created': product_created,
+            'created_product': created_product,
+            'selected_coverages': selected_coverages
+        })
+    except Exception as err:
+        return render(request, 'error.html', {'message': err})
+
+
+def viewProduct(request):
+    try:
+        Model = product
+        model_fields = [field.name for field in Model._meta.fields]
+
+        verboseNamePlural = Model._meta.verbose_name_plural
+        search_query = request.GET.get('search', '')
+        if search_query:
+            q_objects = Q()
+            for field in model_fields:
+                q_objects |= Q(**{f'{field}__icontains': search_query})
+            objects = Model.objects.filter(q_objects)
+        else:
+            objects = Model.objects.all()
+
+        context = {
+            'Model': Model,
+            'model_fields': model_fields,
+            'objects': objects,
+            'verboseNamePlural_value': verboseNamePlural,
+            'search_query': search_query,
+        }
+
+        return render(request, 'productconfigurator/viewproduct.html', context)
+    except Exception as err:
+        return render(request, 'error.html', {'message': err})
