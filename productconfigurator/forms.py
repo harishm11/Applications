@@ -67,7 +67,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = product
-        exclude = ['coverages']
+        exclude = ['coverages', 'discounts', 'surcharges']
         widgets = {
             'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
             'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),

@@ -1,7 +1,8 @@
 from django.db import models
 from django.apps import apps
 from systemtables.models.coverage import Coverage
-
+from systemtables.models.discount import Discount
+from systemtables.models.surcharge import Surcharge
 
 class Product(models.Model):
     StateCode = models.CharField(max_length=2)
@@ -21,6 +22,9 @@ class Product(models.Model):
     CreateTime = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     UpdateTime = models.DateTimeField(auto_now=True, blank=True, null=True)
     coverages = models.ManyToManyField(Coverage)
+    discounts = models.ManyToManyField(Discount)
+    surcharges = models.ManyToManyField(Surcharge)
+
 
     def __str__(self):
         return self.StateCode, self.Carrier, self.UwCompany, self.LineOfBusiness, self.PolicyType, self.PolicySubType

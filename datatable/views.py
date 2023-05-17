@@ -212,7 +212,7 @@ def importCsv(request, appLabel, modelName):
         if request.method == 'POST' and request.FILES['csv_file']:
             csv_file = request.FILES['csv_file']
             reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
-            next(reader)  # Skip header row
+            # next(reader)  # Skip header row
 
             for row in reader:
                 obj = Model()

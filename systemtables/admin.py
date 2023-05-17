@@ -11,6 +11,8 @@ from .models.policytype import PolicyType
 from .models.policyterm import PolicyTerm
 from .models.productcode import ProductCode
 from .models.offering import Offering
+from .models.discount import Discount
+from .models.surcharge import Surcharge
 
 
 admin.site.register(State)
@@ -23,3 +25,5 @@ admin.site.register(PolicySubType)
 admin.site.register(PolicyTerm)
 admin.site.register(ProductCode)
 admin.site.register(Offering)
+admin.site.register(Discount)
+admin.site.register(Surcharge)
