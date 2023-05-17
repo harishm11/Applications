@@ -54,7 +54,6 @@ def createProduct(request):
                 product.save()
                 product.coverages.set(selected_coverages)
 
-
                 selected_discounts_ids = request.POST.getlist('discounts')
                 selected_discounts = discount.objects.filter(
                     id__in=selected_discounts_ids)
@@ -64,7 +63,6 @@ def createProduct(request):
                 selected_surcharges = surcharge.objects.filter(
                     id__in=selected_surcharges_ids)
                 product.surcharges.set(selected_surcharges)
-
 
                 product_created = True
                 created_product = product
@@ -87,7 +85,8 @@ def createProduct(request):
             'surcharges': surcharges,
             'product_created': product_created,
             'created_product': created_product,
-            'selected_coverages': selected_coverages
+            'selected_coverages': selected_coverages,
+            'title': 'Create Product'
         })
     except Exception as err:
         return render(request, 'error.html', {'message': err})
@@ -114,6 +113,7 @@ def viewProduct(request):
             'objects': objects,
             'verboseNamePlural_value': verboseNamePlural,
             'search_query': search_query,
+            'title': 'View Products'
         }
 
         return render(request, 'productconfigurator/viewproduct.html', context)
