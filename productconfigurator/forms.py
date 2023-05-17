@@ -53,7 +53,7 @@ class ProductForm(forms.ModelForm):
     )
 
     PolicySubType = forms.ModelChoiceField(
-        queryset=policysubtype.objects.all(),
+        queryset=policysubtype.objects.none(),
         label='PolicySubType'
     )
     Offering = forms.ModelChoiceField(
@@ -77,12 +77,26 @@ class ProductForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'PolicyType' in self.data:
-            policytype_id = int(self.data.get('PolicyType'))
+
+        policy_type_id = self.data.get('PolicyType') or getattr(
+            self.instance, 'PolicyType_id', None)
+        if policy_type_id:
+            policy_type_id = int(policy_type_id)
             self.fields['PolicySubType'].queryset = policysubtype.objects.filter(
-                PolicyType_id=policytype_id)
-        elif self.instance.pk:
-            self.fields['PolicySubType'].queryset = self.instance.PolicyType.policysubtype_set.all()
+                PolicyType_id=policy_type_id)
+        else:
+            self.fields['PolicySubType'].queryset = policysubtype.objects.none()
+        # if 'PolicyType' in self.data:
+        #     policytype_id = int(self.data.get('PolicyType'))
+        #     self.fields['PolicySubType'].queryset = policysubtype.objects.filter(
+        #         PolicyType_id=policytype_id)
+        # # elif self.instance.pk:
+        # #     self.fields['PolicySubType'].queryset = self.instance.PolicyType.policysubtype_set.all()
+        # else:
+        #     instance = kwargs.get('instance')
+        #     if instance and instance.PolicyType:
+        #         self.fields['PolicySubType'].queryset = instance.PolicyType.policysubtype_set.all(
+        #         )
 
 
 class PolicySubTypeForm(forms.ModelForm):

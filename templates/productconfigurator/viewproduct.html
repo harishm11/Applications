@@ -24,6 +24,7 @@
     <table class="table table-bordered table-responsive-sm custom-table">
       <thead>
         <tr> 
+        <th>Update</th>
           {% for field in model_fields %} {% if field != 'id' and field != 'CreateTime' and field != 'UpdateTime'%}
           <th>{{ field }}
           {% endif %} {% endfor %}
@@ -32,7 +33,12 @@
       </thead>
       <tbody>
         {% for object in objects %}
-        <tr>       
+        <tr>  
+        <td>
+            <a href="{% url 'updateproduct' product_id=object.pk %}"
+              ><i class="fa fa-edit"></i
+            ></a>
+          </td>     
           {% for field in model_fields %} {% if field != 'id' and field != 'CreateTime' and field != 'UpdateTime'%}
           <td>{{ object|get_attribute:field }}</td>
           {% endif %} 

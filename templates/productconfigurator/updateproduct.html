@@ -1,0 +1,116 @@
+{% extends 'body.html' %}
+{% load static %}
+{% load options_tag %}
+
+{% block title %}
+  {{ title }}
+{% endblock %}
+
+{% load crispy_forms_tags%}
+
+{% block sidebarcontent %}
+  {% include 'productconfigurator/sidebar.html' %}
+{% endblock %}
+
+{% block maincontent %}
+  {% if request.user.is_authenticated %}
+    <h2>Update Product</h2>
+    <form method="POST" action="{% url 'updateproduct' updated_product.id %}">
+      {% csrf_token %}
+      
+      <table class="table table-responsive table-bordered">
+        {% for field in product_form %}
+          <tr>
+            <td>{{ field.label_tag }}</td>
+            <td>{{ field }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <h2>Select Coverages</h2>
+      <table class="table table-responsive table-bordered">
+        {% for coverage in coverages %}
+          {% ifchanged coverage.CoverageName %}
+            <tr>
+              <td>
+                <label>
+                  <input type="checkbox" name="coverages" class="toggle-coverage" {% if coverage in coverages %}checked{% endif %}/>
+                  {{ coverage.CoverageName }}
+                </label>
+              </td>
+            </tr>
+            <tr class="coverage-options" style="display: none;">
+              <td colspan="3">
+                <table class="table table-responsive table-bordered">
+                  <tbody>
+                    
+{% for c in coverages %}
+  {% if c.CoverageName == coverage.CoverageName %}
+    <tr>
+      <td>
+        <label>
+          <input type="checkbox" name="options" value="{{ c.OptionValue }}"
+            {% if c.OptionValue in selected_coverage_options and c.CoverageName in selected_coverage_options %}checked{% endif %} />
+          {{ c.OptionValue }}
+        </label>
+      </td>
+    </tr>
+  {% endif %}
+{% endfor %}
+
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          {% endifchanged %}
+        {% endfor %}
+      </table>
+
+      <h2>Select Discounts</h2>
+      <table class="table table-responsive table-bordered">
+        {% for discount in discounts %}
+          <tr>
+            <td>
+              <input type="checkbox" name="discounts" value="{{ discount.id }}" {% if discount in selected_discounts %}checked{% endif %} />
+            </td>
+            <td>{{ discount.DiscountName }}</td>
+            <td>{{ discount.DiscountDesc }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <h2>Select Surcharges</h2>
+      <table class="table table-responsive table-bordered">
+        {% for surcharge in surcharges %}
+          <tr>
+            <td>
+              <input type="checkbox" name="surcharges" value="{{ surcharge.id }}" {% if surcharge in selected_surcharges %}checked{% endif %} />
+            </td>
+            <td>{{ surcharge.SurchargeName }}</td>
+            <td>{{ surcharge.SurchargeDesc }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <button class="btn btn-secondary" type="submit">Update Product</button>
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block js %}
+<script>
+  $(document).ready(function() {
+    $('.toggle-coverage').each(function() {
+      if ($(this).is(':checked')) {
+        $(this).closest('tr').next('.coverage-options').show();
+      } else {
+        $(this).closest('tr').next('.coverage-options').hide();
+      }
+    });
+
+    $('.toggle-coverage').change(function() {
+      $(this).closest('tr').next('.coverage-options').toggle(this.checked);
+    });
+  });
+</script>
+{% endblock js %}
