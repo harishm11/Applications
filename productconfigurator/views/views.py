@@ -10,7 +10,8 @@ from django.shortcuts import render,  redirect
 from productconfigurator.forms import *
 
 coverage = apps.get_model('systemtables', 'coverage')
-
+discount = apps.get_model('systemtables', 'discount')
+surcharge = apps.get_model('systemtables', 'surcharge')
 
 # def productconfigurator(request):
 #     options = []
@@ -18,6 +19,7 @@ coverage = apps.get_model('systemtables', 'coverage')
 #         options.append(model.__name__)
 #     context = {'options': options, 'appLabel': 'productconfigurator'}
 #     return render(request, 'productconfigurator/home.html', context)
+
 
 def productconfigurator(request):
 
@@ -52,19 +54,37 @@ def createProduct(request):
                 product.save()
                 product.coverages.set(selected_coverages)
 
+
+                selected_discounts_ids = request.POST.getlist('discounts')
+                selected_discounts = discount.objects.filter(
+                    id__in=selected_discounts_ids)
+                product.discounts.set(selected_discounts)
+
+                selected_surcharges_ids = request.POST.getlist('surcharges')
+                selected_surcharges = surcharge.objects.filter(
+                    id__in=selected_surcharges_ids)
+                product.surcharges.set(selected_surcharges)
+
+
                 product_created = True
                 created_product = product
 
                 return redirect('viewproduct')
             else:
-                coverages = coverage.objects.all()
+                coverages = coverage.objects.all().order_by('CoverageName', 'Amount1')
+                discounts = discount.objects.all().order_by('DiscountName')
+                surcharges = surcharge.objects.all().order_by('SurchargeName')
         else:
             product_form = ProductForm()
-            coverages = coverage.objects.all()
+            coverages = coverage.objects.all().order_by('CoverageName', 'Amount1')
+            discounts = discount.objects.all().order_by('DiscountName')
+            surcharges = surcharge.objects.all().order_by('SurchargeName')
 
         return render(request, 'productconfigurator/createproduct.html', {
             'product_form': product_form,
             'coverages': coverages,
+            'discounts': discounts,
+            'surcharges': surcharges,
             'product_created': product_created,
             'created_product': created_product,
             'selected_coverages': selected_coverages

@@ -3,8 +3,7 @@
 {% load crispy_forms_tags%} {% block sidebarcontent %} {% include 'productconfigurator/sidebar.html' %} {%endblock %} {% block maincontent%} 
 {% if  request.user.is_authenticated %}
 
-<h1>Create Product</h1>
-
+<h2>Add Product</h2>
 <form method="POST" action="{% url 'createproduct' %}">
   {% csrf_token %} 
   
@@ -26,6 +25,26 @@
     <tr>
       <td><input type="checkbox" name="coverages" value="{{ coverage.id }}" /></td>
       <td>{{ coverage.CoverageName }}  </td>  <td>{{ coverage.OptionValue }} </td>
+     </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Select Discounts</h2>
+  <table class="table table-responsive table-bordered">
+    {% for discount in discounts %}
+    <tr>
+      <td><input type="checkbox" name="discounts" value="{{ discount.id }}" /></td>
+      <td>{{ discount.DiscountName }}  </td>  <td>{{ discount.DiscountDesc }} </td>
+     </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Select Surcharges</h2>
+  <table class="table table-responsive table-bordered">
+    {% for surcharge in surcharges %}
+    <tr>
+      <td><input type="checkbox" name="surcharges" value="{{ surcharge.id }}" /></td>
+      <td>{{ surcharge.SurchargeName }}  </td>  <td>{{ surcharge.SurchargeDesc }} </td>
      </tr>
     {% endfor %}
   </table>
