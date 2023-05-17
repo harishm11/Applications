@@ -58,6 +58,53 @@
                  </tbody>
                  </table>
           </td>
+
+          <td>
+          <table class="table table-bordered table-responsive-sm custom-table">
+          <thead>
+              <tr> 
+              <th>Discounts</th>
+               <th>Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              
+                {% for discount in object.discounts.all %}
+                <tr>
+                  <td>{{ discount.DiscountName }}</td>
+                   <td>{{ discount.DiscountDesc }}</td>
+                {% empty %}
+                  <td>No discounts selected</td>
+                  </tr>
+                {% endfor %}
+                 </tbody>
+                 </table>
+          </td>
+
+
+          <td>
+          <table class="table table-bordered table-responsive-sm custom-table">
+          <thead>
+              <tr> 
+              <th>Surcharges</th>
+               <th>Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              
+                {% for surcharge in object.surcharges.all %}
+                <tr>
+                  <td>{{ surcharge.SurchargeName }}</td>
+                   <td>{{ surcharge.SurchargeDesc }}</td>
+                {% empty %}
+                  <td>No surcharges selected</td>
+                  </tr>
+                {% endfor %}
+                 </tbody>
+                 </table>
+          </td>
+
+
         </tr>
         {% endfor %}
       </tbody>

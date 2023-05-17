@@ -56,16 +56,14 @@ def createProduct(request):
 
 
                 selected_discounts_ids = request.POST.getlist('discounts')
-                selected_discounts = coverage.objects.filter(
+                selected_discounts = discount.objects.filter(
                     id__in=selected_discounts_ids)
-                product.save()
                 product.discounts.set(selected_discounts)
 
                 selected_surcharges_ids = request.POST.getlist('surcharges')
-                selected_surcharges = coverage.objects.filter(
+                selected_surcharges = surcharge.objects.filter(
                     id__in=selected_surcharges_ids)
-                product.save()
-                product.discounts.set(selected_surcharges)
+                product.surcharges.set(selected_surcharges)
 
 
                 product_created = True
