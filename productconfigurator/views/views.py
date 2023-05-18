@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.shortcuts import render,  redirect
 from django.forms import modelform_factory
 from ..models.product import Product
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from productconfigurator.forms import *
 
@@ -119,9 +119,21 @@ def viewProduct(request):
             q_objects |= Q(surcharges__SurchargeName__icontains=search_query) | Q(
                 surcharges__SurchargeDesc__icontains=search_query)
 
-            objects = Model.objects.filter(q_objects).distinct()
+            objectsall = Model.objects.filter(q_objects).distinct()
         else:
-            objects = Model.objects.all()
+            objectsall = Model.objects.all()
+
+        paginator = Paginator(objectsall, 1)
+
+        page = request.GET.get('page')
+        try:
+            objects = paginator.page(page)
+        except PageNotAnInteger:
+
+            objects = paginator.page(1)
+        except EmptyPage:
+
+            objects = paginator.page(paginator.num_pages)
 
         context = {
             'Model': Model,
@@ -197,7 +209,7 @@ def updateProduct(request, product_id):
             selected_coverages = product.coverages.all
             selected_discounts = product.discounts.all
             selected_surcharges = product.surcharges.all
-            # Execute the method to obtain the queryset
+
             selected_coverage_options = [
                 (c.CoverageName, c.OptionValue) for c in selected_coverages()]
             print(selected_coverage_options)
