@@ -61,7 +61,7 @@
     {% for discount in discounts %}
     <tr>
       <td><input type="checkbox" name="discounts" value="{{ discount.id }}" /></td>
-      <td>{{ discount.DiscountName }}  </td>  <td>{{ discount.DiscountDesc }} </td>
+      <td>{{ discount.DiscountName }}  </td>  
      </tr>
     {% endfor %}
   </table>
@@ -71,7 +71,7 @@
     {% for surcharge in surcharges %}
     <tr>
       <td><input type="checkbox" name="surcharges" value="{{ surcharge.id }}" /></td>
-      <td>{{ surcharge.SurchargeName }}  </td>  <td>{{ surcharge.SurchargeDesc }} </td>
+      <td>{{ surcharge.SurchargeName }}  </td>  
      </tr>
     {% endfor %}
   </table>

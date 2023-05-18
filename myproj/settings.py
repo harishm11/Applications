@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',
 
+
 ]
 
 

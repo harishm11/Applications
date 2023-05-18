@@ -8,6 +8,7 @@ from django.forms import modelform_factory
 from django import forms
 from productconfigurator.forms import *
 from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def getModelNames(appLabel):
@@ -30,10 +31,21 @@ def datatable(request, appLabel, modelName):
             q_objects = Q()
             for field in model_fields:
                 q_objects |= Q(**{f'{field}__icontains': search_query})
-            objects = Model.objects.filter(q_objects)
+            objectsall = Model.objects.filter(q_objects)
         else:
-            objects = Model.objects.all()
+            objectsall = Model.objects.all()
 
+        paginator = Paginator(objectsall, 12)
+
+        page = request.GET.get('page')
+        try:
+            objects = paginator.page(page)
+        except PageNotAnInteger:
+
+            objects = paginator.page(1)
+        except EmptyPage:
+
+            objects = paginator.page(paginator.num_pages)
         context = {
             'Model': Model,
             'model_fields': model_fields,
