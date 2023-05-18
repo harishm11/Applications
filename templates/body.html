@@ -1,14 +1,16 @@
 {% extends 'base.html' %}{% load static %} {% block content%}
+
+
 <div class="container-fluid">
-  <div class="row flex-nowrap">
-    <div class="col-auto col-md-2 col-xl-2 px-sm-2 px-0 navbar">
-      <div
-        class="d-flex flex-column align-items-center align-items-sm-start pt-2 text-white min-vh-100"
-      >
-        {% block sidebarcontent %} {% endblock %}
-      </div>
+  <div class="custom-grid">
+    <div class="sidebar">
+      {% block sidebarcontent %} {% endblock %}
     </div>
-    <div class="col py-3">{% block maincontent %} {% endblock %}</div>
+    <div class="main">
+      {% block maincontent %} {% endblock %}
+    </div>
   </div>
 </div>
+     
+
 {% endblock content %}
