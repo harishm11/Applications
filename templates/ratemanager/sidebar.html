@@ -1,7 +1,7 @@
 <ul>
   {% for option in options %}
-  <li class="nav-link">
-    <a href="/{{appLabel}}/{{ option }}/">{{ option }}</a>
+  <li class="nav-link p-2">
+    <a href="/{{appLabel}}/{{ option }}/">{{ option|capfirst }}</a>
   </li>
   {% endfor %}
 </ul>

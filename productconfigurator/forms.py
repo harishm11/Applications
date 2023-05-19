@@ -105,3 +105,47 @@ class PolicySubTypeForm(forms.ModelForm):
     class Meta:
         model = policysubtype
         fields = '__all__'
+
+
+class ProductFilterForm(forms.Form):
+    Carrier = forms.ModelChoiceField(
+        queryset=carrier.objects.all(),
+        required=False,
+        label='Carrier'
+    )
+    StateCode = forms.ModelChoiceField(
+        queryset=state.objects.all(),
+        required=False,
+        label='StateCode'
+    )
+
+    UwCompany = forms.ModelChoiceField(
+        queryset=uwcompany.objects.all(),
+        required=False,
+        label='CompanyName'
+    )
+
+    LineOfBusiness = forms.ModelChoiceField(
+        queryset=lineofbusiness.objects.all(),
+        required=False,
+        label='LobName'
+    )
+
+    PolicyType = forms.ModelChoiceField(
+        queryset=policytype.objects.all(),
+        required=False,
+        label='PolicyType',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
+    )
+
+    ProductCode = forms.ModelChoiceField(
+        queryset=productcode.objects.all(),
+        required=False,
+        label='ProductCode'
+    )
+
+    PolicySubType = forms.ModelChoiceField(
+        queryset=policysubtype.objects.none(),
+        required=False,
+        label='PolicySubType'
+    )

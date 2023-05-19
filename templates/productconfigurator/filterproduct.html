@@ -1,4 +1,4 @@
-{% extends 'body.html' %} {% load static %} {% load options_tag %} {% load product_tags %} 
+{% extends 'body.html' %} {% load static %} {% load product_tags %} {% load options_tag %} 
 {% block title %} {{ title}}{% endblock %} 
 {% load crispy_forms_tags%} 
 {% block sidebarcontent %} 
@@ -8,19 +8,21 @@
 {% block maincontent%} 
 {% if request.user.is_authenticated %}
 
+
+<form method="GET">
+    <table class="table table-responsive table-borderd">
+      {% for field in form %}
+      <tr>
+        <td>{{ field.label_tag }}</td>
+        <td>{{ field }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <button class="btn btn-secondary" type="submit">Filter</button>
+</form>
+
 <div class="">
-  <div class="row">
-    <form
-      method="get"
-      action="{% url 'viewproduct'  %}"
-      class="p-3"
-    >
-      <div class=input-group >
-      <input type="text" name="search" value="{{ search_query }}" />
-      <button class="btn btn-secondary" type="submit"><i class="fa fa-search"></i></button>
-    </div>
-    </form>
-  </div>
+
 
   <div class="table-outer-div">
     <table class="table table-responsive table-borderd">
@@ -126,26 +128,30 @@
     </table>
   </div>
 
-  <nav aria-label="Page navigation">
-      <ul class="pagination pagination-sm">
-          {% if objects.has_previous %}
-              <li class="page-item"><a class="page-link" href="?page={{ objects.previous_page_number }}">Previous</a></li>
-          {% endif %}
+<nav aria-label="Page navigation">
+    <ul class="pagination pagination-sm">
+        {% if objects.has_previous %}
+            <li class="page-item"><a class="page-link" href="{% url_with_query request.get_full_path page=objects.previous_page_number %}">Previous</a></li>
+        {% endif %}
 
-          {% for num in objects.paginator.page_range %}
-              {% if objects.number == num %}
-                  <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-              {% else %}
-                  <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-              {% endif %}
-          {% endfor %}
+        {% for num in objects.paginator.page_range %}
+            {% if objects.number == num %}
+                <li class="page-item active"><a class="page-link" href="{% url_with_query request.get_full_path page=num %}">{{ num }}</a></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="{% url_with_query request.get_full_path page=num %}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
 
-          {% if objects.has_next %}
-              <li class="page-item"><a class="page-link" href="?page={{ objects.next_page_number }}">Next</a></li>
-          {% endif %}
-      </ul>
-    </nav>
+        {% if objects.has_next %}
+            <li class="page-item"><a class="page-link" href="{% url_with_query request.get_full_path page=objects.next_page_number %}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
+
+
 </div>
+
 {%else%}
 Please Login to access this 
 

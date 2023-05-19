@@ -54,6 +54,15 @@
               </a>
             </li>   
 
+            <li class="nav-item dropdown  {% if 'rulesmanager' in request.path%}active {% endif%} mx-3">
+              <a
+                class="nav-link"
+                href="/rulesmanager"
+              >
+                Rules Manager
+              </a>
+            </li>   
+
           </ul>
         <form class="d-flex" role="search">
           {% if request.user.is_authenticated %} 
