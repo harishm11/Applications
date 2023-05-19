@@ -18,7 +18,7 @@
     <form method="POST" action="{% url 'updateproduct' updated_product.id %}">
       {% csrf_token %}
       
-      <table class="table table-responsive table-bordered">
+      <table class="table table-responsive table-borderd">
         {% for field in product_form %}
           <tr>
             <td>{{ field.label_tag }}</td>
@@ -28,7 +28,7 @@
       </table>
 
       <h2>Select Coverages</h2>
-      <table class="table table-responsive table-bordered">
+      <table class="table table-responsive table-borderd">
         {% for coverage in coverages %}
           {% ifchanged coverage.CoverageName %}
             <tr>
@@ -41,7 +41,7 @@
             </tr>
             <tr class="coverage-options" style="display: none;">
               <td colspan="3">
-                <table class="table table-responsive table-bordered">
+                <table class="table table-responsive table-borderd">
                   <tbody>
                     
 {% for c in coverages %}
@@ -67,33 +67,35 @@
       </table>
 
       <h2>Select Discounts</h2>
-      <table class="table table-responsive table-bordered">
+      <table class="table table-responsive table-borderd">
         {% for discount in discounts %}
           <tr>
             <td>
               <input type="checkbox" name="discounts" value="{{ discount.id }}" {% if discount in selected_discounts %}checked{% endif %} />
             </td>
             <td>{{ discount.DiscountName }}</td>
-            <td>{{ discount.DiscountDesc }}</td>
+
           </tr>
         {% endfor %}
       </table>
 
       <h2>Select Surcharges</h2>
-      <table class="table table-responsive table-bordered">
+      <table class="table table-responsive table-borderd">
         {% for surcharge in surcharges %}
           <tr>
             <td>
               <input type="checkbox" name="surcharges" value="{{ surcharge.id }}" {% if surcharge in selected_surcharges %}checked{% endif %} />
             </td>
             <td>{{ surcharge.SurchargeName }}</td>
-            <td>{{ surcharge.SurchargeDesc }}</td>
+
           </tr>
         {% endfor %}
       </table>
 
       <button class="btn btn-secondary" type="submit">Update Product</button>
     </form>
+    {%else%}
+Please Login to access this 
   {% endif %}
 {% endblock %}
 

@@ -8,7 +8,7 @@
   {% csrf_token %} 
   
   {% csrf_token %}
-      <table class="table table-responsive table-bordered">
+      <table class="table table-responsive table-borderd">
       {% for field in product_form %}
       <tr>
         <td>{{ field.label_tag }}</td>
@@ -20,7 +20,7 @@
 
 
   <h2>Select Coverages</h2>
-<table class="table table-responsive table-bordered">
+<table class="table table-responsive table-borderd">
   {% for coverage in coverages %}
     {% ifchanged coverage.CoverageName %}
       <tr>
@@ -33,7 +33,7 @@
       </tr>
       <tr class="coverage-options" style="display: none;">
         <td colspan="3">
-          <table class="table table-responsive table-bordered">
+          <table class="table table-responsive table-borderd">
             <tbody>
               {% for c in coverages %}
                 {% if c.CoverageName == coverage.CoverageName %}
@@ -57,7 +57,7 @@
 
 
   <h2>Select Discounts</h2>
-  <table class="table table-responsive table-bordered">
+  <table class="table table-responsive table-borderd">
     {% for discount in discounts %}
     <tr>
       <td><input type="checkbox" name="discounts" value="{{ discount.id }}" /></td>
@@ -67,7 +67,7 @@
   </table>
 
   <h2>Select Surcharges</h2>
-  <table class="table table-responsive table-bordered">
+  <table class="table table-responsive table-borderd">
     {% for surcharge in surcharges %}
     <tr>
       <td><input type="checkbox" name="surcharges" value="{{ surcharge.id }}" /></td>
@@ -78,7 +78,8 @@
 
   <button class="btn btn-secondary"  type="submit">Create Product</button>
 </form>
-
+{%else%}
+Please Login to access this 
 
  {% endif %} {% endblock %} {% block js%} <script>
   $(document).ready(function() {

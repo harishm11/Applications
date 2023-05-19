@@ -1,6 +1,9 @@
 :root {
   --font-size: 14px; 
-  --font-family: Arial, sans-serif
+  --font-family: Georgia, 'Times New Roman', Times, serif;
+  --hf1-color:#f1f1f8;
+  --hf2-color:#fcfcfc;
+  --brdr-color:None;
 }
 
 
@@ -14,14 +17,14 @@ body {
 
 .header {
   height: 100px;
-  background-color: #f2f2f2;
+  background-color:  var(--hf1-color);
   font-size: var(--font-size);
   font-family:  var(--font-family);
 }
 
 .footer {
   height: 100px;
-  background-color: #f2f2f2;
+  background-color:   var(--hf1-color);
   margin-top: auto;
   font-size: var(--font-size);
   font-family:  var(--font-family);
@@ -33,10 +36,9 @@ body {
 
 .sidebar {
   padding-top: 3px;
-  background-color: #f8f9fa;
   height: calc(100vh - 200px);
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid var(--brdr-color);
   font-size: var(--font-size);
   font-family:  var(--font-family);
 }
@@ -45,7 +47,7 @@ body {
   padding-top: 3px;
   height: calc(100vh - 200px);
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid var(--brdr-color);
   font-size: var(--font-size);
   font-family:  var(--font-family);
 }
@@ -57,7 +59,7 @@ body {
 }
 
 .custom-grid .sidebar {
-  background-color: #f8f9fa;
+  background-color: var(--hf2-color);
 }
 
 .custom-grid .main {
@@ -78,7 +80,6 @@ td {
 .active{
   background-color: lightgrey;
   border-style: groove;
-  /* box-shadow: 10px 10px grey; */
   }
 
   
@@ -86,3 +87,8 @@ td {
   font-size: var(--font-size);
   font-family: var(--font-family);
  }
+
+
+a {
+  text-decoration: none;
+}

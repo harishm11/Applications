@@ -37,12 +37,11 @@
   </div>
 
   <div class="table-outer-div">
-    <table class="table table-bordered table-responsive-sm custom-table">
-      <thead>
+    <table class="table table-responsive table-bordered" >
+      <thead class="table-something"> 
         <tr>
           <th>
-            Clone
-            
+            Clone  
           </th>
           <th>Edit</th>
           <th>Delete</th>
@@ -97,5 +96,6 @@
       </ul>
     </nav>
 </div>
-
+{%else%}
+Please Login to access this 
 {% endif %} {% endblock %} {% block js%} {% endblock js%}

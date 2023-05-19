@@ -1,3 +1,4 @@
+from ..forms import ProductFilterForm
 from django.shortcuts import render
 from django.urls import get_resolver
 from ..forms import ProductForm
@@ -25,7 +26,7 @@ surcharge = apps.get_model('systemtables', 'surcharge')
 
 def productconfigurator(request):
 
-    view_functions = ['createproduct', 'viewproduct']
+    view_functions = ['createproduct', 'filterproduct']
     context = {'options': view_functions, 'appLabel': 'productconfigurator'}
     return render(request, 'productconfigurator/home.html', context)
 
@@ -94,59 +95,59 @@ def createProduct(request):
         return render(request, 'error.html', {'message': err})
 
 
-def viewProduct(request):
-    try:
-        Model = product
-        model_fields = [field.name for field in Model._meta.fields]
+# def viewProduct(request):
+#     try:
+#         Model = product
+#         model_fields = [field.name for field in Model._meta.fields]
 
-        verboseNamePlural = Model._meta.verbose_name_plural
-        search_query = request.GET.get('search', '')
-        if search_query:
-            q_objects = Q()
-            # Search in the specified model fields
-            for field in model_fields:
-                q_objects |= Q(**{f'{field}__icontains': search_query})
+#         verboseNamePlural = Model._meta.verbose_name_plural
+#         search_query = request.GET.get('search', '')
+#         if search_query:
+#             q_objects = Q()
+#             # Search in the specified model fields
+#             for field in model_fields:
+#                 q_objects |= Q(**{f'{field}__icontains': search_query})
 
-            # Search in the 'coverages' field
-            q_objects |= Q(coverages__CoverageName__icontains=search_query) | Q(
-                coverages__OptionValue__icontains=search_query)
+#             # Search in the 'coverages' field
+#             q_objects |= Q(coverages__CoverageName__icontains=search_query) | Q(
+#                 coverages__OptionValue__icontains=search_query)
 
-            # Search in the 'discounts' field
-            q_objects |= Q(discounts__DiscountName__icontains=search_query) | Q(
-                discounts__DiscountDesc__icontains=search_query)
+#             # Search in the 'discounts' field
+#             q_objects |= Q(discounts__DiscountName__icontains=search_query) | Q(
+#                 discounts__DiscountDesc__icontains=search_query)
 
-            # Search in the 'surcharges' field
-            q_objects |= Q(surcharges__SurchargeName__icontains=search_query) | Q(
-                surcharges__SurchargeDesc__icontains=search_query)
+#             # Search in the 'surcharges' field
+#             q_objects |= Q(surcharges__SurchargeName__icontains=search_query) | Q(
+#                 surcharges__SurchargeDesc__icontains=search_query)
 
-            objectsall = Model.objects.filter(q_objects).distinct()
-        else:
-            objectsall = Model.objects.all()
+#             objectsall = Model.objects.filter(q_objects).distinct()
+#         else:
+#             objectsall = Model.objects.all()
 
-        paginator = Paginator(objectsall, 1)
+#         paginator = Paginator(objectsall, 1)
 
-        page = request.GET.get('page')
-        try:
-            objects = paginator.page(page)
-        except PageNotAnInteger:
+#         page = request.GET.get('page')
+#         try:
+#             objects = paginator.page(page)
+#         except PageNotAnInteger:
 
-            objects = paginator.page(1)
-        except EmptyPage:
+#             objects = paginator.page(1)
+#         except EmptyPage:
 
-            objects = paginator.page(paginator.num_pages)
+#             objects = paginator.page(paginator.num_pages)
 
-        context = {
-            'Model': Model,
-            'model_fields': model_fields,
-            'objects': objects,
-            'verboseNamePlural_value': verboseNamePlural,
-            'search_query': search_query,
-            'title': 'View Products'
-        }
+#         context = {
+#             'Model': Model,
+#             'model_fields': model_fields,
+#             'objects': objects,
+#             'verboseNamePlural_value': verboseNamePlural,
+#             'search_query': search_query,
+#             'title': 'View Products'
+#         }
 
-        return render(request, 'productconfigurator/viewproduct.html', context)
-    except Exception as err:
-        return render(request, 'error.html', {'message': err})
+#         return render(request, 'productconfigurator/viewproduct.html', context)
+#     except Exception as err:
+#         return render(request, 'error.html', {'message': err})
 
 
 def updateProduct(request, product_id):
@@ -228,3 +229,33 @@ def updateProduct(request, product_id):
         })
     except Exception as err:
         return render(request, 'error.html', {'message': err})
+
+
+def filterProduct(request):
+    Model = product
+    model_fields = [field.name for field in Model._meta.fields]
+    form = ProductFilterForm(request.GET or None)
+    objectsall = []
+    objectsall = Model.objects.none()
+    if form.is_valid():
+        filter_params = {k: v for k,
+                         v in form.cleaned_data.items() if v is not None and v != ''}
+
+        objectsall = Product.objects.filter(**filter_params)
+
+    paginator = Paginator(objectsall, 1)
+
+    page = request.GET.get('page')
+    try:
+        objects = paginator.page(page)
+    except PageNotAnInteger:
+        objects = paginator.page(1)
+    except EmptyPage:
+        objects = paginator.page(paginator.num_pages)
+
+    context = {
+        'form': form,
+        'objects': objects,
+        'model_fields': model_fields
+    }
+    return render(request, 'productconfigurator/filterproduct.html', context)
