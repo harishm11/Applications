@@ -3,20 +3,13 @@
 {% load crispy_forms_tags%} {% block sidebarcontent %} {% include 'productconfigurator/sidebar.html' %} {%endblock %} {% block maincontent%} 
 {% if  request.user.is_authenticated %}
 
-<form method="POST" action="{% url 'createproduct' %}">
-  {% csrf_token %} 
-  
-  {% csrf_token %}
-      <table class="table table-responsive table-borderd">
-      {% for field in product_form %}
-      <tr>
-        <td>{{ field.label_tag }}</td>
-        <td>{{ field }}</td>
-      </tr>
-      {% endfor %}
-    </table>
 
-  <button class="btn btn-secondary"  type="submit">Create Product</button>
+<p>Are you sure you want to delete the following product?</p>
+
+<form method="post">
+   {% csrf_token %}
+   <input type="submit" class="btn btn-danger" value="Delete">
+   <a href="#" onclick="history.back();" class="btn btn-secondary">Cancel</a>
 </form>
 {%else%}
 Please Login to access this 

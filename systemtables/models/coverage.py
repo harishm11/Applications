@@ -19,4 +19,4 @@ class Coverage(models.Model):
     EnableInd = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.CoverageName
+        return f"{self.CoverageName}       {self.OptionValue}"

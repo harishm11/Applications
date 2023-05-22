@@ -92,3 +92,14 @@ td {
 a {
   text-decoration: none;
 }
+
+
+.link-container {
+  display: flex;
+  /* border: 1px solid #ccc; */
+  padding: 5px;
+}
+
+.link-item {
+  margin-right: 10px;
+}

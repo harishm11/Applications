@@ -1,4 +1,5 @@
 from django.db import models
+from ..models.productcode import ProductCode
 
 
 class Discount(models.Model):
@@ -6,6 +7,8 @@ class Discount(models.Model):
     DiscountCode = models.CharField(max_length=50)
     DiscountDesc = models.CharField(max_length=100)
     RatingItemCode = models.CharField(max_length=10)
+    ProductCd = models.ForeignKey(
+        ProductCode, on_delete=models.CASCADE, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
 
     def __str__(self):

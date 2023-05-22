@@ -49,7 +49,22 @@ def createProduct(request):
             product_form = ProductForm(request.POST)
 
             if product_form.is_valid():
-                product = product_form.save()
+                product = product_form.save(commit=False)
+                # selected_option_values = request.POST.getlist('options')
+                # selected_coverages = coverage.objects.filter(
+                #     OptionValue__in=selected_option_values)
+                # product.save()
+                # product.coverages.set(selected_coverages)
+
+                # selected_discounts_ids = request.POST.getlist('discounts')
+                # selected_discounts = discount.objects.filter(
+                #     id__in=selected_discounts_ids)
+                # product.discounts.set(selected_discounts)
+
+                # selected_surcharges_ids = request.POST.getlist('surcharges')
+                # selected_surcharges = surcharge.objects.filter(
+                #     id__in=selected_surcharges_ids)
+                # product.surcharges.set(selected_surcharges)
 
                 product_created = True
                 created_product = product
@@ -82,7 +97,22 @@ def updateProduct(request, product_id):
                 request.POST or None, instance=product)
 
             if product_form.is_valid():
-                product = product_form.save()
+                product = product_form.save(commit=False)
+                # selected_option_values = request.POST.getlist('options')
+                # selected_coverages = coverage.objects.filter(
+                #     OptionValue__in=selected_option_values)
+                # product.save()
+                # product.coverages.set(selected_coverages)
+
+                # selected_discounts_ids = request.POST.getlist('discounts')
+                # selected_discounts = discount.objects.filter(
+                #     id__in=selected_discounts_ids)
+                # product.discounts.set(selected_discounts)
+
+                # selected_surcharges_ids = request.POST.getlist('surcharges')
+                # selected_surcharges = surcharge.objects.filter(
+                #     id__in=selected_surcharges_ids)
+                # product.surcharges.set(selected_surcharges)
 
                 product_updated = True
                 updated_product = product
@@ -97,11 +127,26 @@ def updateProduct(request, product_id):
                 request.POST or None, instance=product)
 
             updated_product = product
+            coverages = coverage.objects.all().order_by('CoverageName', 'Amount1')
+            discounts = discount.objects.all().order_by('DiscountName')
+            surcharges = surcharge.objects.all().order_by('SurchargeName')
+            selected_coverages = product.coverages.all
+            selected_discounts = product.discounts.all
+            selected_surcharges = product.surcharges.all
 
+            selected_coverage_options = [
+                (c.CoverageName, c.OptionValue) for c in selected_coverages()]
         return render(request, 'productconfigurator/updateproduct.html', {
             'product_form': product_form,
+            'coverages': coverages,
+            'discounts': discounts,
+            'surcharges': surcharges,
+            'selected_coverages': selected_coverages,
+            'selected_discounts': selected_discounts,
+            'selected_surcharges': selected_surcharges,
             'product_updated': product_updated,
             'updated_product': updated_product,
+            'selected_coverage_options': selected_coverage_options,
             'title': 'Update Product'
         })
     except Exception as err:
@@ -109,10 +154,8 @@ def updateProduct(request, product_id):
 
 
 def viewProduct(request):
-    Model = Product
-    # model_fields = [field.name for field in Model._meta.fields]
-    model_fields = [
-        field.name for field in Model._meta.get_fields(include_hidden=False)]
+    Model = product
+    model_fields = [field.name for field in Model._meta.fields]
     form = ProductFilterForm(request.GET or None)
     objectsall = []
     objectsall = Model.objects.none()
@@ -135,49 +178,6 @@ def viewProduct(request):
     context = {
         'form': form,
         'objects': objects,
-        'model_fields': model_fields,
-        'title': 'View Product',
-        'coverages': 'CoverageName',
-        'discounts': 'DiscountName',
-        'surcharges': 'SurchargeName',
-
+        'model_fields': model_fields
     }
     return render(request, 'productconfigurator/viewproduct.html', context)
-
-
-def deleteProduct(request, product_id):
-    try:
-        product = get_object_or_404(Product, pk=product_id)
-
-        if request.method == 'POST':
-            product.delete()
-            return redirect('viewproduct')
-
-        return render(request, 'productconfigurator/deleteproduct.html', {
-            'product': product,
-            'title': 'Delete Product'
-        })
-    except Exception as err:
-        return render(request, 'error.html', {'message': err})
-
-
-def cloneProduct(request, product_id):
-    try:
-        product = get_object_or_404(Product, pk=product_id)
-
-        if request.method == 'POST':
-            product.pk = None  # Create a new object with a new primary key
-            product_form = ProductForm(request.POST, instance=product)
-            if product_form.is_valid():
-                cloned_product = product_form.save()
-                return redirect('viewproduct')
-
-        product_form = ProductForm(instance=product)
-
-        return render(request, 'productconfigurator/cloneproduct.html', {
-            'product_form': product_form,
-            'product': product,
-            'title': 'Clone Product'
-        })
-    except Exception as err:
-        return render(request, 'error.html', {'message': err})
