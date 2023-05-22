@@ -1,6 +1,3 @@
 {% load static %} {% block title %} {{title}} {%endblock %} {% block content %}
-<h4>Ratebook ID --- Version</h4>
-{% for i in rb_list %}
-    {{ i.ratebookid }} -------- {{ i.ratebookversion }}</br>
-{% endfor %}
+{{ rb_html }}
 {%endblock%}

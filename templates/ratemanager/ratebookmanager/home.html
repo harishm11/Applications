@@ -1,5 +1,9 @@
 {% extends 'body.html' %} {% load static %} {% block title %} {{title}}
-{%endblock %} {% load crispy_forms_tags %} {% block maincontent %}
+{%endblock %} {% load crispy_forms_tags %} 
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% block maincontent %}
 
 <h2> Ratebook Manager </h2>
 
@@ -24,10 +28,35 @@
   <div class="tab-pane active" id="view" role="tabpanel" aria-labelledby="view-tab">{% include "./view_rb.html" %}</div>
   <div class="tab-pane" id="create" role="tabpanel" aria-labelledby="create-tab">{% include "./create_rb.html" %}</div>
   <div class="tab-pane" id="export" role="tabpanel" aria-labelledby="export-tab">{% include "./export_rb.html" %}</div>
-  <div class="tab-pane" id="import" role="tabpanel" aria-labelledby="import-tab">{% include "./uploadexhibit.html" %}</div>
+  <div class="tab-pane" id="import" role="tabpanel" aria-labelledby="import-tab">{% include "./import_rb.html" %}</div>
 </div>
 
 <script>
+$(document).ready(() => {
+  let url = location.href.replace(/\/$/, "");
+  if (location.hash) {
+    const hash = url.split("#");
+    $('#myTab a[href="#'+hash[1]+'"]').tab("show");
+    url = location.href.replace(/\/#/, "#");
+    history.replaceState(null, null, url);
+    setTimeout(() => {
+      $(window).scrollTop(0);
+    }, 400);
+  } 
+  
+  $('a[data-toggle="tab"]').on("click", function() {
+    let newUrl;
+    const hash = $(this).attr("href");
+    if(hash == "#home") {
+      newUrl = url.split("#")[0];
+    } else {
+      newUrl = url.split("#")[0] + hash;
+    }
+    newUrl += "/";
+    history.replaceState(null, null, newUrl);
+  });
+});
+
   $('#myTab a').on('click', function (e) {
   e.preventDefault()
   $(this).tab('show')
