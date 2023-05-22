@@ -15,7 +15,8 @@
 
 <form method="post">
     {% csrf_token %}
-    <button class="btn btn-secondary"  type="submit">Delete</button>
+    <button class="btn btn-danger"  type="submit">Delete</button>
+    <a href="#" onclick="history.back();" class="btn btn-secondary">Cancel</a>
 </form>
 </div>
 {%else%}
