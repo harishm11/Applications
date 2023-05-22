@@ -40,11 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'datatable',
     'ratemanager',
+    'rulesmanager',
     'authenticate',
     'productconfigurator',
     'systemtables',
     'corsheaders',
     'crispy_forms',
+
+
 
 ]
 
@@ -79,6 +82,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
+
     },
 ]
 

@@ -1,15 +1,14 @@
 {% load static %}
 <html>
-  <meta name="viewport" />
   <head>
     <title>{% block title %}{% endblock title %}</title>
     {% include 'imports.html' %}
   </head>
-  <body>
+  <body >
     <!-- Header -->
     {% include 'header.html' %}
     <!-- Content -->
-    <div class="page">{% block content %} {% endblock content%}</div>
+    {% block content %} {% endblock content%}
     <!-- Footer -->
     {% include 'footer.html' %} {% block js %} {% endblock js%}
   </body>

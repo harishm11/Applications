@@ -1,121 +1,101 @@
-{% extends 'body.html' %} {% load static %} {% load product_tags %} 
+{% extends 'body.html' %} {% load static %} {% load product_tags %} {% load options_tag %} {% load related_objects %}
 {% block title %} {{ title}}{% endblock %} 
 {% load crispy_forms_tags%} 
 {% block sidebarcontent %} 
 {% include 'productconfigurator/sidebar.html' %} 
 {%endblock %} 
-
 {% block maincontent%} 
 {% if request.user.is_authenticated %}
+   <form method="GET" class="border p-4">
+      <table class="table table-responsive table-borderd">
+         {% for field in form %}
+         <tr>
+            <td>{{ field.label_tag }}</td>
+            <td>{{ field }}</td>
+         </tr>
+         {% endfor %}
+      </table>
+      <button class="btn btn-secondary" type="submit">Filter</button>
+   </form>
 
-<div class="">
-  <div class="row">
-    <form
-      method="get"
-      action="{% url 'viewproduct'  %}"
-      class="p-3"
-    >
-      <input type="text" name="search" value="{{ search_query }}" />
-      <button class="btn btn-secondary" type="submit">Search</button>
-    </form>
-  </div>
 
-  <div class="table-outer-div">
-    <table class="table table-bordered table-responsive-sm custom-table">
-      <thead>
-        <tr> 
-        <th>Update</th>
-          {% for field in model_fields %} {% if field != 'id' and field != 'CreateTime' and field != 'UpdateTime'%}
-          <th>{{ field }}
-          {% endif %} {% endfor %}
-          <th>Coverages</th> 
-        </tr>
-      </thead>
+<div class="border p-4">
+{% if objects %}
+
+ {% for object in objects %}
+      <div class="link-container">
+   <div class="link-item">
+      <a href="{% url 'cloneproduct' product_id=object.pk %}">
+         <i class="fa fa-clone"></i> Clone
+      </a>
+   </div>
+   <div class="link-item">
+      <a href="{% url 'updateproduct' product_id=object.pk %}">
+         <i class="fa fa-edit"></i> Edit
+      </a>
+   </div>
+   <div class="link-item">
+      <a href="{% url 'deleteproduct' product_id=object.pk %}">
+         <i class="fa fa-trash"></i> Delete
+      </a>
+   </div>
+</div>
+   {% endfor %}
+   <table class="table table-responsive table-borderd">
       <tbody>
-        {% for object in objects %}
-        <tr>  
-        <td>
-            <a href="{% url 'updateproduct' product_id=object.pk %}"
-              ><i class="fa fa-edit"></i
-            ></a>
-          </td>     
-          {% for field in model_fields %} {% if field != 'id' and field != 'CreateTime' and field != 'UpdateTime'%}
-          <td>{{ object|get_attribute:field }}</td>
-          {% endif %} 
-          {% endfor %}
-          <td>
-          <table class="table table-bordered table-responsive-sm custom-table">
-          <thead>
-              <tr> 
-              <th>Coverage</th>
-               <th>Option</th>
-              </tr>
-              </thead>
-              <tbody>
-              
-                {% for coverage in object.coverages.all %}
-                <tr>
-                  <td>{{ coverage.CoverageName }}</td>
-                   <td>{{ coverage.OptionValue }}</td>
-                {% empty %}
-                  <td>No coverages selected</td>
-                  </tr>
-                {% endfor %}
-                 </tbody>
-                 </table>
-          </td>
-
-          <td>
-          <table class="table table-bordered table-responsive-sm custom-table">
-          <thead>
-              <tr> 
-              <th>Discounts</th>
-               <th>Description</th>
-              </tr>
-              </thead>
-              <tbody>
-              
-                {% for discount in object.discounts.all %}
-                <tr>
-                  <td>{{ discount.DiscountName }}</td>
-                   <td>{{ discount.DiscountDesc }}</td>
-                {% empty %}
-                  <td>No discounts selected</td>
-                  </tr>
-                {% endfor %}
-                 </tbody>
-                 </table>
-          </td>
-
-
-          <td>
-          <table class="table table-bordered table-responsive-sm custom-table">
-          <thead>
-              <tr> 
-              <th>Surcharges</th>
-               <th>Description</th>
-              </tr>
-              </thead>
-              <tbody>
-              
-                {% for surcharge in object.surcharges.all %}
-                <tr>
-                  <td>{{ surcharge.SurchargeName }}</td>
-                   <td>{{ surcharge.SurchargeDesc }}</td>
-                {% empty %}
-                  <td>No surcharges selected</td>
-                  </tr>
-                {% endfor %}
-                 </tbody>
-                 </table>
-          </td>
-
-
-        </tr>
-        {% endfor %}
+         {% for field in model_fields %}
+            {% if field != 'id' and field != 'CreateTime' and field != 'UpdateTime' %}
+               <tr>
+                  <td><b>{{ field | capfirst }}</b></td>
+                  {% for object in objects %}
+                     <td>
+                        {% if field == 'coverages' or field == 'discounts' or field == 'surcharges' %}
+                           {% with related_objects=object|get_attribute:field %}
+                              {% for related_object in related_objects.all %}
+                                 {{ related_object }}<br>
+                              {% empty %}
+                                 No {{ field }} selected
+                              {% endfor %}
+                           {% endwith %}
+                        {% else %}
+                           {{ object|get_attribute:field }}
+                        {% endif %}
+                     </td>
+                  {% endfor %}
+               </tr>
+            {% endif %}
+         {% endfor %}
       </tbody>
-    </table>
-  </div>
+   </table>
+  
+{% else %}
+   <p>No data available.</p>
+{% endif %}
 </div>
 
+
+
+
+
+
+   <nav aria-label="Page navigation">
+      <ul class="pagination pagination-sm">
+         {% if objects.has_previous %}
+         <li class="page-item"><a class="page-link" href="{% url_with_query request.get_full_path page=objects.previous_page_number %}">Previous</a></li>
+         {% endif %}
+         {% for num in objects.paginator.page_range %}
+         {% if objects.number == num %}
+         <li class="page-item active"><a class="page-link" href="{% url_with_query request.get_full_path page=num %}">{{ num }}</a></li>
+         {% else %}
+         <li class="page-item"><a class="page-link" href="{% url_with_query request.get_full_path page=num %}">{{ num }}</a></li>
+         {% endif %}
+         {% endfor %}
+         {% if objects.has_next %}
+         <li class="page-item"><a class="page-link" href="{% url_with_query request.get_full_path page=objects.next_page_number %}">Next</a></li>
+         {% endif %}
+      </ul>
+   </nav>
+</div>
+{%else%}
+Please Login to access this 
 {% endif %} {% endblock %} {% block js%} {% endblock js%}

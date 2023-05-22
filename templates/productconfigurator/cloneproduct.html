@@ -15,7 +15,7 @@
 {% block maincontent %}
   {% if request.user.is_authenticated %}
 
-    <form method="POST" action="{% url 'updateproduct' updated_product.id %}">
+    <form method="POST" >
       {% csrf_token %}
       
       <table class="table table-responsive table-borderd">
@@ -26,7 +26,7 @@
           </tr>
         {% endfor %}
       </table>
-      <button class="btn btn-secondary" type="submit">Update Product</button>
+      <button class="btn btn-secondary" type="submit">Clone Product</button>
     </form>
     {%else%}
 Please Login to access this 
