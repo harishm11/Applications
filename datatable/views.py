@@ -229,6 +229,11 @@ def importCsv(request, appLabel, modelName):
             for row in reader:
                 obj = Model()
                 for i, field in enumerate(model_fields):
+                    first_field_value = row[i]
+                    if first_field_value.startswith('\ufeff'):
+                        first_field_value = first_field_value[1:]
+                        row[i] = first_field_value
+
                     if field in 'Date':
                         # Convert date string to datetime object
                         date_str = row[i]
@@ -236,7 +241,14 @@ def importCsv(request, appLabel, modelName):
                             date_str, '%m/%d/%y').date()
                         setattr(obj, field, date_obj)
                     else:
-                        setattr(obj, field, row[i])
+                        if row[i] == 'FFPA':
+                            # Get the value from the CSV file
+                            product_code_value = row[i]
+                            product_code_instance = productcode.objects.get(
+                                ProductCd=product_code_value)
+                            setattr(obj, 'ProductCd', product_code_instance)
+                        else:
+                            setattr(obj, field, row[i])
                 obj.save()
 
             return redirect('datatable', appLabel=appLabel, modelName=modelName)

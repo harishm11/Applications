@@ -1,4 +1,4 @@
-from ..forms import ProductFilterForm
+# from ..forms import ProductForm
 from django.shortcuts import render
 from django.urls import get_resolver
 from ..forms import ProductForm
@@ -26,7 +26,7 @@ surcharge = apps.get_model('systemtables', 'surcharge')
 
 def productconfigurator(request):
 
-    view_functions = ['createproduct', 'filterproduct']
+    view_functions = ['createproduct', 'viewproduct']
     context = {'options': view_functions, 'appLabel': 'productconfigurator'}
     return render(request, 'productconfigurator/home.html', context)
 
@@ -70,7 +70,7 @@ def createProduct(request):
                 product_created = True
                 created_product = product
 
-                return redirect('viewproduct')
+                return redirect('viewProduct')
             else:
                 coverages = coverage.objects.all().order_by('CoverageName', 'Amount1')
                 discounts = discount.objects.all().order_by('DiscountName')
@@ -95,80 +95,17 @@ def createProduct(request):
         return render(request, 'error.html', {'message': err})
 
 
-# def viewProduct(request):
-#     try:
-#         Model = product
-#         model_fields = [field.name for field in Model._meta.fields]
-
-#         verboseNamePlural = Model._meta.verbose_name_plural
-#         search_query = request.GET.get('search', '')
-#         if search_query:
-#             q_objects = Q()
-#             # Search in the specified model fields
-#             for field in model_fields:
-#                 q_objects |= Q(**{f'{field}__icontains': search_query})
-
-#             # Search in the 'coverages' field
-#             q_objects |= Q(coverages__CoverageName__icontains=search_query) | Q(
-#                 coverages__OptionValue__icontains=search_query)
-
-#             # Search in the 'discounts' field
-#             q_objects |= Q(discounts__DiscountName__icontains=search_query) | Q(
-#                 discounts__DiscountDesc__icontains=search_query)
-
-#             # Search in the 'surcharges' field
-#             q_objects |= Q(surcharges__SurchargeName__icontains=search_query) | Q(
-#                 surcharges__SurchargeDesc__icontains=search_query)
-
-#             objectsall = Model.objects.filter(q_objects).distinct()
-#         else:
-#             objectsall = Model.objects.all()
-
-#         paginator = Paginator(objectsall, 1)
-
-#         page = request.GET.get('page')
-#         try:
-#             objects = paginator.page(page)
-#         except PageNotAnInteger:
-
-#             objects = paginator.page(1)
-#         except EmptyPage:
-
-#             objects = paginator.page(paginator.num_pages)
-
-#         context = {
-#             'Model': Model,
-#             'model_fields': model_fields,
-#             'objects': objects,
-#             'verboseNamePlural_value': verboseNamePlural,
-#             'search_query': search_query,
-#             'title': 'View Products'
-#         }
-
-#         return render(request, 'productconfigurator/viewproduct.html', context)
-#     except Exception as err:
-#         return render(request, 'error.html', {'message': err})
-
-
 def updateProduct(request, product_id):
     try:
         product_updated = False
         updated_product = None
         selected_coverages = []
 
-        # Retrieve the product instance to be updated
         product = get_object_or_404(Product, pk=product_id)
-        # product = Product.objects.get(id=product_id)
 
-        form = modelform_factory(Product, exclude=('id', 'coverages', 'discounts', 'surcharges'), widgets={
-            'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
-            'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),
-            'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
-            'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
-
-        })
         if request.method == 'POST':
-            product_form = ProductForm(request.POST or None, instance=product)
+            product_form = ProductForm(
+                request.POST or None, instance=product)
 
             if product_form.is_valid():
                 product = product_form.save(commit=False)
@@ -191,18 +128,15 @@ def updateProduct(request, product_id):
                 product_updated = True
                 updated_product = product
 
-                context = {
-                    'Model': Product,
-                    'title': 'View Products'
-                }
-
-                redirect(request, 'productconfigurator/viewproduct.html', context)
+                redirect('viewProduct')
             else:
-                coverages = coverage.objects.all().order_by('CoverageName', 'Amount1')
-                discounts = discount.objects.all().order_by('DiscountName')
-                surcharges = surcharge.objects.all().order_by('SurchargeName')
+                redirect(
+                    request, 'error.html', {'message': 'Form Error'})
+
         else:
-            product_form = form(instance=product)
+            product_form = ProductForm(
+                request.POST or None, instance=product)
+
             updated_product = product
             coverages = coverage.objects.all().order_by('CoverageName', 'Amount1')
             discounts = discount.objects.all().order_by('DiscountName')
@@ -213,7 +147,6 @@ def updateProduct(request, product_id):
 
             selected_coverage_options = [
                 (c.CoverageName, c.OptionValue) for c in selected_coverages()]
-            print(selected_coverage_options)
         return render(request, 'productconfigurator/updateproduct.html', {
             'product_form': product_form,
             'coverages': coverages,
@@ -231,7 +164,7 @@ def updateProduct(request, product_id):
         return render(request, 'error.html', {'message': err})
 
 
-def filterProduct(request):
+def viewProduct(request):
     Model = product
     model_fields = [field.name for field in Model._meta.fields]
     form = ProductFilterForm(request.GET or None)
@@ -258,4 +191,4 @@ def filterProduct(request):
         'objects': objects,
         'model_fields': model_fields
     }
-    return render(request, 'productconfigurator/filterproduct.html', context)
+    return render(request, 'productconfigurator/viewproduct.html', context)
