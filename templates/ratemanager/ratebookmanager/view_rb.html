@@ -1,127 +1,22 @@
-{% load static %} {% block title %} {{title}} {%endblock %} {% block content %}
+{% load static %} {% block title %} 
+{{title}} 
+{%endblock %} 
+{% block content %}
+{% load crispy_forms_tags %}
 
-<h2>View Ratebook</h2>
-<form method="post" action="/ratemanager/viewratebookstable">
+<form method="post" action="/ratemanager/viewRatebooksTable/">
   {% csrf_token %}
-  <label for="state">State</label><br />
-  <select
-    id="state"
-    name="state"
-    class="form-select form-select-sm"
-    onchange="filterbyfield()"
-  >
-    <option selected>{{ stateid }}</option>
-    {% for i in state %}
-    <option>{{ i }}</option>
-    {% endfor %}
-  </select>
+<table class="table">
+  {{ form.as_table }}
+</table>
   <br />
-  <label for="business">Business</label><br />
-  <select
-    id="business"
-    name="business"
-    class="form-select form-select-sm"
-    onchange="filterbyfield()"
-  >
-    <option selected>{{ businessid }}</option>
-    {% for i in business %}
-    <option>{{ i }}</option>
-    {% endfor %}
-  </select>
-  <br />
-  <label for="company">Company</label><br />
-  <select
-    id="company"
-    name="company"
-    class="form-select form-select-sm"
-    onchange="filterbyfield()"
-  >
-    <option selected>{{ companyid }}</option>
-    {% for i in company %}
-    <option>{{ i }}</option>
-    {% endfor %}
-  </select>
-  <br />
-  <label for="product_group">Product Group</label><br />
-  <select
-    id="product_group"
-    name="product_group"
-    class="form-select form-select-sm"
-    onchange="filterbyfield()"
-  >
-    <option selected>{{ product_groupid }}</option>
-    {% for i in product_group %}
-    <option>{{ i }}</option>
-    {% endfor %}
-  </select>
-  <br />
-  <label for="product_type">Product Type</label><br />
-  <select
-    id="product_type"
-    name="product_type"
-    class="form-select form-select-sm"
-    onchange="filterbyfield()"
-  >
-    <option selected>{{ product_typeid }}</option>
-    {% for i in product_type %}
-    <option>{{ i }}</option>
-    {% endfor %}
-  </select>
-  <br />
-  <label for="product_name">Product Name</label><br />
-  <select
-    id="product_name"
-    name="product_name"
-    class="form-select form-select-sm"
-    onchange="filterbyfield()"
-  >
-    <option selected>{{ product_nameid }}</option>
-    {% for i in product_name %}
-    <option>{{ i }}</option>
-    {% endfor %}
-  </select>
-  <br />
-  <label for="ratebookgroupid">Ratebook Group</label><br />
-  <select
-    id="ratebookgroupid"
-    name="ratebookgroupid"
-    class="form-select form-select-sm"
-    onchange="filterbyfield()"
-  >
-    <option selected>{{ book_groupid }}</option>
-    {% for i in ratebookgroupid %}
-    <option>{{ i }}</option>
-    {% endfor %}
-  </select>
-  <br />
+<div class="text-center">
   <input type="submit" class="btn btn-primary" value="View" />
+</div>  
 </form>
 
-<script>
-  function filterbyfield() {
-    stateid = document.getElementById("state").value;
-    businessid = document.getElementById("business").value;
-    companyid = document.getElementById("company").value;
-    product_groupid = document.getElementById("product_group").value;
-    product_typeid = document.getElementById("product_type").value;
-    product_nameid = document.getElementById("product_name").value;
-    book_groupid = document.getElementById("ratebookgroupid").value;
-    window.location =
-      "/ratemanager/filterbyfield?stateid=" +
-      stateid +
-      "&businessid=" +
-      businessid +
-      "&companyid=" +
-      companyid +
-      "&product_groupid=" +
-      product_groupid +
-      "&product_typeid=" +
-      product_typeid +
-      "&product_nameid=" +
-      product_nameid +
-      "&book_groupid=" +
-      book_groupid;
-  }
-</script>
+{% if show_rb_table == True %}
+  {% include "ratemanager/ratebookmanager/rb_table.html" %}
+{% endif %}
 
 {% endblock %}

@@ -4,28 +4,28 @@ from django.db import models
 class RatebookGroups (models.Model):
     id = models.IntegerField(primary_key=True, null=False,
                              auto_created=True, default=0)
-    state = models.CharField(max_length=50, null=True)
-    business = models.CharField(max_length=50, null=True)
-    company = models.CharField(max_length=50, null=True)
-    product_group = models.CharField(max_length=50, null=True)
-    product_type = models.CharField(max_length=50, null=True)
-    product_name = models.CharField(max_length=50, null=True)
-    projectid = models.CharField(max_length=50, null=True)
-    ratebookgroupid = models.CharField(max_length=50, null=True)
+    State = models.CharField(max_length=50, null=True)
+    LoBusiness = models.CharField(max_length=50, null=True)
+    Company = models.CharField(max_length=50, null=True)
+    ProductGroup = models.CharField(max_length=50, null=True)
+    ProductType = models.CharField(max_length=50, null=True)
+    ProductName = models.CharField(max_length=50, null=True)
+    ProjectID = models.CharField(max_length=50, null=True)
+    RatebookGroupID = models.CharField(max_length=50, null=True)
 
 
 class RateBooks (models.Model):
     id = models.IntegerField(primary_key=True, null=False,
                              auto_created=True, default=0)
-    ratebookgroupid = models.CharField(max_length=50, null=True)
-    ratebookid = models.CharField(max_length=50, null=True)
-    ratebookversion = models.CharField(max_length=50, null=True)
+    RatebookGroupID = models.CharField(max_length=50, null=True)
+    RatebookID = models.CharField(max_length=50, null=True)
+    RatebookVersion = models.CharField(max_length=50, null=True)
 
 
 class AllExhibits (models.Model):
     id = models.IntegerField(primary_key=True, null=False,
                              auto_created=True, default=0)
-    ratebookid = models.CharField(max_length=100)
+    RatebookID = models.CharField(max_length=100)
     Coverage = models.CharField(max_length=100, null=True)
     Exhibit = models.CharField(max_length=100, null=True)
     Factor = models.CharField(max_length=100, null=True)

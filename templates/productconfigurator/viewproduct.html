@@ -7,7 +7,7 @@
 {% block maincontent%} 
 {% if request.user.is_authenticated %}
    <form method="GET" class="border p-4">
-      <table class="table table-responsive table-borderd">
+       <table class="table table-responsive table-borderd">
          {% for field in form %}
          <tr>
             <td>{{ field.label_tag }}</td>
