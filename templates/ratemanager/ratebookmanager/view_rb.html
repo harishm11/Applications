@@ -1,15 +1,31 @@
-{% load static %} {% block title %} 
-{{title}} 
-{%endblock %} 
-{% block content %}
+{% extends 'body.html' %} {% load static %}
+{% block title %} View Ratebook {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
 {% load crispy_forms_tags %}
+{% block maincontent %} 
+
+<h1> View Ratebook </h1>
 
 <form method="post" action="/ratemanager/viewRatebooksTable/">
   {% csrf_token %}
 <table class="table">
-  {{ form.as_table }}
+  {% for field in form %}
+    {%if forloop.counter|divisibleby:"2" %}
+      <td>
+        {{field.label}}:&emsp;{{field}}
+      </td>
+    </tr>
+    {%else%}
+    <tr>
+      <td>
+        {{field.label}}:&emsp;{{field}}
+      </td>
+    {%endif%}
+  {%endfor%}
 </table>
-  <br />
+  <br>
 <div class="text-center">
   <input type="submit" class="btn btn-primary" value="View" />
 </div>  

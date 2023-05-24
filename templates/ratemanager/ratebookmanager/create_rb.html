@@ -1,42 +1,51 @@
-{% load static %} {% block title %} {{title}} {%endblock %}{% block content %}
+{% extends 'body.html' %} {% load static %}
+{% block title %} View Ratebook {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %} 
+
+<h1>Create new ratebook.</h1>
+
 <div>
   {% if request.user.is_authenticated %}
-  <div>
-    <h4>Create new ratebook.</h4>
-    <br />
-
-    <form
-      method="post"
-      enctype="multipart/form-data"
-      action="/ratemanager/createFromExcel/"
-      id="uploadform"
-    >
-      {% csrf_token%}
-    <div class="mb-3">
-      <label for="uploadform">Select and upload an Excel file to create a new ratebook:</label>
-      <input
-        type="file"
-        name="file"
-        class="form-control-file"
-        accept=".xlsx"
-        required
-      />
-      <input
-        type="submit"
-        name="submit"
-        value="Upload & Validate"
-        class="btn btn-primary mb-3"
-      />
+    {% if not file_uploaded %}
+    <div>
+      <form
+        method="post"
+        enctype="multipart/form-data"
+        action="/ratemanager/uploadRB/"
+        id="uploadform"
+      >
+        {% csrf_token%}
+      <div class="mb-3">
+        <label for="uploadform"> Select and upload an Excel file to create a new ratebook: </label>
+        <input
+          type="file"
+          name="file"
+          class="form-control-file"
+          accept=".xlsx"
+          required
+        />
+        <input
+          type="submit"
+          name="submit"
+          value="Upload & Validate"
+          class="btn btn-primary mb-3"
+        />
+      </div>
+      </form>
     </div>
-    </form>
-  </div>
-  {% if show_result == "yes" %}
-  <div>
-    {% include "uploadmessage.html" %}
-  </div>
-  {% endif %}
+    {% endif %}
+
+    {% if file_uploaded %}
+    <div>
+      {% include "ratemanager/ratebookmanager/uploadmessage.html" %}
+    </div>
+    {% endif %}
 
   {% endif %}
 </div>
-{% endblock %}
 
+{% endblock %}
