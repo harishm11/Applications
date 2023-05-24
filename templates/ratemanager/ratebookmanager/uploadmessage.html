@@ -1,13 +1,12 @@
 {% extends 'base.html' %} {% load static %} {% block title %} {{title}}
 {%endblock %} {% load crispy_forms_tags %} {% block content %}
 <div>
-  <br/>
+  {{ err }}
   {{ msg }}
-
-  <a href="/ratemanager/exhlist">View Exhibit Lists from Uploaded File</a>
-
-  <br/>
-  <a href="/ratemanager/viewprocessed">View the Processed Exhibit File</a>
+  
+  <div class="text-center">
+    <input type="submit" class="btn btn-primary" value="Load to Database" />
+  </div>  
 
 </div>
 {% endblock %}

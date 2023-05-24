@@ -92,22 +92,23 @@ class PolicySubTypeForm(forms.ModelForm):
 
 
 class ProductFilterForm(forms.Form):
-    # Carrier = forms.ModelChoiceField(
-    #     queryset=carrier.objects.all(),
-    #     required=False,
-    #     label='Carrier'
-    # )
+
     StateCode = forms.ModelChoiceField(
         queryset=state.objects.all(),
         required=False,
         label='StateCode'
     )
 
-    UwCompany = forms.ModelChoiceField(
-        queryset=uwcompany.objects.all(),
+    Carrier = forms.ModelChoiceField(
+        queryset=carrier.objects.all(),
         required=False,
-        label='CompanyName'
+        label='Carrier'
     )
+    # UwCompany = forms.ModelChoiceField(
+    #     queryset=uwcompany.objects.all(),
+    #     required=False,
+    #     label='CompanyName'
+    # )
 
     LineOfBusiness = forms.ModelChoiceField(
         queryset=lineofbusiness.objects.all(),
@@ -122,14 +123,26 @@ class ProductFilterForm(forms.Form):
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
+    PolicySubType = forms.ModelChoiceField(
+        queryset=policysubtype.objects.none(),
+        required=False,
+        label='PolicySubType'
+    )
+
     ProductCode = forms.ModelChoiceField(
         queryset=productcode.objects.all(),
         required=False,
         label='ProductCode'
     )
 
-    PolicySubType = forms.ModelChoiceField(
-        queryset=policysubtype.objects.none(),
-        required=False,
-        label='PolicySubType'
-    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        policy_type_id = self.data.get('PolicyType')
+        if policy_type_id is not None:
+            try:
+                policy_type_id = int(policy_type_id)
+            except ValueError:
+                policy_type_id = None
+        self.fields['PolicySubType'].queryset = policysubtype.objects.filter(
+            PolicyType_id=policy_type_id) if policy_type_id else policysubtype.objects.none()
