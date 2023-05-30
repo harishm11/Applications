@@ -92,22 +92,22 @@ class PolicySubTypeForm(forms.ModelForm):
 
 
 class ProductFilterForm(forms.Form):
-    # Carrier = forms.ModelChoiceField(
-    #     queryset=carrier.objects.all(),
-    #     required=False,
-    #     label='Carrier'
-    # )
+    Carrier = forms.ModelChoiceField(
+        queryset=carrier.objects.all(),
+        required=False,
+        label='Carrier'
+    )
     StateCode = forms.ModelChoiceField(
         queryset=state.objects.all(),
         required=False,
         label='StateCode'
     )
 
-    UwCompany = forms.ModelChoiceField(
-        queryset=uwcompany.objects.all(),
-        required=False,
-        label='CompanyName'
-    )
+    # UwCompany = forms.ModelChoiceField(
+    #     queryset=uwcompany.objects.all(),
+    #     required=False,
+    #     label='CompanyName'
+    # )
 
     LineOfBusiness = forms.ModelChoiceField(
         queryset=lineofbusiness.objects.all(),
