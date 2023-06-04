@@ -10,70 +10,22 @@
     <h1>Create Rule</h1>
 
 
-    <form method="post">
-        {% csrf_token %}
+    <form method="POST" action="{% url 'createrule' %}">
+  {% csrf_token %}
+  {{ ruleset_form.as_p }}
 
-        <label for="id_name">Name:</label>
-        {{ rule_set_form.name }}
-        <br><br>
+  {{ rulegroup_formset.management_form }}
+  {% for form in rulegroup_formset %}
+    {{ form.as_table }}
+  {% endfor %}
 
-        <label for="id_description">Description:</label>
-        {{ rule_set_form.description }}
-        <br><br>
+  {{ action_formset.management_form }}
+  {% for form in action_formset %}
+    {{ form.as_table }}
+  {% endfor %}
 
-        <label for="id_level">Level:</label>
-        {{ rule_set_form.level }}
-        <br><br>
-
-        <label for="id_operator">Operator:</label>
-        {{ rule_set_form.operator }}
-        <br><br>
-
-        {% for rule_group_form in rule_set_form.rule_groups.forms %}
-            {{ rule_group_form.management_form }}
-            {{ rule_group_form.non_form_errors }}
-            {{ rule_group_form.errors }}
-
-            <div class="rule-group">
-                <div>
-                    <label for="{{ rule_group_form.prefix }}-operator">Rule Group Operator:</label>
-                    {{ rule_group_form.operator }}
-                </div>
-
-                <fieldset>
-                    <legend>Rules:</legend>
-                    {% for rule_form in rule_group_form.rules.forms %}
-                        {{ rule_form.management_form }}
-                        {{ rule_form.non_form_errors }}
-                        {{ rule_form.errors }}
-
-                        <div class="rule">
-                            <div>
-                                <label for="{{ rule_form.prefix }}-field">Field:</label>
-                                {{ rule_form.field }}
-                            </div>
-                            <div>
-                                <label for="{{ rule_form.prefix }}-operator">Operator:</label>
-                                {{ rule_form.operator }}
-                            </div>
-                            <div>
-                                <label for="{{ rule_form.prefix }}-value">Value:</label>
-                                {{ rule_form.value }}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </fieldset>
-            </div>
-        {% endfor %}
-
-        <fieldset>
-            <legend>Actions:</legend>
-            {{ action_form.as_table }}
-        </fieldset>
-
-        <br>
-        <button type="submit">Save Rule</button>
-    </form>
+  <button type="submit">Create RuleSet</button>
+</form>
 </div>
 {%else%}
 Please Login to access this 

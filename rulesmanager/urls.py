@@ -6,7 +6,7 @@ from rulesmanager import views
 urlpatterns = [
     path('', views.rulesmanager,
          name='rulesmanager'),
-    #     path('createrule/', views.createRule,
-    #          name='createrule'),
+    path('createrule/', views.createRule,
+         name='createrule'),
 
 ]
