@@ -6,5 +6,12 @@
 
 
 {% block maincontent %} 
+<ul>
+  {% for table in tables %}
+  <li class="nav-link p-2">
+    <a href="/datatable/{{appLabel}}/{{ table }}/">{{ table|capfirst  }}</a>
+  </li>
+  {% endfor %}
+</ul>
     
 {% endblock %}

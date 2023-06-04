@@ -6,8 +6,10 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('createModel/',
-         views.createModel, name='createModel'),
+    path('createsystemtable/',
+         views.createModel, name='createsystemtable'),
     path('', views.systemtables,
          name='systemtables'),
+    #     path('viewsystemtable/', views.viewsystemtable,
+    #          name='viewsystemtable'),
 ]
