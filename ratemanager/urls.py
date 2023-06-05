@@ -13,5 +13,5 @@ urlpatterns = [
     path('uploadRB/', views.uploadRB, name="uploadRB"),
     path('loadRBtoDB/', views.loadRBtoDB, name="loadRBtoDB"),
     path('viewRB/', views.viewRB, name="viewRB"),
-    path('viewRatebooksTable/', views.viewRatebooksTable, name='viewratebookstable')
+    path('viewExhibits/<str:rbID>/', views.viewExhibits, name='viewExhibits')
 ]

@@ -4,7 +4,7 @@ from systemtables.models import \
     uwcompany, productcode, policytype, policysubtype
 
 
-class RatebookGroups (models.Model):
+class Ratebooks(models.Model):
     id = models.AutoField(
         primary_key=True,
         null=False,
@@ -12,65 +12,96 @@ class RatebookGroups (models.Model):
         )
     Carrier = models.ForeignKey(
         carrier.Carrier,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=None
         )
     State = models.ForeignKey(
         state.State,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=None
         )
     LoBusiness = models.ForeignKey(
         lineofbusiness.LineOfBusiness,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=None
         )
     UwCompany = models.ForeignKey(
         uwcompany.Uwcompany,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=None
         )
     PolicyType = models.ForeignKey(
         policytype.PolicyType,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=None
         )
     PolicySubType = models.ForeignKey(
         policysubtype.PolicySubType,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=None
         )
-    ProductName = models.ForeignKey(
+    ProductCode = models.ForeignKey(
         productcode.ProductCode,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=None
         )
     ProjectID = models.CharField(
         max_length=50,
         null=True,
-        blank=True
+        blank=True,
+        default=None
         )
-    NewBusinessEffectiveDate = models.DateTimeField(null=False)
-    NewBusinessExpiryDate = models.DateTimeField(null=False)
-    RenewalEffectiveDate = models.DateTimeField(null=False)
-    RenewalExpiryDate = models.DateTimeField(null=False)
-    ActivationDate = models.DateTimeField(null=False)
-    ActivationTime = models.DateTimeField(null=False)
-
-    def __str__(self):
-        return str(self.id)
-
-
-class RateBooks (models.Model):
-    id = models.AutoField(
-        primary_key=True,
+    RatebookVersion = models.FloatField(
         null=False,
-        auto_created=True
+        default=None
         )
-    RatebookGroup = models.ForeignKey(
-        RatebookGroups,
-        on_delete=models.CASCADE
+    RatebookRevisionType = models.CharField(
+        max_length=10,
+        null=False,
+        default=None
         )
-    RatebookVersion = models.IntegerField(null=False)
-    RatebookRevisionType = models.CharField(max_length=10, null=False)
-    RatebookStatusType = models.CharField(max_length=10, null=False)
-    RatebookChangeType = models.CharField(max_length=10, null=False)
-
-    def __str__(self):
-        return str(self.id)
+    RatebookStatusType = models.CharField(
+        max_length=10,
+        null=False,
+        default=None
+        )
+    RatebookChangeType = models.CharField(
+        max_length=10,
+        null=False,
+        default=None
+        )
+    NewBusinessEffectiveDate = models.DateField(
+        null=False,
+        default=None
+        )
+    NewBusinessExpiryDate = models.DateField(
+        null=False,
+        default=None
+        )
+    RenewalEffectiveDate = models.DateField(
+        null=False,
+        default=None
+        )
+    RenewalExpiryDate = models.DateField(
+        null=False,
+        default=None
+        )
+    ActivationDate = models.DateField(
+        null=False,
+        default=None
+        )
+    ActivationTime = models.TimeField(
+        null=False,
+        default=None
+        )
+    MigrationDate = models.DateField(
+        null=False,
+        default=None
+        )
+    MigrationTime = models.TimeField(
+        null=False,
+        default=None
+        )
 
 
 class AllExhibits (models.Model):
@@ -80,9 +111,9 @@ class AllExhibits (models.Model):
         auto_created=True
         )
     Ratebook = models.ForeignKey(
-        RateBooks,
+        Ratebooks,
         on_delete=models.CASCADE
-    )
+        )
     Coverage = models.CharField(max_length=100, null=False)
     Exhibit = models.CharField(max_length=100, null=False)
     Factor = models.CharField(max_length=100, null=False)
@@ -90,6 +121,3 @@ class AllExhibits (models.Model):
     RatingVarName2 = models.CharField(max_length=100, null=True)
     RatingVarValue1 = models.CharField(max_length=100, null=True)
     RatingVarValue2 = models.CharField(max_length=100, null=True)
-
-    def __str__(self):
-        return self.Exhibit

@@ -7,11 +7,22 @@ import os
 import pandas as pd
 from myproj.settings import BASE_DIR
 from django.apps import apps
-from .models import RatebookGroups, RateBooks, AllExhibits
-from .forms import ViewRBForm
+from ratemanager.models import Ratebooks, AllExhibits
+from ratemanager.forms import ViewRBForm, SelectExhibitForm
 from django.utils.html import format_html
 import sqlalchemy as sa
+from django.db.models import Q
 import traceback
+from datetime import datetime
+
+# get models from other apps
+uwCompany = apps.get_model('systemtables', 'uwcompany')
+state = apps.get_model('systemtables', 'state')
+carrier = apps.get_model('systemtables', 'carrier')
+lineOfBusiness = apps.get_model('systemtables', 'lineofbusiness')
+policyType = apps.get_model('systemtables', 'policytype')
+policySubType = apps.get_model('systemtables', 'policysubtype')
+productCode = apps.get_model('systemtables', 'productcode')
 
 
 def rateManager(request):
@@ -191,14 +202,8 @@ def loadRBtoDB(request):
 
         return df_out
 
-    # get models from other apps
-    uwCompany = apps.get_model('systemtables', 'uwcompany')
-    state = apps.get_model('systemtables', 'state')
-    carrier = apps.get_model('systemtables', 'carrier')
-    lineOfBusiness = apps.get_model('systemtables', 'lineofbusiness')
-    policyType = apps.get_model('systemtables', 'policytype')
-    policySubType = apps.get_model('systemtables', 'policysubtype')
-    productName = apps.get_model('systemtables', 'productcode')
+    def convertDate(x):
+        return datetime.strptime(x, "%m/%d/%Y").strftime('%Y-%m-%d')
 
     # Insert to DB (kind of validation automatically from the error messages)
     try:
@@ -208,30 +213,30 @@ def loadRBtoDB(request):
         SelectedCompany = uwCompany.objects.get(CompanyName=rate_details['UW Company'])
         SelectedPolicyType = policyType.objects.get(PolicyTypeName=rate_details['Policy Type'])
         SelectedPolicySubType = policySubType.objects.get(PolicySubTypeName=rate_details['Policy Sub Type'])
-        SelectedProductName = productName.objects.get(ProductName=rate_details['Product Name'])
-        rbGroupObj, loaded_to_dbGroups = RatebookGroups.objects.get_or_create(
+        SelectedProductCode = productCode.objects.get(ProductCd=rate_details['Product Code'])
+        rbObj, loaded_to_dbBooks = Ratebooks.objects.get_or_create(
             Carrier=SelectedCarrier,
             State=SelectedState,
             LoBusiness=SelectedLoB,
             UwCompany=SelectedCompany,
             PolicyType=SelectedPolicyType,
-            ProductName=SelectedProductName,
+            ProductCode=SelectedProductCode,
             PolicySubType=SelectedPolicySubType,
             ProjectID='Test Auto Generation',
-            NewBusinessEffectiveDate=rate_details['New Business Effective Date'],
-            NewBusinessExpiryDate=rate_details['New Business Expiry Date'],
-            RenewalEffectiveDate=rate_details['Renewal Effective Date'],
-            RenewalExpiryDate=rate_details['Renewal Expiry Date'],
-            ActivationDate=rate_details['Activation Date'],
-            ActivationTime=rate_details['Activation Time stamp']
-        )
-        rbObj, loaded_to_dbBooks = RateBooks.objects.get_or_create(
-            RatebookGroup=rbGroupObj,
+            NewBusinessEffectiveDate=convertDate(rate_details['New Business Effective Date']),
+            NewBusinessExpiryDate=convertDate(rate_details['New Business Expiry Date']),
+            RenewalEffectiveDate=convertDate(rate_details['Renewal Effective Date']),
+            RenewalExpiryDate=convertDate(rate_details['Renewal Expiry Date']),
+            ActivationDate=convertDate(rate_details['Activation Date']),
+            ActivationTime=rate_details['Activation Time'],
+            MigrationDate=convertDate(rate_details['Migration Date']),
+            MigrationTime=rate_details['Migration Time'],
             RatebookVersion=0,
             RatebookRevisionType='Test',
             RatebookStatusType='Test',
             RatebookChangeType='Test'
-            )
+        )
+
         loaded_to_dbExhibits = False
         if loaded_to_dbBooks:
             try:
@@ -244,15 +249,17 @@ def loadRBtoDB(request):
                 df.to_sql('ratemanager_allexhibits', engine, method='multi', if_exists='append', index=False)
                 loaded_to_dbExhibits = True
             except Exception as err:
-                msgs.append(err)
-                RateBooks.objects.get(pk=rbObj.id).delete()
-                RatebookGroups.objects.get(pk=rbGroupObj.id).delete()
+                msgs.append(repr(err))
+                loaded_to_dbExhibits = False
+                Ratebooks.objects.get(pk=rbObj.id).delete()
+        else:
+            msgs.append('Record already exists')
 
-        if any([loaded_to_dbGroups, loaded_to_dbBooks, loaded_to_dbExhibits]):
+        if all([loaded_to_dbBooks, loaded_to_dbExhibits]):
             loaded_to_db = True
             msgs.append('Sucessfully Loaded to Database.')
         else:
-            msgs.append('Record already Exists, you may want to use update.')
+            msgs.append('Unable to load to Database.')
             load_failed = True
     except Exception as err:
         load_failed = True
@@ -264,22 +271,50 @@ def loadRBtoDB(request):
 def viewRB(request):
     options = ['createRB', 'viewRB']
     appLabel = 'ratemanager'
-    form = ViewRBForm
-    options = ['createRB', 'viewRB']
-    appLabel = 'ratemanager'
+    fields = [f.name for f in Ratebooks._meta.get_fields(include_hidden=False)][1:]
+    if request.method == 'GET':
+        viewForm = ViewRBForm
+        filteredRatebooks = Ratebooks.objects.filter()
+    if request.method == 'POST':
+        selected = {k: v[0] for k, v in dict(request.POST).items()}
+
+        rbQuery = Q()
+        if selected.get('Carrier') != '':
+            rbQuery &= Q(Carrier_id=selected.get('Carrier'))
+        if selected.get('StateCode') != '':
+            rbQuery &= Q(State_id=selected.get('StateCode'))
+        if selected.get('UwCompany') != '':
+            rbQuery &= Q(UwCompany_id=selected.get('UwCompany'))
+        if selected.get('LineOfBusiness') != '':
+            rbQuery &= Q(LoBusiness_id=selected.get('LineOfBusiness'))
+        if selected.get('PolicyType') != '':
+            rbQuery &= Q(PolicyType_id=selected.get('PolicyType'))
+        if selected.get('PolicySubType') != '':
+            rbQuery &= Q(PolicySubType_id=selected.get('PolicySubType'))
+        if selected.get('ProductCode') != '':
+            rbQuery &= Q(ProductCode_id=selected.get('ProductCode'))
+        filteredRatebooks = Ratebooks.objects.filter(rbQuery)
+        viewForm = ViewRBForm(initial=selected)
     return render(request, "ratemanager/ratebookmanager/view_rb.html", locals())
 
 
-def viewRatebooksTable(request):
+def viewExhibits(request, rbID):
     options = ['createRB', 'viewRB']
     appLabel = 'ratemanager'
-    form = ViewRBForm
-    selected = {k: v[0] for k, v in dict(request.POST).items()}
-    print(selected)
-    show_rb_table = True
-    rb_df = pd.DataFrame.from_records(AllExhibits.objects.filter(Exhibit=selected['Exhibit']).values())
-    rb_html = format_html(rb_df.to_html(index=False, justify='left', classes=['table', 'table-bordered']))
-    return render(request, "ratemanager/ratebookmanager/view_rb.html", locals())
+    if request.method == 'GET':
+        filteredExhibits = AllExhibits.objects.filter().values_list()
+        fields = [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]
+        exhibitForm = SelectExhibitForm
+    if request.method == 'POST':
+        selected = {k: v[0] for k, v in dict(request.POST).items()}
+        Query = Q()
+        Query &= Q(Ratebook_id=rbID)
+        if selected.get('Exhibit') != '':
+            Query &= Q(Exhibit=selected.get('Exhibit'))
+        filteredExhibits = AllExhibits.objects.filter(Query).values_list()
+        fields = [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]
+        exhibitForm = SelectExhibitForm(initial=selected)
+    return render(request, "ratemanager/ratebookmanager/view_exhibits.html", locals())
 
 
 def exhibitlist(request):

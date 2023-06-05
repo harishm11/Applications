@@ -6,33 +6,84 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
-<h1> View Ratebook </h1>
-
-<form method="post" action="/ratemanager/viewRatebooksTable/">
+<h2 class="text-center"><u><b>View Ratebook</b></u></h2>
+<form method="post" action="/ratemanager/viewRB/">
   {% csrf_token %}
-<table class="table">
-  {% for field in form %}
-    {%if forloop.counter|divisibleby:"2" %}
-      <td>
-        {{field.label}}:&emsp;{{field}}
-      </td>
-    </tr>
-    {%else%}
-    <tr>
-      <td>
-        {{field.label}}:&emsp;{{field}}
-      </td>
-    {%endif%}
-  {%endfor%}
-</table>
-  <br>
-<div class="text-center">
-  <input type="submit" class="btn btn-primary" value="View" />
-</div>  
+  <table class="table">
+    {% for field in viewForm %}
+      {%if forloop.counter|divisibleby:"2" %}
+        <td>
+          {{field.label}}:&emsp;{{field}}
+        </td>
+      </tr>
+      {%else%}
+      <tr>
+        <td>
+          {{field.label}}:&emsp;{{field}}
+        </td>
+      {%endif%}
+    {%endfor%}
+  </table>
+  <div class="text-center">
+    <input type="submit" class="btn btn-primary" value="Apply Filters" />
+  </div>  
 </form>
 
-{% if show_rb_table == True %}
-  {% include "ratemanager/ratebookmanager/rb_table.html" %}
-{% endif %}
+<br>
+
+<div class="container">          
+  <table class="table table-responsive table-borderd">
+    <thead>
+      <tr>
+        <th>Carrier</th>
+        <th>State</th>
+        <th>LoBusiness</th>
+        <th>UwCompany</th>
+        <th>PolicyType</th>
+        <th>PolicySubType</th>
+        <th>ProductCode</th>
+        <th>RatebookVersion</th>
+        <th>RatebookRevisionType</th>
+        <th>RatebookStatusType</th>
+        <th>RatebookChangeType</th>
+        <th>NewBusinessEffectiveDate</th>
+        <th>NewBusinessExpiryDate</th>
+        <th>RenewalEffectiveDate</th>
+        <th>RenewalExpiryDate</th>
+        <th>ActivationDate</th>
+        <th>ActivationTime</th>
+        <th>MigrationDate</th>
+        <th>MigrationTime</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% if filteredRatebooks %}  
+    {% for obj in filteredRatebooks %}
+      <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewExhibits/{{ obj.id }}/';">
+        <td>{{obj.Carrier}}</td>
+        <td>{{obj.State}}</td>
+        <td>{{obj.LoBusiness}}</td>
+        <td>{{obj.UwCompany}}</td>
+        <td>{{obj.PolicyType}}</td>
+        <td>{{obj.PolicySubType}}</td>
+        <td>{{obj.ProductCode}}</td>
+        <td>{{obj.RatebookVersion}}</td>
+        <td>{{obj.RatebookRevisionType}}</td>
+        <td>{{obj.RatebookStatusType}}</td>
+        <td>{{obj.RatebookChangeType}}</td>
+        <td>{{obj.NewBusinessEffectiveDate}}</td>
+        <td>{{obj.NewBusinessExpiryDate}}</td>
+        <td>{{obj.RenewalEffectiveDate}}</td>
+        <td>{{obj.RenewalExpiryDate}}</td>
+        <td>{{obj.ActivationDate}}</td>
+        <td>{{obj.ActivationTime}}</td>
+        <td>{{obj.MigrationDate}}</td>
+        <td>{{obj.MigrationTime}}</td>
+      </tr>
+    {% endfor %}
+    {% endif %}
+    </tbody>
+  </table>
+</div>
 
 {% endblock %}
