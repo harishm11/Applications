@@ -10,7 +10,6 @@ try:
     productCode = apps.get_model('systemtables', 'productcode')
     policyType = apps.get_model('systemtables', 'policytype')
     policySubType = apps.get_model('systemtables', 'policysubtype')
-    rbGroups = apps.get_model('ratemanager', 'RatebookGroups')
     ratebooks = apps.get_model('ratemanager', 'Ratebooks')
     allexhibits = apps.get_model('ratemanager', 'AllExhibits')
 except LookupError:
@@ -20,93 +19,67 @@ except LookupError:
 class ViewRBForm(forms.ModelForm):
 
     class Meta:
-        model = allexhibits
+        model = ratebooks
         fields = ()
 
-    Carrier = forms.ModelChoiceField(
-        queryset=carrier.objects.all().distinct(),
-        label='Carrier',
-        required=False
+    StateCode = forms.ModelChoiceField(
+        queryset=state.objects.all().distinct().order_by('id'),
+        label='State Code',
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
-    StateCode = forms.ModelChoiceField(
-        queryset=state.objects.all().distinct(),
-        label='State Code',
-        required=False
+    Carrier = forms.ModelChoiceField(
+        queryset=carrier.objects.all().distinct().order_by('CarrierName'),
+        label='Carrier',
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     UwCompany = forms.ModelChoiceField(
-        queryset=uwCompany.objects.all().distinct(),
+        queryset=uwCompany.objects.all().distinct().order_by('CompanyName'),
         label='UW Company Name',
-        required=False
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     LineOfBusiness = forms.ModelChoiceField(
         queryset=lineOfBusiness.objects.all().distinct(),
         label='Line of Business',
-        required=False
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     PolicyType = forms.ModelChoiceField(
         queryset=policyType.objects.all().distinct(),
         label='Policy Type',
-        required=False
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     PolicySubType = forms.ModelChoiceField(
         queryset=policySubType.objects.all().distinct(),
         label='Policy Sub Type',
-        required=False
-    )
-
-    ProductName = forms.ModelChoiceField(
-        queryset=productCode.objects.all().filter().values_list('ProductName', flat=True).order_by('ProductName').distinct(),
-        label='Product Name',
-        required=False
-    )
-
-    RatebookGroup = forms.ModelChoiceField(
-        queryset=rbGroups.objects.all().distinct(),
-        label='Ratebook Group',
         required=False,
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
-    RatebookVersion = forms.ModelChoiceField(
-        queryset=ratebooks.objects.filter().values_list('RatebookVersion', flat=True).order_by('RatebookVersion').distinct(),
-        label='Ratebook Version',
-        required=False
+    ProductCode = forms.ModelChoiceField(
+        queryset=productCode.objects.all().distinct(),
+        label='Product Code',
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
-    RatebookRevisionType = forms.ModelChoiceField(
-        queryset=ratebooks.objects.filter().values_list('RatebookRevisionType', flat=True).order_by('RatebookRevisionType').distinct(),
-        label='Ratebook Revision Type',
-        required=False
-    )
 
-    RatebookStatusType = forms.ModelChoiceField(
-        queryset=ratebooks.objects.filter().values_list('RatebookStatusType', flat=True).order_by('RatebookStatusType').distinct(),
-        label='Ratebook Status Type',
-        required=False
-    )
-
-    RatebookChangeType = forms.ModelChoiceField(
-        queryset=ratebooks.objects.filter().values_list('RatebookChangeType', flat=True).order_by('RatebookChangeType').distinct(),
-        label='Ratebook Change Type',
-        required=False
-    )
-
-    RatebookID = forms.ModelChoiceField(
-        queryset=ratebooks.objects.all().distinct(),
-        label='Ratebook ID',
-        required=False
-    )
+class SelectExhibitForm(forms.ModelForm):
+    class Meta:
+        model = allexhibits
+        fields = ()
 
     Exhibit = forms.ModelChoiceField(
         queryset=allexhibits.objects.filter().values_list('Exhibit', flat=True).order_by('Exhibit').distinct(),
         label='Exhibit Name',
-        required=False
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
