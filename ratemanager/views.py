@@ -4,7 +4,6 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 import os
-from django.db import connection
 import pandas as pd
 from myproj.settings import BASE_DIR
 from django.apps import apps
@@ -13,53 +12,132 @@ from .forms import ViewRBForm
 from django.utils.html import format_html
 
 
-def extractData(request):
-    pass
-
-
 def rateManager(request):
-    options = ['ratebookManager', 'filterbyfield', 'viewRatebooksTable']
+    options = ['createRB', 'viewRB']
     appLabel = 'ratemanager'
     return render(request, 'ratemanager/home.html', locals())
 
 
-def createFromExcel(request):
+def createRB(request):
+    options = ['createRB', 'viewRB']
+    appLabel = 'ratemanager'
+    file_uploaded = False
+    return render(request, 'ratemanager/ratebookmanager/create_rb.html', locals())
+
+
+def uploadRB(request):
+    options = ['createRB', 'viewRB']
+    appLabel = 'ratemanager'
+    msgs = []
+
+    # save and get uploaded file path
+    upfile = request.FILES.get('file')
+    root = 'uploads'
+    path = os.path.realpath(os.path.join(root, str(upfile.name)))
+    fileexists = False
+    if not fileexists:
+        filstg = FileSystemStorage()
+        upldfl = filstg.save(path, upfile)
+        upldfl_url = filstg.url(upldfl)
+    request.session['upload_url'] = upldfl_url
+
+    # Function to find Ratebook Details Tab
+    def findRBDetails(df):
+        rateDetailsSheet = None
+        for sheet in list(df.keys()):
+            iLower = sheet.lower()
+            if 'rate' in iLower and 'book' in iLower and 'details' in iLower:
+                rateDetailsSheet = sheet
+        return rateDetailsSheet
+
+    file_uploaded = True
+    sheet_name = None
+
+    # read from excel file and convert to pandas series and HTML Table
+    df = pd.read_excel('.'+request.session.get('upload_url'), sheet_name=None)
+    sheet_name = findRBDetails(df)
+    df = df[sheet_name]
+    df = df.T.reset_index().T
+    df_view = pd.Series(index=list(df[0]), data=list(df[1]), name='Details')
+    rbDetilsTable = format_html(df_view.to_frame().to_html(justify='left', classes=['table', 'table-bordered']))
+    request.session['rate_details'] = df_view.astype(str).to_dict()
+
+    if sheet_name is not None:
+        msgs.append('Found Ratebook Details')
+    else:
+        msgs.append('Could not find Ratebook Details \
+                    Sheet in the uploaded Excel file please check again.')
+    return render(request, 'ratemanager/ratebookmanager/create_rb.html', locals())
+
+
+def loadRBtoDB(request):
+    options = ['createRB', 'viewRB']
+    appLabel = 'ratemanager'
+    msgs = []
+    loaded_to_db = False
+    file_uploaded = True
+    load_failed = False
+    # get models from other apps
+    uwCompany = apps.get_model('systemtables', 'uwcompany')
+    state = apps.get_model('systemtables', 'state')
+    carrier = apps.get_model('systemtables', 'carrier')
+    lineOfBusiness = apps.get_model('systemtables', 'lineofbusiness')
+    rate_details = request.session.get('rate_details')
+
+    # Insert to DB (kind of validation automatically)
     try:
-        show_result = True
-        upfile = request.FILES['file']
-        root = 'uploads'
-        path = os.path.realpath(os.path.join(root, str(upfile.name)))
-        fileexists = False
-        if not fileexists:
-            filstg = FileSystemStorage()
-            upldfl = filstg.save(path, upfile)
-            upldfl_url = filstg.url(upldfl)
-        msg = 'File uploaded to path:' + upldfl_url + ' sucessfully.'
-        err = ''
-        df = pd.read_excel('.'+upldfl_url, sheet_name=None)
-
-        # Function to find Ratebook Details Tab
-        def findRBDetails(df):
-            sheet = None
-            for i in list(df.keys()):
-                iLower = i.lower()
-                if 'rate' in iLower and 'book' in iLower and 'details' in iLower:
-                    sheet = i
-            return sheet
-
-        sheet_name = findRBDetails(df)
-        df = df[sheet_name]
-        df = df.T.reset_index().T
-        df = df.T
-        df, df.columns = df[1:], df.iloc[0]
-        rbDetilsTable = format_html(df.to_html(index=False, justify='left', classes=['table', 'table-bordered']))
-        if sheet_name is not None:
-            msg = rbDetilsTable
+        SelectedCarrier = carrier.objects.get(CarrierName=rate_details['Carrier'])
+        SelectedState = state.objects.get(StateName=rate_details['State'])
+        SelectedLoB = lineOfBusiness.objects.get(LobName=rate_details['Line of Business'])
+        SelectedCompany = uwCompany.objects.get(CompanyName=rate_details['UW Company'])
+        getObj, loaded_to_db = RatebookGroups.objects.get_or_create(
+            Carrier=SelectedCarrier,
+            State=SelectedState,
+            LoBusiness=SelectedLoB,
+            UwCompany=SelectedCompany,
+            ProductGroup=rate_details['Product Group'],
+            ProductName=rate_details['Product Type'],
+            ProductType=rate_details['Product Name'],
+            ProjectID='Test Auto Generation',
+            RatebookGroup='Test Auto Generation',
+            RenewalEffDate=rate_details['Renewal Effective Date'],
+            RenewalExpDate=rate_details['Renewal Expiry Date'],
+            ActivationDate=rate_details['Activation Date'],
+            ActivationTime=rate_details['Activation Time stamp']
+        )
+        if loaded_to_db:
+            msgs.append('Sucessfully Loaded to Database.')
         else:
-            msg = 'Could not find Ratebook Details Sheet in the uploaded Excel file please check again.'
-        return render(request, 'ratemanager/ratebookmanager/uploadmessage.html', locals())
+            msgs.append('Record already Exists, you may want to use update.')
+            load_failed = True
     except Exception as err:
-        return render(request, 'ratemanager/ratebookmanager/uploadmessage.html', {'msg': 'File not uploaded', 'err': err})
+        load_failed = True
+        msgs.append(err)
+    return render(request, 'ratemanager/ratebookmanager/create_rb.html', locals())
+
+
+def viewRB(request):
+    options = ['createRB', 'viewRB']
+    appLabel = 'ratemanager'
+    form = ViewRBForm
+    options = ['createRB', 'viewRB']
+    appLabel = 'ratemanager'
+    return render(request, "ratemanager/ratebookmanager/view_rb.html", locals())
+
+
+def viewRatebooksTable(request):
+    options = ['createRB', 'viewRB']
+    appLabel = 'ratemanager'
+    form = ViewRBForm
+    SelectedID = request.POST.get('Exhibits')
+    show_rb_table = True
+    SelectedExhibit = AllExhibits.objects.get(pk=SelectedID).Exhibit
+    print(SelectedExhibit)
+    rb_df = pd.DataFrame.from_records(AllExhibits.objects.filter(
+        Exhibit=SelectedExhibit).values()
+        )
+    rb_html = format_html(rb_df.to_html(index=False, justify='left', classes=['table', 'table-bordered']))
+    return render(request, "ratemanager/ratebookmanager/view_rb.html", locals())
 
 
 def exhibitlist(request):
@@ -118,21 +196,4 @@ def openexhibit(request):
             {'Error': err}), content_type='application/json')
         response.status_code = 400
         return response
-
-
-def ratebookManager(request):
-    form = ViewRBForm
-    options = ['ratebookManager', 'filterbyfield', 'viewRatebooksTable']
-    appLabel = 'ratemanager'
-    return render(request, "ratemanager/ratebookmanager/home.html", locals())
-
-
-def viewRatebooksTable(request):
-    form = ViewRBForm
-    bookGroupID = request.POST.get('ratebookgroupid')
-    print(bookGroupID)
-    show_rb_table = True
-    rb_df = pd.DataFrame.from_records(RateBooks.objects.all().values())
-    rb_df.reset_index(inplace=True)
-    rb_html = format_html(rb_df.to_html(index=False, justify='left', classes=['table', 'table-bordered']))
-    return render(request, "ratemanager/ratebookmanager/home.html", locals())
+<<<<<<< HEAD

@@ -1,12 +1,19 @@
-{% extends 'base.html' %} {% load static %} {% block title %} {{title}}
+{% block title %} {{title}}
 {%endblock %} {% load crispy_forms_tags %} {% block content %}
 <div>
-  {{ err }}
-  {{ msg }}
-  
-  <div class="text-center">
-    <input type="submit" class="btn btn-primary" value="Load to Database" />
-  </div>  
+  {{ rbDetilsTable }}
 
+  <b>Messages: <br>
+    {% for i in msgs %}
+    &emsp; - {{ i }}<br>
+    {% endfor %}
+  </b><br>
+  {% if not loaded_to_db and not load_failed %}
+  <div class="text-center">
+    <a href='/ratemanager/loadRBtoDB/'>
+    <input type="submit" class="btn btn-primary" value="Load to Database" action="" />
+    </a>
+  </div>  
+  {% endif %}
 </div>
 {% endblock %}

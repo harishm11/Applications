@@ -92,18 +92,17 @@ class PolicySubTypeForm(forms.ModelForm):
 
 
 class ProductFilterForm(forms.Form):
-
+    Carrier = forms.ModelChoiceField(
+        queryset=carrier.objects.all(),
+        required=False,
+        label='Carrier'
+    )
     StateCode = forms.ModelChoiceField(
         queryset=state.objects.all(),
         required=False,
         label='StateCode'
     )
 
-    Carrier = forms.ModelChoiceField(
-        queryset=carrier.objects.all(),
-        required=False,
-        label='Carrier'
-    )
     # UwCompany = forms.ModelChoiceField(
     #     queryset=uwcompany.objects.all(),
     #     required=False,
@@ -135,14 +134,8 @@ class ProductFilterForm(forms.Form):
         label='ProductCode'
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        policy_type_id = self.data.get('PolicyType')
-        if policy_type_id is not None:
-            try:
-                policy_type_id = int(policy_type_id)
-            except ValueError:
-                policy_type_id = None
-        self.fields['PolicySubType'].queryset = policysubtype.objects.filter(
-            PolicyType_id=policy_type_id) if policy_type_id else policysubtype.objects.none()
+    PolicySubType = forms.ModelChoiceField(
+        queryset=policysubtype.objects.none(),
+        required=False,
+        label='PolicySubType'
+    )

@@ -26,7 +26,7 @@ surcharge = apps.get_model('systemtables', 'surcharge')
 
 def productconfigurator(request):
 
-    view_functions = ['createproduct', 'viewproduct']
+    view_functions = ['createproduct', 'filterproduct']
     context = {'options': view_functions, 'appLabel': 'productconfigurator'}
     return render(request, 'productconfigurator/home.html', context)
 
@@ -54,7 +54,7 @@ def createProduct(request):
                 product_created = True
                 created_product = product
 
-                return redirect('viewproduct')
+                return redirect('filterproduct')
 
         else:
             product_form = ProductForm()
@@ -87,7 +87,7 @@ def updateProduct(request, product_id):
                 product_updated = True
                 updated_product = product
 
-                return redirect('viewproduct')
+                return redirect('filterproduct')
             else:
                 redirect(
                     request, 'error.html', {'message': 'Form Error'})
@@ -108,11 +108,12 @@ def updateProduct(request, product_id):
         return render(request, 'error.html', {'message': err})
 
 
-def viewProduct(request):
+def filterProduct(request):
     Model = Product
     # model_fields = [field.name for field in Model._meta.fields]
-    model_fields = [
-        field.name for field in Model._meta.get_fields(include_hidden=False)]
+    model_fields = [field.name for field in Model._meta.get_fields(
+        include_hidden=False) if field.name not in ['coverages', 'discounts', 'surcharges', 'id', 'CreateTime', 'UpdateTime',
+                                                    'OpenBookInd', 'OpenBookStartDate', 'CloseBookEndDate']]
     form = ProductFilterForm(request.GET or None)
     objectsall = []
     objectsall = Model.objects.none()
@@ -122,7 +123,7 @@ def viewProduct(request):
 
         objectsall = Product.objects.filter(**filter_params)
 
-    paginator = Paginator(objectsall, 1)
+    paginator = Paginator(objectsall, 5)
 
     page = request.GET.get('page')
     try:
@@ -142,7 +143,26 @@ def viewProduct(request):
         'surcharges': 'SurchargeName',
 
     }
-    return render(request, 'productconfigurator/viewproduct.html', context)
+    return render(request, 'productconfigurator/filterproduct.html', context)
+
+
+def viewProduct(request, product_id):
+    try:
+        Model = Product
+        model_fields = [
+            field.name for field in Model._meta.get_fields(include_hidden=False)]
+        object = get_object_or_404(Product, pk=product_id)
+        context = {
+            'object': object,
+            'model_fields': model_fields,
+            'title': 'View Product',
+            'coverages': 'CoverageName',
+            'discounts': 'DiscountName',
+            'surcharges': 'SurchargeName',
+        }
+        return render(request, 'productconfigurator/viewproduct.html', context)
+    except Exception as err:
+        return render(request, 'error.html', {'message': err})
 
 
 def deleteProduct(request, product_id):
@@ -151,7 +171,7 @@ def deleteProduct(request, product_id):
 
         if request.method == 'POST':
             product.delete()
-            return redirect('viewproduct')
+            return redirect('filterproduct')
 
         return render(request, 'productconfigurator/deleteproduct.html', {
             'product': product,
@@ -170,7 +190,7 @@ def cloneProduct(request, product_id):
             product_form = ProductForm(request.POST, instance=product)
             if product_form.is_valid():
                 cloned_product = product_form.save()
-                return redirect('viewproduct')
+                return redirect('filterproduct')
 
         product_form = ProductForm(instance=product)
 

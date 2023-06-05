@@ -1,28 +1,30 @@
-# # models.py
-# from django.db import models
+# models.py
+from django.db import models
 
 
-# class Rule(models.Model):
-#     field = models.CharField(max_length=255)
-#     operator = models.CharField(max_length=255)
-#     value = models.CharField(max_length=255)
+class Rule(models.Model):
+    Rulefield = models.CharField(max_length=255)
+    Ruleoperator = models.CharField(max_length=255)
+    Rulevalue = models.CharField(max_length=255)
+    RuleGroup = models.ForeignKey('RuleGroup', on_delete=models.CASCADE)
 
 
-# class RuleGroup(models.Model):
-#     operator = models.CharField(max_length=255, blank=True)
-#     rules = models.ManyToManyField(Rule)
+class RuleGroup(models.Model):
+    RuleGroupOperator = models.CharField(max_length=255, blank=True)
+    Rules = models.ManyToManyField(Rule)
+    Ruleset = models.ForeignKey('RuleSet', on_delete=models.CASCADE)
 
 
-# class RuleSet(models.Model):
-#     name = models.CharField(max_length=255)
-#     description = models.TextField()
-#     level = models.CharField(max_length=255)
-#     operator = models.CharField(max_length=255, blank=True)
-#     groups = models.ManyToManyField(RuleGroup)
+class Action(models.Model):
+    ActionType = models.CharField(max_length=255)
+    ActionMessage = models.CharField(max_length=255, blank=True)
+    Ruleset = models.ForeignKey('RuleSet', on_delete=models.CASCADE)
 
 
-# class Action(models.Model):
-#     rule_set = models.ForeignKey(
-#         RuleSet, on_delete=models.CASCADE, related_name='actions')
-#     type = models.CharField(max_length=255)
-#     record = models.CharField(max_length=255, blank=True)
+class RuleSet(models.Model):
+    RulesetName = models.CharField(max_length=255)
+    RulesetDescription = models.TextField()
+    RulesetLevel = models.CharField(max_length=255)
+    RulesetOperator = models.CharField(max_length=255, blank=True)
+    Groups = models.ManyToManyField(RuleGroup)
+    Actions = models.ManyToManyField(Action)

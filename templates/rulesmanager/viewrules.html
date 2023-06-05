@@ -1,0 +1,41 @@
+{% extends 'body.html' %} {% load static %} {% block title %}Add {{ modelName }}{% endblock %} {% load crispy_forms_tags %}
+{% block sidebarcontent %} 
+    {% include 'rulesmanager/sidebar.html' %}
+{% endblock  %}
+
+{% block maincontent %} {% if request.user.is_authenticated %}
+<div class="container">
+    
+
+    <h1>RuleSet Details</h1>
+<p>Name: {{ ruleset.RulesetName }}</p>
+<p>Description: {{ ruleset.RulesetDescription }}</p>
+<p>Level: {{ ruleset.RulesetLevel }}</p>
+<p>Operator: {{ ruleset.RulesetOperator }}</p>
+
+<h2>Rule Groups:</h2>
+<ul>
+  {% for group in ruleset.Groups.all %}
+    <li>Operator: {{ group.RuleGroupOperator }}</li>
+    <ul>
+      {% for rule in group.Rules.all %}
+        <li>Field: {{ rule.Rulefield }}</li>
+        <li>Operator: {{ rule.Ruleoperator }}</li>
+        <li>Value: {{ rule.Rulevalue }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+</ul>
+
+<h2>Actions:</h2>
+<ul>
+  {% for action in ruleset.Actions.all %}
+    <li>Type: {{ action.ActionType }}</li>
+    <li>Message: {{ action.ActionMessage }}</li>
+  {% endfor %}
+</ul>
+
+</div>
+{%else%}
+Please Login to access this 
+{% endif %} {% endblock %} {% block js %} {% endblock js %}
