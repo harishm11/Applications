@@ -196,4 +196,4 @@ def openexhibit(request):
             {'Error': err}), content_type='application/json')
         response.status_code = 400
         return response
-<<<<<<< HEAD
+
