@@ -8,3 +8,4 @@ db.sqlite3
 **/migrations/
 .DS_Store
 uploads/
+systemtables.json
