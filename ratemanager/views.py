@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 import os
 import pandas as pd
 from myproj.settings import BASE_DIR
@@ -301,14 +301,15 @@ def viewRB(request):
 def viewExhibits(request, rbID):
     options = ['createRB', 'viewRB']
     appLabel = 'ratemanager'
+    selected = {k: v[0] for k, v in dict(request.POST).items()}
+    SelectedRB = Ratebooks.objects.get(pk=rbID)
+    Query = Q()
+    Query &= Q(Ratebook=SelectedRB)
     if request.method == 'GET':
-        filteredExhibits = AllExhibits.objects.filter().values_list()
+        filteredExhibits = AllExhibits.objects.filter(Query).values_list()
         fields = [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]
         exhibitForm = SelectExhibitForm
     if request.method == 'POST':
-        selected = {k: v[0] for k, v in dict(request.POST).items()}
-        Query = Q()
-        Query &= Q(Ratebook_id=rbID)
         if selected.get('Exhibit') != '':
             Query &= Q(Exhibit=selected.get('Exhibit'))
         filteredExhibits = AllExhibits.objects.filter(Query).values_list()
@@ -373,4 +374,3 @@ def openexhibit(request):
             {'Error': err}), content_type='application/json')
         response.status_code = 400
         return response
-

@@ -9,8 +9,8 @@
     {% csrf_token %}
     {{ exhibitForm.as_table }}
 </form>
-<div class="container">          
-    <table class="table table-responsive table-borderd">
+<div class="container table-responsive">          
+    <table class="table table-condensed table-borderd">
       <thead>
         <tr>
           {% for field in fields %}
