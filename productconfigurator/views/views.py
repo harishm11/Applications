@@ -15,7 +15,8 @@ from productconfigurator.forms import *
 coverage = apps.get_model('systemtables', 'coverage')
 discount = apps.get_model('systemtables', 'discount')
 surcharge = apps.get_model('systemtables', 'surcharge')
-
+options = ['createproduct', 'filterproduct']
+appLabel = 'productconfigurator'
 # def productconfigurator(request):
 #     options = []
 #     for model in apps.get_app_config('productconfigurator').get_models():
@@ -25,9 +26,7 @@ surcharge = apps.get_model('systemtables', 'surcharge')
 
 
 def productconfigurator(request):
-
-    view_functions = ['createproduct', 'filterproduct']
-    context = {'options': view_functions, 'appLabel': 'productconfigurator'}
+    context = {'options': options, 'appLabel': appLabel}
     return render(request, 'productconfigurator/home.html', context)
 
 
@@ -42,6 +41,7 @@ def getModelNames(appLabel):
 
 def createProduct(request):
     try:
+
         product_created = False
         created_product = None
 
@@ -58,19 +58,20 @@ def createProduct(request):
 
         else:
             product_form = ProductForm()
+        context = {'options': options, 'appLabel': appLabel,
+                   'product_form': product_form,
+                   'product_created': product_created,
+                   'created_product': created_product,
+                   'title': 'Create Product'}
 
-        return render(request, 'productconfigurator/createproduct.html', {
-            'product_form': product_form,
-            'product_created': product_created,
-            'created_product': created_product,
-            'title': 'Create Product'
-        })
+        return render(request, 'productconfigurator/createproduct.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
 
 def updateProduct(request, product_id):
     try:
+
         product_updated = False
         updated_product = None
         selected_coverages = []
@@ -97,20 +98,21 @@ def updateProduct(request, product_id):
                 request.POST or None, instance=product)
 
             updated_product = product
+        context = {'options': options, 'appLabel': appLabel,
+                   'product_form': product_form,
+                   'product_updated': product_updated,
+                   'updated_product': updated_product,
+                   'title': 'Update Product'}
 
-        return render(request, 'productconfigurator/updateproduct.html', {
-            'product_form': product_form,
-            'product_updated': product_updated,
-            'updated_product': updated_product,
-            'title': 'Update Product'
-        })
+        return render(request, 'productconfigurator/updateproduct.html', context
+                      )
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
 
 def filterProduct(request):
+
     Model = Product
-    # model_fields = [field.name for field in Model._meta.fields]
     model_fields = [field.name for field in Model._meta.get_fields(
         include_hidden=False) if field.name not in ['coverages', 'discounts', 'surcharges', 'id', 'CreateTime', 'UpdateTime',
                                                     'OpenBookInd', 'OpenBookStartDate', 'CloseBookEndDate']]
@@ -134,6 +136,8 @@ def filterProduct(request):
         objects = paginator.page(paginator.num_pages)
 
     context = {
+        'options': options,
+        'appLabel': appLabel,
         'form': form,
         'objects': objects,
         'model_fields': model_fields,
@@ -148,11 +152,14 @@ def filterProduct(request):
 
 def viewProduct(request, product_id):
     try:
+
         Model = Product
         model_fields = [
             field.name for field in Model._meta.get_fields(include_hidden=False)]
         object = get_object_or_404(Product, pk=product_id)
         context = {
+            'options': options,
+            'appLabel': appLabel,
             'object': object,
             'model_fields': model_fields,
             'title': 'View Product',
@@ -167,6 +174,7 @@ def viewProduct(request, product_id):
 
 def deleteProduct(request, product_id):
     try:
+
         product = get_object_or_404(Product, pk=product_id)
 
         if request.method == 'POST':
@@ -174,6 +182,7 @@ def deleteProduct(request, product_id):
             return redirect('filterproduct')
 
         return render(request, 'productconfigurator/deleteproduct.html', {
+            'options': options,
             'product': product,
             'title': 'Delete Product'
         })
@@ -183,6 +192,7 @@ def deleteProduct(request, product_id):
 
 def cloneProduct(request, product_id):
     try:
+
         product = get_object_or_404(Product, pk=product_id)
 
         if request.method == 'POST':
@@ -193,11 +203,15 @@ def cloneProduct(request, product_id):
                 return redirect('filterproduct')
 
         product_form = ProductForm(instance=product)
-
-        return render(request, 'productconfigurator/cloneproduct.html', {
+        context = {
+            'options': options,
+            'appLabel': appLabel,
             'product_form': product_form,
             'product': product,
             'title': 'Clone Product'
-        })
+        }
+        return render(request, 'productconfigurator/cloneproduct.html', context
+
+                      )
     except Exception as err:
         return render(request, 'error.html', {'message': err})
