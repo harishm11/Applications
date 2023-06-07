@@ -95,12 +95,14 @@ class ProductFilterForm(forms.Form):
     Carrier = forms.ModelChoiceField(
         queryset=carrier.objects.all(),
         required=False,
-        label='Carrier'
+        label='Carrier',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
     StateCode = forms.ModelChoiceField(
         queryset=state.objects.all(),
         required=False,
-        label='StateCode'
+        label='StateCode',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     # UwCompany = forms.ModelChoiceField(
@@ -112,7 +114,8 @@ class ProductFilterForm(forms.Form):
     LineOfBusiness = forms.ModelChoiceField(
         queryset=lineofbusiness.objects.all(),
         required=False,
-        label='LobName'
+        label='LobName',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     PolicyType = forms.ModelChoiceField(
@@ -125,17 +128,20 @@ class ProductFilterForm(forms.Form):
     PolicySubType = forms.ModelChoiceField(
         queryset=policysubtype.objects.none(),
         required=False,
-        label='PolicySubType'
+        label='PolicySubType',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     ProductCode = forms.ModelChoiceField(
         queryset=productcode.objects.all(),
         required=False,
-        label='ProductCode'
+        label='ProductCode',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     PolicySubType = forms.ModelChoiceField(
         queryset=policysubtype.objects.none(),
         required=False,
-        label='PolicySubType'
+        label='PolicySubType',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
