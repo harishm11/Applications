@@ -2,12 +2,15 @@ from django.shortcuts import render
 from django.apps import apps
 from .forms import *
 
+options = []
+appLabel = 'systemtables'
+
 
 def systemtables(request):
     tables = []
     for model in apps.get_app_config('systemtables').get_models():
         tables.append(model.__name__)
-    context = {'tables': tables, 'appLabel': 'systemtables'}
+    context = {'tables': tables, 'appLabel': appLabel}
     return render(request, 'systemtables/home.html', context)
 
 
