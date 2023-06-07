@@ -57,7 +57,7 @@ def datatable(request, appLabel, modelName):
 
 
         }
-        context.update(getModelNames(appLabel))
+        # context.update(getModelNames(appLabel))
 
         return render(request, 'datatable/datatable.html', context)
     except Exception as err:
@@ -94,7 +94,7 @@ def addObject(request, appLabel, modelName):
             'modelName': modelName,
             'verboseNamePlural_value': verboseNamePlural,
         }
-        context.update(getModelNames(appLabel))
+        # context.update(getModelNames(appLabel))
 
         return render(request, 'datatable/add.html', context)
     except Exception as err:
@@ -149,7 +149,7 @@ def deleteObject(request, appLabel, modelName, object_id):
             'modelName': modelName,
             'verboseNamePlural_value': verboseNamePlural,
         }
-        context.update(getModelNames(appLabel))
+        # context.update(getModelNames(appLabel))
         return render(request, 'datatable/delete.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
@@ -186,7 +186,7 @@ def cloneObject(request, appLabel, modelName, object_id):
             'modelName': modelName,
             'verboseNamePlural_value': verboseNamePlural,
         }
-        context.update(getModelNames(appLabel))
+        # context.update(getModelNames(appLabel))
 
         return render(request, 'datatable/clone.html', context)
     except Exception as err:
@@ -258,7 +258,7 @@ def importCsv(request, appLabel, modelName):
             'modelName': modelName,
             'verboseNamePlural_value': verboseNamePlural,
         }
-        context.update(getModelNames(appLabel))
+        # context.update(getModelNames(appLabel))
         return render(request, 'datatable/importCsv.html', context)
 
     except Exception as err:
