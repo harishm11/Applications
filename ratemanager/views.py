@@ -14,6 +14,7 @@ import sqlalchemy as sa
 from django.db.models import Q
 import traceback
 from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # get models from other apps
 uwCompany = apps.get_model('systemtables', 'uwcompany')
@@ -125,8 +126,15 @@ def loadRBtoDB(request):
                 df['RatingVarName'+str(i)] = var_list[i-1]
             df.rename(columns=rename_col_names, inplace=True)
 
+        def get_table_category(sheet_name):
+            if 'severitybands' in sheet_name.lower() or 'pointsassignment' in sheet_name.lower():
+                return 'Miscellaneous'
+            else:
+                return 'Pricing'
+
         for sheet_name, df in df_sheets.items():
-            # Categorize Tables based on column features
+
+            # Categorize Tables based on column features and type of transformation
             idvars = []
             table_sig = ''
             for i in df.columns:
@@ -148,6 +156,7 @@ def loadRBtoDB(request):
                 create_rate_vars_cols(df, idvars)
                 df.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
                 df['Exhibit'] = sheet_name
+                df['TableCategory'] = get_table_category(sheet_name)
 
                 df = df.astype(str)
                 if not df.empty:
@@ -163,6 +172,7 @@ def loadRBtoDB(request):
                         rate_vars.append(i)
                 create_rate_vars_cols(df, rate_vars)
                 df['Exhibit'] = sheet_name
+                df['TableCategory'] = get_table_category(sheet_name)
 
                 df = df.astype(str)
                 if not df.empty:
@@ -179,6 +189,7 @@ def loadRBtoDB(request):
                 create_rate_vars_cols(df, list(set(df.columns)-set({'Factor'})))
                 df['Exhibit'] = sheet_name
                 df['Coverage'] = 'UMPD'
+                df['TableCategory'] = get_table_category(sheet_name)
 
                 df = df.astype(str)
                 if not df.empty:
@@ -189,6 +200,7 @@ def loadRBtoDB(request):
                 df = df.T.reset_index()
                 df.rename(columns={'index': 'Coverage', 0: 'Factor'}, inplace=True)
                 df['Exhibit'] = sheet_name
+                df['TableCategory'] = get_table_category(sheet_name)
                 df = df.astype(str)
                 if not df.empty:
                     df_out = pd.merge(df_out, df, how='outer')
@@ -203,7 +215,10 @@ def loadRBtoDB(request):
         return df_out
 
     def convertDate(x):
-        return datetime.strptime(x, "%m/%d/%Y").strftime('%Y-%m-%d')
+        if '/' in x:
+            return datetime.strptime(x, "%m/%d/%Y").strftime('%Y-%m-%d')
+        elif '-' in x:
+            return datetime.strptime(x, "%m-%d-%Y").strftime('%Y-%m-%d')
 
     # Insert to DB (kind of validation automatically from the error messages)
     try:
@@ -272,29 +287,32 @@ def viewRB(request):
     options = ['createRB', 'viewRB']
     appLabel = 'ratemanager'
     fields = [f.name for f in Ratebooks._meta.get_fields(include_hidden=False)][1:]
-    if request.method == 'GET':
-        viewForm = ViewRBForm
-        filteredRatebooks = Ratebooks.objects.filter()
-    if request.method == 'POST':
-        selected = {k: v[0] for k, v in dict(request.POST).items()}
-
-        rbQuery = Q()
-        if selected.get('Carrier') != '':
-            rbQuery &= Q(Carrier_id=selected.get('Carrier'))
-        if selected.get('StateCode') != '':
-            rbQuery &= Q(State_id=selected.get('StateCode'))
-        if selected.get('UwCompany') != '':
-            rbQuery &= Q(UwCompany_id=selected.get('UwCompany'))
-        if selected.get('LineOfBusiness') != '':
-            rbQuery &= Q(LoBusiness_id=selected.get('LineOfBusiness'))
-        if selected.get('PolicyType') != '':
-            rbQuery &= Q(PolicyType_id=selected.get('PolicyType'))
-        if selected.get('PolicySubType') != '':
-            rbQuery &= Q(PolicySubType_id=selected.get('PolicySubType'))
-        if selected.get('ProductCode') != '':
-            rbQuery &= Q(ProductCode_id=selected.get('ProductCode'))
-        filteredRatebooks = Ratebooks.objects.filter(rbQuery)
-        viewForm = ViewRBForm(initial=selected)
+    selected = {k: v[0] for k, v in dict(request.POST).items()}
+    rbQuery = Q()
+    if selected.get('Carrier') != '' and selected.get('Carrier') is not None:
+        rbQuery &= Q(Carrier_id=selected.get('Carrier'))
+    if selected.get('StateCode') != '' and selected.get('StateCode') is not None:
+        rbQuery &= Q(State_id=selected.get('StateCode'))
+    if selected.get('UwCompany') != '' and selected.get('UwCompany') is not None:
+        rbQuery &= Q(UwCompany_id=selected.get('UwCompany'))
+    if selected.get('LineOfBusiness') != '' and selected.get('LineOfBusiness') is not None:
+        rbQuery &= Q(LoBusiness_id=selected.get('LineOfBusiness'))
+    if selected.get('PolicyType') != '' and selected.get('PolicyType') is not None:
+        rbQuery &= Q(PolicyType_id=selected.get('PolicyType'))
+    if selected.get('PolicySubType') != '' and selected.get('PolicySubType') is not None:
+        rbQuery &= Q(PolicySubType_id=selected.get('PolicySubType'))
+    if selected.get('ProductCode') != '' and selected.get('ProductCode') is not None:
+        rbQuery &= Q(ProductCode_id=selected.get('ProductCode'))
+    filteredRatebooks = Ratebooks.objects.filter(rbQuery)
+    page_number = request.GET.get('page')
+    paginator = Paginator(filteredRatebooks, 50)
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+    viewForm = ViewRBForm(initial=selected)
     return render(request, "ratemanager/ratebookmanager/view_rb.html", locals())
 
 
@@ -302,19 +320,24 @@ def viewExhibits(request, rbID):
     options = ['createRB', 'viewRB']
     appLabel = 'ratemanager'
     selected = {k: v[0] for k, v in dict(request.POST).items()}
+    if request.method == 'GET':
+        selected['Exhibit'] = ''
     SelectedRB = Ratebooks.objects.get(pk=rbID)
     Query = Q()
     Query &= Q(Ratebook=SelectedRB)
-    if request.method == 'GET':
-        filteredExhibits = AllExhibits.objects.filter(Query).values_list()
-        fields = [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]
-        exhibitForm = SelectExhibitForm
-    if request.method == 'POST':
-        if selected.get('Exhibit') != '':
-            Query &= Q(Exhibit=selected.get('Exhibit'))
-        filteredExhibits = AllExhibits.objects.filter(Query).values_list()
-        fields = [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]
-        exhibitForm = SelectExhibitForm(initial=selected)
+    if selected.get('Exhibit') != '':
+        Query &= Q(Exhibit=selected.get('Exhibit'))
+    filteredExhibits = AllExhibits.objects.filter(Query).values_list()
+    fields = [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]
+    exhibitForm = SelectExhibitForm(initial=selected)
+    page_number = request.GET.get('page')
+    paginator = Paginator(filteredExhibits, 1000)
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
     return render(request, "ratemanager/ratebookmanager/view_exhibits.html", locals())
 
 

@@ -55,6 +55,11 @@ class Ratebooks(models.Model):
         null=False,
         default=None
         )
+    RatebookName = models.CharField(
+        max_length=100,
+        null=False,
+        default=None
+        )
     RatebookRevisionType = models.CharField(
         max_length=10,
         null=False,
@@ -103,6 +108,10 @@ class Ratebooks(models.Model):
         default=None
         )
 
+    def save(self, *args, **kwargs):
+        self.RatebookName = str(self.State) + str(self.ProductCode)
+        super(Ratebooks, self).save(*args, **kwargs)
+
 
 class AllExhibits (models.Model):
     id = models.AutoField(
@@ -114,6 +123,7 @@ class AllExhibits (models.Model):
         Ratebooks,
         on_delete=models.CASCADE
         )
+    TableCategory = models.CharField(max_length=100, null=False)
     Coverage = models.CharField(max_length=100, null=False)
     Exhibit = models.CharField(max_length=100, null=False)
     Factor = models.CharField(max_length=100, null=False)
