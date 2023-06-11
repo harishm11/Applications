@@ -77,9 +77,23 @@ class SelectExhibitForm(forms.ModelForm):
         model = allexhibits
         fields = ()
 
+    TableCategory = forms.ModelChoiceField(
+        queryset=allexhibits.objects.filter().values_list('TableCategory', flat=True).distinct(),
+        label='Table Category',
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
+    )
+
     Exhibit = forms.ModelChoiceField(
         queryset=allexhibits.objects.filter().values_list('Exhibit', flat=True).order_by('Exhibit').distinct(),
         label='Exhibit Name',
         required=False,
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.initial.get('TableCategory') != '':
+            self.fields['Exhibit'].queryset = allexhibits.objects.\
+                filter(TableCategory=self.initial.get('TableCategory')).\
+                values_list('Exhibit', flat=True).order_by('Exhibit').distinct()
