@@ -54,7 +54,7 @@
     <thead>
       <tr>
         <th>Ratebook Name</th>
-        <th>ID</th>
+        <th>Ratebook ID</th>
         <th>Ratebook Version</th>
         <th>New Business Effective Date</th>
         <th>New Business Expiry Date</th>
@@ -69,11 +69,11 @@
         <th>Ratebook Change Type</th>
         <th>Carrier</th>
         <th>State</th>
-        <th>LoBusiness</th>
-        <th>UwCompany</th>
-        <th>PolicyType</th>
-        <th>PolicySubType</th>
-        <th>ProductCode</th>
+        <th>Line of Business</th>
+        <th>UW Company</th>
+        <th>Policy Type</th>
+        <th>Policy SubType</th>
+        <th>Product Code</th>
       </tr>
     </thead>
     <tbody>
@@ -81,7 +81,7 @@
     {% for obj in filteredRatebooks %}
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewExhibits/{{ obj.id }}/';">
         <td>{{obj.RatebookName}}</td>
-        <td>{{obj.id}}</td>
+        <td>{{obj.RatebookID}}</td>
         <td>{{obj.RatebookVersion}}</td>
         <td>{{obj.NewBusinessEffectiveDate}}</td>
         <td>{{obj.NewBusinessExpiryDate}}</td>
@@ -96,8 +96,8 @@
         <td>{{obj.RatebookChangeType}}</td>
         <td>{{obj.Carrier}}</td>
         <td>{{obj.State}}</td>
-        <td>{{obj.LoBusiness}}</td>
-        <td>{{obj.UwCompany}}</td>
+        <td>{{obj.LineofBusiness}}</td>
+        <td>{{obj.UWCompany}}</td>
         <td>{{obj.PolicyType}}</td>
         <td>{{obj.PolicySubType}}</td>
         <td>{{obj.ProductCode}}</td>

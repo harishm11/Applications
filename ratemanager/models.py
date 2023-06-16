@@ -10,6 +10,12 @@ class Ratebooks(models.Model):
         null=False,
         auto_created=True
         )
+    RatebookID = models.CharField(
+        max_length=50,
+        blank=True,
+        null=False,
+        default=None
+        )
     Carrier = models.ForeignKey(
         carrier.Carrier,
         on_delete=models.CASCADE,
@@ -20,12 +26,12 @@ class Ratebooks(models.Model):
         on_delete=models.CASCADE,
         default=None
         )
-    LoBusiness = models.ForeignKey(
+    LineofBusiness = models.ForeignKey(
         lineofbusiness.LineOfBusiness,
         on_delete=models.CASCADE,
         default=None
         )
-    UwCompany = models.ForeignKey(
+    UWCompany = models.ForeignKey(
         uwcompany.Uwcompany,
         on_delete=models.CASCADE,
         default=None
@@ -47,8 +53,8 @@ class Ratebooks(models.Model):
         )
     ProjectID = models.CharField(
         max_length=50,
-        null=True,
         blank=True,
+        null=False,
         default=None
         )
     RatebookVersion = models.FloatField(
@@ -109,7 +115,7 @@ class Ratebooks(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        self.RatebookName = str(self.State) + str(self.ProductCode)
+        self.RatebookName = str(self.State) + '_' + str(self.ProductCode)
         super(Ratebooks, self).save(*args, **kwargs)
 
 

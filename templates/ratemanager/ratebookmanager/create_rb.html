@@ -1,5 +1,5 @@
 {% extends 'body.html' %} {% load static %}
-{% block title %} View Ratebook {% endblock %}
+{% block title %} Create Ratebook {% endblock %}
 {% block sidebarcontent %} 
   {% include 'ratemanager/sidebar.html' %} 
 {% endblock  %}
@@ -13,28 +13,36 @@
     {% if not file_uploaded %}
     <div>
       <form
+        class="form-control"
         method="post"
         enctype="multipart/form-data"
         action="/ratemanager/uploadRB/"
         id="uploadform"
       >
-        {% csrf_token%}
-      <div class="mb-3">
-        <label for="uploadform"> Select and upload an Excel file to create a new ratebook: </label>
-        <input
-          type="file"
-          name="file"
-          class="form-control-file"
-          accept=".xlsx"
-          required
-        />
-        <input
-          type="submit"
-          name="submit"
-          value="Upload & Validate"
-          class="btn btn-primary mb-3"
-        />
-      </div>
+          {% csrf_token%}
+          {{ form.RatebookCreationType.label }} :&emsp; {{ form.RatebookCreationType }}
+          <br><br>
+        <div id="RatebookUpdateType">
+          {{ form.RatebookUpdateType.label }} :&emsp; {{ form.RatebookUpdateType }}
+        </div>
+        <br>
+        <div class="mb-3">
+          <label for="uploadform"> Select and upload the Excel file: </label>
+          <input
+            type="file"
+            name="file"
+            class="form-control-file"
+            accept=".xlsx"
+            required
+          />
+          <input
+            type="submit"
+            name="submit"
+            value="Upload & Validate"
+            class="btn btn-primary mb-3"
+            action="/ratemanager/uploadRB/"
+          />
+        </div>
       </form>
     </div>
     {% endif %}
@@ -47,5 +55,17 @@
 
   {% endif %}
 </div>
-
+<script>
+    function check_field_value() {
+        if($(this).val() != 'update') {  
+            $('#RatebookUpdateType').hide();
+        } else {
+            $('#RatebookUpdateType').show();
+        }
+    }
+    $(document).ready(function() {
+        $('#RatebookCreationType').change(check_field_value);
+        check_field_value.call($('#RatebookCreationType').get(0));
+    });
+</script>
 {% endblock %}
