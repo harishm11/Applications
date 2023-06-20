@@ -1,6 +1,6 @@
 # from django.contrib import admin
 from django.urls import path
-from ratemanager import views
+from ratemanager.views import viewRB, views, createRB
 
 
 urlpatterns = [
@@ -9,9 +9,9 @@ urlpatterns = [
     path('openfiling/<str:data>/', views.openfiling, name="openfiling"),
     path('openexhibit/', views.openexhibit, name="openexhibit"),
     path('exhibitlist/', views.exhibitlist, name="exhibitlist"),
-    path('createRB/', views.createRB, name="createRB"),
-    path('uploadRB/', views.uploadRB, name="uploadRB"),
-    path('loadRBtoDB/', views.loadRBtoDB, name="loadRBtoDB"),
-    path('viewRB/', views.viewRB, name="viewRB"),
-    path('viewExhibits/<str:rbID>/', views.viewExhibits, name='viewExhibits')
+    path('createRB/', createRB.createRB, name="createRB"),
+    path('uploadRB/', createRB.uploadRB, name="uploadRB"),
+    path('loadRBtoDB/', createRB.loadRBtoDB, name="loadRBtoDB"),
+    path('viewRB/', viewRB.viewRB, name="viewRB"),
+    path('viewExhibits/<str:rbID>/', viewRB.viewExhibits, name='viewExhibits')
 ]
