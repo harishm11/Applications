@@ -36,14 +36,14 @@ class ViewRBForm(forms.ModelForm):
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
-    UwCompany = forms.ModelChoiceField(
+    UWCompany = forms.ModelChoiceField(
         queryset=uwCompany.objects.all().distinct().order_by('CompanyName'),
         label='UW Company Name',
         required=False,
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
-    LineOfBusiness = forms.ModelChoiceField(
+    LineofBusiness = forms.ModelChoiceField(
         queryset=lineOfBusiness.objects.all().distinct(),
         label='Line of Business',
         required=False,
@@ -77,9 +77,46 @@ class SelectExhibitForm(forms.ModelForm):
         model = allexhibits
         fields = ()
 
+    TableCategory = forms.ModelChoiceField(
+        queryset=allexhibits.objects.filter().values_list('TableCategory', flat=True).distinct(),
+        label='Table Category',
+        required=False,
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
+    )
+
     Exhibit = forms.ModelChoiceField(
         queryset=allexhibits.objects.filter().values_list('Exhibit', flat=True).order_by('Exhibit').distinct(),
         label='Exhibit Name',
         required=False,
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.initial.get('TableCategory') != '':
+            self.fields['Exhibit'].queryset = allexhibits.objects.\
+                filter(TableCategory=self.initial.get('TableCategory'),
+                       Ratebook=self.initial.get('Ratebook')).\
+                values_list('Exhibit', flat=True).order_by('Exhibit').distinct()
+
+
+class UpdateForm(forms.Form):
+    RatebookCreationType = forms.ChoiceField(
+        label='Do you want to create a New Ratebook or Update Existing One?',
+        choices=(
+            ('new', 'New Ratebook'),
+            ('update', 'Update Existing')
+            ),
+        required=True,
+        widget=forms.Select(attrs={'id': 'RatebookCreationType'})
+        )
+
+    RatebookUpdateType = forms.ChoiceField(
+        label='Is it a minor update or major update?',
+        choices=(
+            ('minor', 'Minor'),
+            ('major', 'Major')
+            ),
+        required=True,
+        widget=forms.Select(attrs={'id': 'RatebookUpdateType'})
+        )
