@@ -3,10 +3,11 @@ from django.shortcuts import render
 from ratemanager.models import Ratebooks, AllExhibits
 from ratemanager.forms import ViewRBForm, SelectExhibitForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import ratemanager.views.HelperFunctions as helperfuncs
 
 
 def viewRB(request):
-    options = ['createRB', 'viewRB']
+    options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
     fields = [f.name for f in Ratebooks._meta.get_fields(include_hidden=False)][1:]
     selected = {k: v[0] for k, v in dict(request.POST).items()}
@@ -38,19 +39,19 @@ def viewRB(request):
     return render(request, "ratemanager/ratebookmanager/view_rb.html", locals())
 
 
-def viewExhibits(request, rbID):
-    options = ['createRB', 'viewRB']
+def viewExhibits(request, rbID, rbVer):
+    options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
     selected = {k: v[0] for k, v in dict(request.POST).items()}
     if request.method == 'GET':
         selected['Exhibit'] = ''
-    SelectedRB = Ratebooks.objects.get(pk=rbID)
-    selected['Ratebook'] = SelectedRB
+    selected['RatebookID'] = rbID
     Query = Q()
-    Query &= Q(Ratebook=SelectedRB)
+    Query &= Q(RatebookID=rbID)
     if selected.get('Exhibit') != '':
         Query &= Q(Exhibit=selected.get('Exhibit'))
-    filteredExhibits = AllExhibits.objects.filter(Query).order_by('id').values_list()
+    filteredExhibits = helperfuncs.fetchRatebookSpecificVersion(rbID=rbID, rbVersion=rbVer).\
+        order_by('id').values_list()
     fields = [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]
     exhibitForm = SelectExhibitForm(initial=selected)
     page_number = request.GET.get('page')

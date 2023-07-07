@@ -101,16 +101,6 @@ class SelectExhibitForm(forms.ModelForm):
 
 
 class UpdateForm(forms.Form):
-    RatebookCreationType = forms.ChoiceField(
-        label='Do you want to create a New Ratebook or Update Existing One?',
-        choices=(
-            ('new', 'New Ratebook'),
-            ('update', 'Update Existing')
-            ),
-        required=True,
-        widget=forms.Select(attrs={'id': 'RatebookCreationType'})
-        )
-
     RatebookUpdateType = forms.ChoiceField(
         label='Is it a minor update or major update?',
         choices=(

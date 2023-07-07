@@ -79,7 +79,7 @@
     <tbody>
     {% if filteredRatebooks %}  
     {% for obj in filteredRatebooks %}
-      <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewExhibits/{{ obj.id }}/';">
+      <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewExhibits/{{ obj.RatebookID }}/{{ obj.RatebookVersion }}';">
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
         <td>{{obj.RatebookVersion}}</td>

@@ -5,11 +5,6 @@ from systemtables.models import \
 
 
 class Ratebooks(models.Model):
-    id = models.AutoField(
-        primary_key=True,
-        null=False,
-        auto_created=True
-        )
     RatebookID = models.CharField(
         max_length=50,
         blank=True,
@@ -86,7 +81,7 @@ class Ratebooks(models.Model):
         default=None
         )
     NewBusinessExpiryDate = models.DateField(
-        null=False,
+        null=True,
         default=None
         )
     RenewalEffectiveDate = models.DateField(
@@ -94,7 +89,7 @@ class Ratebooks(models.Model):
         default=None
         )
     RenewalExpiryDate = models.DateField(
-        null=False,
+        null=True,
         default=None
         )
     ActivationDate = models.DateField(
@@ -113,6 +108,10 @@ class Ratebooks(models.Model):
         null=False,
         default=None
         )
+    CreationDateTime = models.DateTimeField(
+        null=False,
+        default=None
+        )
 
     def save(self, *args, **kwargs):
         self.RatebookName = str(self.State) + '_' + str(self.ProductCode)
@@ -120,14 +119,19 @@ class Ratebooks(models.Model):
 
 
 class AllExhibits (models.Model):
-    id = models.AutoField(
-        primary_key=True,
-        null=False,
-        auto_created=True
-        )
     Ratebook = models.ForeignKey(
         Ratebooks,
         on_delete=models.CASCADE
+        )
+    RatebookID = models.CharField(
+        max_length=50,
+        blank=True,
+        null=False,
+        default=None
+        )
+    RatebookVersion = models.FloatField(
+        null=False,
+        default=None
         )
     TableCategory = models.CharField(max_length=100, null=False)
     Coverage = models.CharField(max_length=100, null=False)
@@ -137,3 +141,53 @@ class AllExhibits (models.Model):
     RatingVarName2 = models.CharField(max_length=100, null=True)
     RatingVarValue1 = models.CharField(max_length=100, null=True)
     RatingVarValue2 = models.CharField(max_length=100, null=True)
+    '''
+    RatingVarName3 = models.CharField(max_length=100, null=True)
+    RatingVarName4 = models.CharField(max_length=100, null=True)
+    RatingVarValue3 = models.CharField(max_length=100, null=True)
+    RatingVarValue4 = models.CharField(max_length=100, null=True)
+    RatingVarName5 = models.CharField(max_length=100, null=True)
+    RatingVarName6 = models.CharField(max_length=100, null=True)
+    RatingVarValue5 = models.CharField(max_length=100, null=True)
+    RatingVarValue6 = models.CharField(max_length=100, null=True)
+    RatingVarName7 = models.CharField(max_length=100, null=True)
+    RatingVarName7 = models.CharField(max_length=100, null=True)
+    RatingVarValue8 = models.CharField(max_length=100, null=True)
+    RatingVarValue8 = models.CharField(max_length=100, null=True)
+    '''
+    NewBusinessEffectiveDate = models.DateField(
+        null=False,
+        default=None
+        )
+    NewBusinessExpiryDate = models.DateField(
+        null=True,
+        default=None
+        )
+    RenewalEffectiveDate = models.DateField(
+        null=False,
+        default=None
+        )
+    RenewalExpiryDate = models.DateField(
+        null=True,
+        default=None
+        )
+    ActivationDate = models.DateField(
+        null=False,
+        default=None
+        )
+    ActivationTime = models.TimeField(
+        null=False,
+        default=None
+        )
+    MigrationDate = models.DateField(
+        null=False,
+        default=None
+        )
+    MigrationTime = models.TimeField(
+        null=False,
+        default=None
+        )
+    CreationDateTime = models.DateTimeField(
+        null=False,
+        default=None
+        )
