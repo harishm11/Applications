@@ -7,7 +7,7 @@ from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
 from django.db.models.expressions import Window
 from django.db.models.functions import RowNumber
-from django.db.models import F
+from django.db.models import Q, F
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB"]
 
@@ -261,3 +261,24 @@ def fetchRatebookSpecificVersion(rbID, rbVersion):
     )
     current_version = sorted_partitions.filter(sort_id=1)
     return current_version
+
+
+def fetchRatebookbyDate(rbID, qDate):
+    '''
+    Select RATEBOOKID from Ratemanager_allexhibits
+    where NB Effective <= current date
+    and RN Effective Dt < = current Date
+    and (( NB expiry and rn Expiry  is null)
+    or (NB expiry and RN expiry date > current date) )
+    and activation date <= current date
+    '''
+    filteredQueryResults = AllExhibits.objects.filter(RatebookID=rbID).filter(
+        Q(NewBusinessEffectiveDate__lte=qDate)
+        & Q(RenewalEffectiveDate__lt=qDate)
+        & (
+            (Q(NewBusinessExpiryDate__isnull=True) & Q(RenewalExpiryDate__isnull=True))
+            | (Q(NewBusinessExpiryDate__gt=qDate) & Q(RenewalExpiryDate__gt=qDate))
+        )
+        & Q(ActivationDate__lte=qDate)
+    )
+    return filteredQueryResults

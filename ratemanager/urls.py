@@ -2,10 +2,8 @@
 from django.urls import path
 from ratemanager.views import viewRB, views, createRB, updateRB
 
-
 urlpatterns = [
-    path('', views.rateManager,
-         name='ratemanager'),
+    path('', views.rateManager, name='ratemanager'),
     path('openfiling/<str:data>/', views.openfiling, name="openfiling"),
     path('openexhibit/', views.openexhibit, name="openexhibit"),
     path('exhibitlist/', views.exhibitlist, name="exhibitlist"),
@@ -15,7 +13,10 @@ urlpatterns = [
     path('loadNewRBtoDB/', createRB.loadNewRBtoDB, name="loadNewRBtoDB"),
     # view
     path('viewRB/', viewRB.viewRB, name="viewRB"),
-    path('viewExhibits/<str:rbID>/<str:rbVer>/', viewRB.viewExhibits, name='viewExhibits'),
+    path('viewRBbyVersion/', viewRB.viewRBbyVersion, name="viewRBbyVersion"),
+    path('viewRBbyVersionExhibits/<str:rbID>/<str:rbVer>/', viewRB.viewRBbyVersionExhibits, name='viewRBbyVersionExhibits'),
+    path('viewRBbyDate/', viewRB.viewRBbyDate, name="viewRBbyDate"),
+    path('viewRBbyDateExhibits/<str:rbID>/', viewRB.viewRBbyDateExhibits, name='viewRBbyDateExhibits'),
     # update
     path('updateRB/', updateRB.updateRB, name="updateRB"),
     path('loadUpdatedRB/', updateRB.loadUpdatedRB, name="loadUpdatedRB"),

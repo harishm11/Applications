@@ -6,7 +6,7 @@
 {% load crispy_forms_tags %} 
 {% block maincontent %}
 <!-- Form to select table type and exhibit -->
-<form method="post" action="/ratemanager/viewExhibits/{{ rbID }}/">
+<form method="post" action="/ratemanager/viewRBbyDateExhibits/{{ rbID }}/{{rbVer}}/">
     {% csrf_token %}
     <table class="table">
       {% for field in exhibitForm %}
@@ -45,20 +45,30 @@
     <table id="example" class="table table-condensed cell-border">
       <thead>
         <tr>
-          {% for field in fields %}
-          <th>{{ field }}</th>
-          {% endfor %}
+          <th>RatebookID</th>
+          <th>Coverage</th>
+          <th>Exhibit</th>
+          <th>Factor</th>
+          <th>RatingVarName1</th>
+          <th>RatingVarName2</th>
+          <th>RatingVarValue1</th>
+          <th>RatingVarValue2</th>							
         </tr>
       </thead>
       <tbody>
       {% if page_obj %}  
-      {% for obj in page_obj %}
-        <tr>
-          {% for field_val in obj %}
-          <td>{{ field_val }}</td>
-          {% endfor %}
-        </tr>
-      {% endfor %}
+        {% for obj in page_obj %}
+          <tr>
+            <td>{{obj.RatebookID}}</td>
+            <td>{{obj.Coverage}}</td>
+            <td>{{obj.Exhibit}}</td>
+            <td>{{obj.Factor}}</td>
+            <td>{{obj.RatingVarName1}}</td>
+            <td>{{obj.RatingVarValue1}}</td>
+            <td>{{obj.RatingVarName2}}</td>
+            <td>{{obj.RatingVarValue2}}</td>
+          </tr>
+        {% endfor %}
       {% endif %}
       </tbody>
     </table>
