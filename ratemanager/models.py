@@ -136,7 +136,7 @@ class AllExhibits (models.Model):
     TableCategory = models.CharField(max_length=100, null=False)
     Coverage = models.CharField(max_length=100, null=False)
     Exhibit = models.CharField(max_length=100, null=False)
-    Factor = models.CharField(max_length=100, null=False)
+    Factor = models.CharField(max_length=100, null=True)
     RatingVarName1 = models.CharField(max_length=100, null=True)
     RatingVarName2 = models.CharField(max_length=100, null=True)
     RatingVarValue1 = models.CharField(max_length=100, null=True)

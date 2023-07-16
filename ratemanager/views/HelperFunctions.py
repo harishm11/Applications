@@ -123,8 +123,9 @@ def transformRB(xl_url):
             df_out['RatingVarValue' + str(i)] = None
 
     df_out = df_out[df_out.columns.sort_values().to_list()]
+    df_out = df_out.astype(object).replace('nan', None, regex=True)
     for i in set(df_sheets.keys()) - set(df_out["Exhibit"].unique()):
-        if i != "Ratebook Details":
+        if i != "Ratebook Details" or i != 'Rate Details':
             msgs.append("Unable to transform {} table.".format(i))
 
     return df_out, msgs
@@ -413,7 +414,6 @@ def convert2Df(QuerySet):
         if 'Date' in i or 'Time' in i:
             toDropList.extend([i])
     df = pd.DataFrame.from_records(QuerySet.values())
-    print(df)
     if not df.empty:
         df.drop(columns=toDropList, axis=1, inplace=True)
     return df

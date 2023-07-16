@@ -100,6 +100,10 @@ def loadUpdatedRB(request):
                 msgs.extend(errors)
 
                 oldRB = helperfuncs.fetchRBLatestVersion(rate_details['RatebookID'])
+
+                # filter only for exhibits in the new DF
+                oldRB = oldRB.filter(Exhibit__in=df['Exhibit'].unique())
+
                 oldRB = helperfuncs.convert2Df(oldRB)
                 changes, stats = helperfuncs.dataframe_difference(old_df=oldRB, new_df=df)
                 if stats['isEmpty']:
