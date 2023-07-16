@@ -8,7 +8,7 @@
 {% block maincontent %} 
 <ul>
   {% for table in tables %}
-  <li class="nav-link p-2">
+  <li class="nav-link">
     <a href="/datatable/{{appLabel}}/{{ table }}/">{{ table|capfirst  }}</a>
   </li>
   {% endfor %}

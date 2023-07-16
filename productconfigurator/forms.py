@@ -95,12 +95,14 @@ class ProductFilterForm(forms.Form):
     Carrier = forms.ModelChoiceField(
         queryset=carrier.objects.all(),
         required=False,
-        label='Carrier'
+        label='Carrier',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
     StateCode = forms.ModelChoiceField(
         queryset=state.objects.all(),
         required=False,
-        label='StateCode'
+        label='StateCode',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     # UwCompany = forms.ModelChoiceField(
@@ -112,7 +114,8 @@ class ProductFilterForm(forms.Form):
     LineOfBusiness = forms.ModelChoiceField(
         queryset=lineofbusiness.objects.all(),
         required=False,
-        label='LobName'
+        label='LobName',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     PolicyType = forms.ModelChoiceField(
@@ -125,17 +128,35 @@ class ProductFilterForm(forms.Form):
     PolicySubType = forms.ModelChoiceField(
         queryset=policysubtype.objects.none(),
         required=False,
-        label='PolicySubType'
+        label='PolicySubType',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
     ProductCode = forms.ModelChoiceField(
         queryset=productcode.objects.all(),
         required=False,
-        label='ProductCode'
+        label='ProductCode',
+        widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
-    PolicySubType = forms.ModelChoiceField(
-        queryset=policysubtype.objects.none(),
-        required=False,
-        label='PolicySubType'
-    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        policy_type_id = self.data.get('PolicyType')
+        if policy_type_id is not None:
+            try:
+                policy_type_id = int(policy_type_id)
+            except ValueError:
+                policy_type_id = None
+        self.fields['PolicySubType'].queryset = policysubtype.objects.filter(
+            PolicyType_id=policy_type_id) if policy_type_id else policysubtype.objects.none()
+
+        lob_id = self.data.get('LineOfBusiness')
+        if lob_id is not None:
+            try:
+                lob_id = int(lob_id)
+            except ValueError:
+                lob_id = None
+        self.fields['ProductCode'].queryset = productcode.objects.filter(
+            Lob_id=lob_id) if lob_id else productcode.objects.none()
+        self.fields['PolicyType'].queryset = policytype.objects.filter(
+            Lob_id=lob_id) if lob_id else policytype.objects.none()

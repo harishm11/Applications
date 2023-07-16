@@ -1,5 +1,6 @@
 myvenvlinux/
 myvenv/
+myvenvlinux/
 .idea/
 .vscode
 
@@ -9,3 +10,4 @@ db.sqlite3
 **/migrations/
 .DS_Store
 uploads/
+systemtables.json
