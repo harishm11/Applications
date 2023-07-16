@@ -24,11 +24,11 @@
       {%endif%}
     {%endfor%}
   </table>
-  <!--
+
   <div class="text-center">
     <input type="submit" class="btn btn-primary" value="Apply Filters" />
   </div>  
-  -->
+
 </form>
 
 <br>
@@ -55,13 +55,9 @@
       <tr>
         <th>Ratebook Name</th>
         <th>Ratebook ID</th>
-        <th>Carrier</th>
-        <th>State</th>
-        <th>Line of Business</th>
-        <th>UW Company</th>
-        <th>Policy Type</th>
-        <th>Policy SubType</th>
-        <th>Product Code</th>
+        <th>RatebookRevisionType</th>
+        <th>RatebookStatusType</th>
+        <th>RatebookChangeType</th>
       </tr>
     </thead>
     <tbody>
@@ -70,13 +66,9 @@
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyDateExhibits/{{ obj.RatebookID }}';">
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
-        <td>{{obj.Carrier}}</td>
-        <td>{{obj.State}}</td>
-        <td>{{obj.LineofBusiness}}</td>
-        <td>{{obj.UWCompany}}</td>
-        <td>{{obj.PolicyType}}</td>
-        <td>{{obj.PolicySubType}}</td>
-        <td>{{obj.ProductCode}}</td>
+        <td>{{obj.RatebookRevisionType}}</td>
+        <td>{{obj.RatebookStatusType}}</td>
+        <td>{{obj.RatebookChangeType}}</td>
       </tr>
     {% endfor %}
     {% endif %}

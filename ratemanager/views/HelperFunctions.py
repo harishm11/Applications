@@ -5,9 +5,9 @@ from django.apps import apps
 from ratemanager.models import Ratebooks, AllExhibits
 from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
-from django.db.models.expressions import Window
-from django.db.models.functions import RowNumber
-from django.db.models import Q, F
+from django.db.models import Q
+from django.utils.html import format_html
+from copy import deepcopy
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB"]
 
@@ -132,7 +132,9 @@ def transformRB(xl_url):
 
 def convertDates(x):
     """converts date from mm-dd-yy to django acceptable format"""
-    if "/" in x:
+    if ':' in x:
+        return datetime.strptime(x, "%Y-%d-%m %H:%M:%S").strftime("%Y-%m-%d")
+    elif "/" in x:
         return datetime.strptime(x, "%m/%d/%Y").strftime("%Y-%m-%d")
     elif "-" in x:
         return datetime.strptime(x, "%m-%d-%Y").strftime("%Y-%m-%d")
@@ -224,42 +226,14 @@ def uploadFile(request):
 
 
 def fetchRatebookSpecificVersion(rbID, rbVersion):
-    # Raw Query
-    """
-    SELECT *
-    FROM
-    (
-        SELECT *, ROW_NUMBER() OVER (PARTITION BY (
-            t1."Coverage",
-            t1."Exhibit",
-            t1."RatingVarName1",
-            t1."RatingVarValue1",
-            t1."RatingVarName2",
-            t1."RatingVarValue2")
-        ORDER BY "RatebookVersion" DESC) AS sort_id
-        FROM public."myTest" t1 WHERE "RatebookVersion" <= 4 -- (Parameter: Required Ratebook Version)
-    ) AS Subquery
-    WHERE sort_id = 1 and "RatebookID" = 'RB0001'; -- Required Ratebook
-    """
 
-    # equivalent django query
-    sorted_partitions = AllExhibits.objects.filter(
-        RatebookID=rbID, RatebookVersion__lte=rbVersion
-    ).alias(
-        sort_id=Window(
-            expression=RowNumber(),
-            partition_by=(
-                F("Coverage"),
-                F("Exhibit"),
-                F("RatingVarName1"),
-                F("RatingVarName2"),
-                F("RatingVarValue1"),
-                F("RatingVarValue2"),
-            ),
-            order_by=(F("RatebookVersion").desc()),
-        )
-    )
-    current_version = sorted_partitions.filter(sort_id=1)
+    ActivationDate = Ratebooks.objects.get(
+        RatebookID=rbID,
+        RatebookVersion=rbVersion
+        ).ActivationDate
+
+    current_version = fetchRatebookbyDate(rbID, ActivationDate)
+
     return current_version
 
 
@@ -279,6 +253,167 @@ def fetchRatebookbyDate(rbID, qDate):
             (Q(NewBusinessExpiryDate__isnull=True) & Q(RenewalExpiryDate__isnull=True))
             | (Q(NewBusinessExpiryDate__gt=qDate) & Q(RenewalExpiryDate__gt=qDate))
         )
-        & Q(ActivationDate__lte=qDate)
+        & (Q(ActivationDate__lte=qDate))
     )
     return filteredQueryResults
+
+
+def buildViewFilterQuery(selected: dict):
+    '''
+    Builds a query joined by '&' on Carrier, State, Company
+    Business, Policy Type, Sub Type, Product Code.
+
+    'selected' is a dictionay containing the request data of filter form.
+    '''
+    rbQuery = Q()
+    if selected.get('Carrier') != '' and selected.get('Carrier') is not None:
+        rbQuery &= Q(Carrier_id=selected.get('Carrier'))
+    if selected.get('StateCode') != '' and selected.get('StateCode') is not None:
+        rbQuery &= Q(State_id=selected.get('StateCode'))
+    if selected.get('UwCompany') != '' and selected.get('UwCompany') is not None:
+        rbQuery &= Q(UwCompany_id=selected.get('UwCompany'))
+    if selected.get('LineofBusiness') != '' and selected.get('LineofBusiness') is not None:
+        rbQuery &= Q(LineofBusiness_id=selected.get('LineofBusiness'))
+    if selected.get('PolicyType') != '' and selected.get('PolicyType') is not None:
+        rbQuery &= Q(PolicyType_id=selected.get('PolicyType'))
+    if selected.get('PolicySubType') != '' and selected.get('PolicySubType') is not None:
+        rbQuery &= Q(PolicySubType_id=selected.get('PolicySubType'))
+    if selected.get('ProductCode') != '' and selected.get('ProductCode') is not None:
+        rbQuery &= Q(ProductCode_id=selected.get('ProductCode'))
+
+    return rbQuery
+
+
+def extractRatebookDetails(inputDataFrame):
+    df = inputDataFrame
+    msgs = []
+    sheet_name = findRBDetails(df)
+
+    if sheet_name is not None:
+        msgs.append("Found Ratebook Details")
+        df = df[sheet_name]
+        df[0] = df[0].str.replace(" ", "")
+        df_view = pd.Series(index=list(df[0]), data=list(df[1]), name="Details")
+        df_view.astype(str).replace("nan", None, inplace=True)
+        rbDetailsTable = format_html(
+            df_view.to_frame().to_html(
+                justify="left", classes=["table", "table-bordered"]
+            )
+        )
+    else:
+        msgs.append("Could not find Ratebook Details Sheet\
+                     in the uploaded Excel file please check again.")
+    return {'details_html': rbDetailsTable,
+            'details_df': df_view,
+            'msgs': msgs}
+
+
+def fetchRBLatestVersion(rbID):
+    '''
+    Loads latest version from AllExhibits of given RBID as a dataframe.
+    '''
+    latestVersion = (
+        Ratebooks.objects.filter(RatebookID=rbID)
+        .order_by("-RatebookVersion")
+        .first()
+    ).RatebookVersion
+    oldRB = fetchRatebookSpecificVersion(
+        rbID=rbID,
+        rbVersion=latestVersion,
+    )
+    return oldRB
+
+
+def dataframe_difference(old_df, new_df):
+    """Find rows which are added, deleted or modified in the new version of DataFrame."""
+    def convertToObject(df):
+        ''' convert all columns to object dtype except factor '''
+        for col in list(df.columns):
+            if 'factor' not in col.lower():
+                df[col] = df[col].astype(object)
+        return df
+
+    old_df = convertToObject(old_df)
+    new_df = convertToObject(new_df)
+
+    comparison_df = old_df.merge(
+        new_df,
+        indicator=True,
+        how='outer'
+    )
+
+    deleted_old = comparison_df.loc[comparison_df._merge == 'left_only']
+    added_new = comparison_df.loc[comparison_df._merge == 'right_only']
+
+    modified = deleted_old.merge(
+        added_new,
+        how='inner',
+        on=[x for x in list(new_df.columns) if x not in ('Factor', '_merge')]
+    )
+    modified.drop(['_merge_x', '_merge_y'], inplace=True, axis=1)
+    modified.rename(columns={'Factor_x': 'Factor_Old',
+                             'Factor_y': 'Factor_New'},
+                    inplace=True)
+    modified = modified[modified.columns.sort_values().to_list()]
+    added_deleted = comparison_df.drop_duplicates(
+        subset=[x for x in list(new_df.columns) if x not in ('Factor', '_merge')],
+        ignore_index=True,
+        keep=False
+        )
+
+    added = added_deleted.loc[added_deleted._merge == 'right_only'].drop('_merge', axis=1)
+    deleted = added_deleted.loc[added_deleted._merge == 'left_only'].drop('_merge', axis=1)
+
+    stats = {}
+    stats['Number of rate revisions'] = len(modified)
+    stats['Number of added factors'] = len(added)
+    stats['Number of deleted factors'] = len(deleted)
+    stats['changed_exhibits'] = []
+    stats['changed_exhibits'].extend(added['Exhibit'].unique())
+    stats['changed_exhibits'].extend(deleted['Exhibit'].unique())
+    stats['changed_exhibits'].extend(modified['Exhibit'].unique())
+    stats['changed_exhibits'] = set(stats['changed_exhibits'])
+    stats['isEmpty'] = False if len(modified)+len(added)+len(deleted) > 0 else True
+
+    return {'modified': modified,
+            'added': added,
+            'deleted': deleted,
+            }, stats
+
+
+def generate_html_diff(changes):
+    ''' Generate Details about the changes in between the 2 dataframes '''
+    updates = deepcopy(changes)
+    updates['modified']['Factor'] = updates['modified']['Factor_Old'].astype(str) +\
+        ' -> ' + updates['modified']['Factor_New'].astype(str)
+    updates['modified'].drop(['Factor_Old', 'Factor_New'], axis=1, inplace=True)
+    updates['modified'] = updates['modified'][updates['modified'].columns.sort_values().to_list()]
+    updates['added'] = updates['added'][updates['modified'].columns.sort_values().to_list()]
+    updates['deleted'] = updates['deleted'][updates['modified'].columns.sort_values().to_list()]
+    updates['modified'] = updates['modified'].astype(str).style.applymap(
+        lambda x: "background-color: lightblue" if '->' in x else "background-color: white")
+    updates['added'] = updates['added'].astype(str).style.applymap(
+        lambda x: "background-color: lightgreen")
+    updates['deleted'] = updates['deleted'].astype(str).style.applymap(
+        lambda x: "background-color: lightcoral")
+    diff_df = updates['modified'].concat(updates['deleted'])
+    diff_df = diff_df.concat(updates['added'])
+    diff_df = diff_df.hide(axis='index')
+    rbChangesTableHTML = diff_df.to_html(
+        table_uuid='changes'
+        )
+    return rbChangesTableHTML
+
+
+def convert2Df(QuerySet):
+    ''' Convert QuerySet to Dataframe and
+    Drops fields not needed for comparision of Rate Factors '''
+    toDropList = ['id', 'RatebookID', 'Ratebook_id', "RatebookVersion", "RecordStatus"]
+    for i in [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]:
+        if 'Date' in i or 'Time' in i:
+            toDropList.extend([i])
+    df = pd.DataFrame.from_records(QuerySet.values())
+    print(df)
+    if not df.empty:
+        df.drop(columns=toDropList, axis=1, inplace=True)
+    return df

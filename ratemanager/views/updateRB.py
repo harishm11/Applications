@@ -2,10 +2,10 @@ import traceback
 import pandas as pd
 from django.shortcuts import render
 import ratemanager.views.HelperFunctions as helperfuncs
-from django.utils.html import format_html
 from ratemanager.forms import UpdateForm
 from ratemanager.models import Ratebooks, AllExhibits
 from datetime import datetime
+from pandas.errors import EmptyDataError
 
 
 def updateRB(request):
@@ -23,49 +23,63 @@ def loadUpdatedRB(request):
     file_uploaded = True
     msgs = []
     rbChangesTable = None
+    loaded_to_db = False
+    load_failed = False
     updateFormValues = {k: v[0] for k, v in dict(request.POST).items()}
 
     # read from excel file and find the Ratebook details Sheet
     df = pd.read_excel(uploadUrl, sheet_name=None, header=None)
-    sheet_name = helperfuncs.findRBDetails(df)
+    extractedRBDetails = helperfuncs.extractRatebookDetails(df)
 
-    if sheet_name is not None:
-        msgs.append("Found Ratebook Details")
-        df = df[sheet_name]
-        df[0] = df[0].str.replace(" ", "")
-        df_view = pd.Series(index=list(df[0]), data=list(df[1]), name="Details")
-        df_view.astype(str).replace("nan", None, inplace=True)
-        rbDetailsTable = format_html(
-            df_view.to_frame().to_html(
-                justify="left", classes=["table", "table-bordered"]
-            )
-        )
-        rate_details = df_view.astype(str).to_dict()
-    else:
-        msgs.append(
-            "Could not find Ratebook Details Sheet\
-                     in the uploaded Excel file please check again."
-        )
+    rate_details = extractedRBDetails['details_df'].astype(str).to_dict()
+    rbDetailsTable = extractedRBDetails['details_html']
+    msgs.extend(extractedRBDetails['msgs'])
 
-    rate_details["RatebookRevisionType"] = "Test"
-    rate_details["RatebookStatusType"] = "Test"
-    rate_details["RatebookChangeType"] = "Test"
+    # modify and add to the rate details dictionary
+    rate_details["RatebookRevisionType"] = "Rate Revision"
+    rate_details["RatebookStatusType"] = "In Production"
+    rate_details["RatebookChangeType"] = "Rate Revision"
     rate_details["CreationDateTime"] = datetime.now().strftime("%m-%d-%Y")
+
     rate_details = helperfuncs.fetchForeignFields(rate_details)
     rate_details = helperfuncs.applyDateConversion(rate_details)
+
     identityKeys = ("Carrier", "State", "LineofBusiness", "UWCompany",
                     "PolicyType", "PolicyType", "PolicySubType", "ProductCode")
     identityRateDetails = {key: rate_details.get(key) for key in identityKeys}
 
     # get last version RatebookID with similar details
-    rbObjLastVersion = (
-        Ratebooks.objects.filter(**identityRateDetails)
-        .order_by("-RatebookVersion")
-        .first()
-    )
+    rbObjLastVersion = Ratebooks.objects.filter(**identityRateDetails).\
+        order_by("-RatebookVersion").first()
     rate_details["RatebookID"] = (
         rbObjLastVersion.RatebookID if rbObjLastVersion is not None else None
     )
+
+    def addMetadataToAllExhibitsRecord(Record, rate_details):
+        Record["Ratebook_id"] = rbObj.id
+        Record["RatebookVersion"] = rate_details["RatebookVersion"]
+        Record["RatebookID"] = rate_details["RatebookID"]
+        Record["RecordStatus"] = 'Active'
+        for key in rate_details:
+            if 'Date' in key or 'Time' in key:
+                Record[key] = rate_details[key]
+
+    def searchAllExhibitsRow(newRecord):
+        identityKeys = ('Coverage', 'Exhibit',
+                        'RatingVarName1', 'RatingVarValue1',
+                        'RatingVarName2', 'RatingVarValue2')
+        identityRateDetails = {key: newRecord.get(key) for key in identityKeys}
+
+        # Get the specific row with given key
+        searchObj = AllExhibits.objects.get(**identityRateDetails)
+        return searchObj
+
+    def expireAllExhibitsRow(Obj, newRecord: dict):
+        ''' Expire a Old Record with dates from New Record '''
+        Obj.NewBusinessExpiryDate = newRecord['NewBusinessEffectiveDate']
+        Obj.RenewalExpiryDate = newRecord['RenewalEffectiveDate']
+        Obj.RecordStatus = 'Expired'
+        Obj.save()
 
     # if No similar ratebook found let the user know
     if rate_details["RatebookID"] is None:
@@ -85,57 +99,45 @@ def loadUpdatedRB(request):
                 df, errors = helperfuncs.transformRB(xl_url=uploadUrl)
                 msgs.extend(errors)
 
-                # code to load latest version from AllExhibits of given RBID as a dataframe
-                oldRb = helperfuncs.fetchRatebookSpecificVersion(
-                    rbID=rate_details["RatebookID"],
-                    rbVersion=rate_details["RatebookVersion"],
-                ).values_list()
-                oldRB_df = pd.DataFrame.from_records(
-                    oldRb,
-                    columns=[
-                        f.name
-                        for f in AllExhibits._meta.get_fields(include_hidden=False)
-                    ],
-                ).drop(["id", "Ratebook", "RatebookID", "RatebookVersion"], axis=1)
+                oldRB = helperfuncs.fetchRBLatestVersion(rate_details['RatebookID'])
+                oldRB = helperfuncs.convert2Df(oldRB)
+                changes, stats = helperfuncs.dataframe_difference(old_df=oldRB, new_df=df)
+                if stats['isEmpty']:
+                    msgs.append('No Changes found.')
+                    raise EmptyDataError
+                rbChangesTable = helperfuncs.generate_html_diff(changes)
 
-                # find rows that are not in the new dataframe and add them to AllExhibits
-                comparison_df = oldRB_df.merge(df, indicator=True, how="outer")
-                diff_df = comparison_df.loc[comparison_df._merge == "right_only"]
-                if diff_df.empty:
-                    raise "Maybe not a new version as No Changes Found in the New Version."
-                rbChangesTable = format_html(
-                    diff_df.to_html(justify="left", classes=["table", "table-bordered"])
-                )
-                for row in (diff_df.drop("_merge", axis=1).itertuples(index=False)):
+                # Add Rate Revised rows and expire the old Rate Rows
+                for row in changes['modified'].itertuples(index=False):
                     Record = dict(row._asdict())
-                    Record["Ratebook_id"] = rbObj.id
-                    Record["RatebookVersion"] = rate_details["RatebookVersion"]
-                    Record["RatebookID"] = rate_details["RatebookID"]
+                    del Record['Factor_Old']
+                    Record['Factor'] = Record['Factor_New']
+                    del Record['Factor_New']
+                    addMetadataToAllExhibitsRecord(Record=Record, rate_details=rate_details)
+                    searchedObj = searchAllExhibitsRow(Record)
+                    expireAllExhibitsRow(searchedObj, newRecord=Record)
+                    AllExhibits.objects.create(**Record)
+                # Expire the Deleted Rows
+                for row in changes['deleted'].itertuples(index=False):
+                    Record = dict(row._asdict())
+                    addMetadataToAllExhibitsRecord(Record=Record, rate_details=rate_details)
+                    searchedObj = searchAllExhibitsRow(Record)
+                    expireAllExhibitsRow(searchedObj, newRecord=Record)
+                # Add the newly added rows
+                for row in changes['added'].itertuples(index=False):
+                    Record = dict(row._asdict())
+                    addMetadataToAllExhibitsRecord(Record=Record, rate_details=rate_details)
+                    AllExhibits.objects.create(**Record)
 
-                    for key in rate_details:
-                        if "Date" in key or "Time" in key:
-                            if "Expiry" not in key:
-                                Record[key] = rate_details[key]
-                            else:
-                                Record[key] = None
-
-                    identityKeys = ('Coverage', 'Exhibit',
-                                    'RatingVarName1', 'RatingVarValue1',
-                                    'RatingVarName2', 'RatingVarValue2')
-                    identityRateDetails = {key: Record.get(key) for key in identityKeys}
-                    searchObj = AllExhibits.objects.get(**identityRateDetails)
-                    if searchObj.Factor != Record['Factor']:
-                        searchObj.NewBusinessExpiryDate = Record['NewBusinessEffectiveDate']
-                        searchObj.RenewalExpiryDate = Record['RenewalEffectiveDate']
-                        searchObj.save()
-                        AllExhibits.objects.create(**Record)
                 loaded_to_dbExhibits = True
+
             except Exception as err:
                 traceback.print_exc()
                 msgs.append(repr(err))
                 loaded_to_dbExhibits = False
                 if rbObj:
                     Ratebooks.objects.get(pk=rbObj.id).delete()
+
         else:
             msgs.append("Record already exists")
 
@@ -146,4 +148,14 @@ def loadUpdatedRB(request):
             msgs.append("Unable to load to Database.")
             load_failed = True
 
-    return render(request, "ratemanager/ratebookmanager/update_rb.html", locals())
+    context = {
+        'msgs': msgs,
+        'load_failed': load_failed,
+        'loaded_to_db': loaded_to_db,
+        'rbDetailsTable': rbDetailsTable,
+        'rbChangesTable': rbChangesTable,
+        'file_uploaded': file_uploaded,
+        'options': options,
+        'appLabel': appLabel
+    }
+    return render(request, "ratemanager/ratebookmanager/update_rb.html", context)

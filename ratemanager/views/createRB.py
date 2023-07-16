@@ -55,12 +55,13 @@ def loadNewRBtoDB(request):
     try:
         loaded_to_dbBooks = False
         rbObj = None
-        rate_details['RatebookRevisionType'] = 'Test'
-        rate_details['RatebookStatusType'] = 'Test'
-        rate_details['RatebookChangeType'] = 'Test'
+        rate_details['RatebookRevisionType'] = 'Initial'
+        rate_details['RatebookStatusType'] = 'In Production'
+        rate_details['RatebookChangeType'] = 'Initial'
         rate_details['CreationDateTime'] = datetime.now().strftime('%m-%d-%Y')
         rate_details = helperfuncs.fetchForeignFields(rate_details)
         rate_details = helperfuncs.applyDateConversion(rate_details)
+
         identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
                         'PolicyType', 'PolicySubType', 'ProductCode')
         identityRateDetails = {key: rate_details.get(key) for key in identityKeys}
@@ -82,6 +83,7 @@ def loadNewRBtoDB(request):
                 df['Ratebook_id'] = rbObj.id
                 df['RatebookVersion'] = rate_details['RatebookVersion']
                 df['RatebookID'] = rate_details['RatebookID']
+                df['RecordStatus'] = 'Active'
                 for key in rate_details:
                     if 'Date' in key or 'Time' in key:
                         df[key] = rate_details[key]

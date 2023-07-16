@@ -6,4 +6,4 @@ psycopg2
 django-cors-headers
 django-crispy-forms
 xlrd
-
+jinja2

@@ -24,13 +24,17 @@
       {%endif%}
     {%endfor%}
   </table>
-  <!--
+
   <div class="text-center">
     <input type="submit" class="btn btn-primary" value="Apply Filters" />
-  </div>  
-  -->
+  </div>
 </form>
 
+<form action="/ratemanager/compareRB">
+<b>Select any two Ratebooks to Compare or click on the row to view it.</b>        
+<div class="text-left">
+  <input id="compare_button" type="submit" class="btn btn-primary" value="Compare" disabled="true"/>
+</div>
 <br>
 <nav aria-label="Page navigation">
   <ul class="pagination pagination-sm">
@@ -53,6 +57,7 @@
   <table id="example" class="table table-sm table-condensed cell-border table-hover">
     <thead>
       <tr>
+        <th class="no-sort" onclick="event.stopPropagation();">Select</th>
         <th>Ratebook Name</th>
         <th>Ratebook ID</th>
         <th>Ratebook Version</th>
@@ -62,6 +67,9 @@
         <th>Migration Time</th>
         <th>Activation Date</th>
         <th>Activation Time</th>
+        <th>RatebookRevisionType</th>
+        <th>RatebookStatusType</th>
+        <th>RatebookChangeType</th>
         <th>Carrier</th>
         <th>State</th>
         <th>Line of Business</th>
@@ -72,9 +80,12 @@
       </tr>
     </thead>
     <tbody>
-    {% if filteredRatebooks %}  
+    {% if filteredRatebooks %}
     {% for obj in filteredRatebooks %}
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyVersionExhibits/{{ obj.RatebookID }}/{{ obj.RatebookVersion }}';">
+        <td onclick="event.stopPropagation();">
+          <input type="checkbox" name="selectedRBs" value="{{ obj.RatebookID }}_{{obj.RatebookVersion}}">
+        </td>
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
         <td>{{obj.RatebookVersion}}</td>
@@ -84,6 +95,9 @@
         <td>{{obj.MigrationTime}}</td>
         <td>{{obj.ActivationDate}}</td>
         <td>{{obj.ActivationTime}}</td>
+        <td>{{obj.RatebookRevisionType}}</td>
+        <td>{{obj.RatebookStatusType}}</td>
+        <td>{{obj.RatebookChangeType}}</td>
         <td>{{obj.Carrier}}</td>
         <td>{{obj.State}}</td>
         <td>{{obj.LineofBusiness}}</td>
@@ -97,14 +111,34 @@
     </tbody>
   </table>
 </div>
+</form>
 <script>
-  $(document).ready(function () {
-    $('#example').DataTable({
-      paging: false,
-      searching: false,
-      info: false,
-      order: [[9, 'desc']],
-    });
+$(document).ready(function () {
+  $('#example').DataTable({
+    paging: false,
+    searching: false,
+    info: false,
+    order: [[9, 'desc']],
+    'columnDefs': [ {
+              'targets': [0],
+              'orderable': false,
+        }]
+  });
+});
+$('input[type=checkbox]').on('change', function (e) {
+    if ($('input[type=checkbox]:checked').length > 2)
+    {
+      $(this).prop('checked', false);
+      alert("Max allowed selections is 2");
+    }
+    else if ($('input[type=checkbox]:checked').length == 2)
+    {
+      $("#compare_button").prop("disabled", false);
+    }
+    else
+    {
+      $("#compare_button").prop("disabled", true);
+    }
 });
 </script>
 

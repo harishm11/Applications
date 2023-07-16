@@ -1,6 +1,6 @@
 # from django.contrib import admin
 from django.urls import path
-from ratemanager.views import viewRB, views, createRB, updateRB
+from ratemanager.views import viewRB, views, createRB, updateRB, compareRB
 
 urlpatterns = [
     path('', views.rateManager, name='ratemanager'),
@@ -20,4 +20,6 @@ urlpatterns = [
     # update
     path('updateRB/', updateRB.updateRB, name="updateRB"),
     path('loadUpdatedRB/', updateRB.loadUpdatedRB, name="loadUpdatedRB"),
+    # compare
+    path('compareRB/', compareRB.compareRB, name="compareRB")
 ]

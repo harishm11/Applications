@@ -62,17 +62,17 @@ class Ratebooks(models.Model):
         default=None
         )
     RatebookRevisionType = models.CharField(
-        max_length=10,
+        max_length=50,
         null=False,
         default=None
         )
     RatebookStatusType = models.CharField(
-        max_length=10,
+        max_length=50,
         null=False,
         default=None
         )
     RatebookChangeType = models.CharField(
-        max_length=10,
+        max_length=50,
         null=False,
         default=None
         )
@@ -188,6 +188,12 @@ class AllExhibits (models.Model):
         default=None
         )
     CreationDateTime = models.DateTimeField(
+        null=False,
+        default=None
+        )
+    RecordStatus = models.CharField(
+        max_length=50,
+        blank=True,
         null=False,
         default=None
         )

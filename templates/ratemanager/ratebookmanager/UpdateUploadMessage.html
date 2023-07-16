@@ -3,7 +3,7 @@
 <div>
   {% if rbChangesTable is not None %}
   <h2> These are the changes in the new version </h2>
-  {{ rbChangesTable }}
+  {{ rbChangesTable | safe }}
   {% endif %}
   <b>Messages: <br>
     {% for i in msgs %}
@@ -18,4 +18,15 @@
   </div>  
   {% endif %}
 </div>
+<script>
+  $(document).ready(function () {
+    $('#T_changes').DataTable({
+      paging: false,
+      searching: false,
+      info: false,
+      ordering: false,
+    });
+});
+$('#T_changes').addClass("table table-sm display compact cell-border");
+</script>
 {% endblock %}

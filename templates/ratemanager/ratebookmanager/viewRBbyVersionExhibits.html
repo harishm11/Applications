@@ -6,7 +6,7 @@
 {% load crispy_forms_tags %} 
 {% block maincontent %}
 <!-- Form to select table type and exhibit -->
-<form method="post" action="/ratemanager/viewRBbyDateExhibits/{{ rbID }}/{{rbVer}}/">
+<form method="post" action="/ratemanager/viewRBbyVersionExhibits/{{ rbID }}/{{rbVer}}/">
     {% csrf_token %}
     <table class="table">
       {% for field in exhibitForm %}
