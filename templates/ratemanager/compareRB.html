@@ -6,28 +6,64 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
-{{ statsTableHTML }}
-<br>
-Exhibits that have been changed:<br>
-<ul>
-{% for i in changedExhibits %}
-    <li>{{ i }}</li><br>
-{% endfor %}
-</ul>
+<table class="table">
+  <tr>
+    <td>
+      {{ statsTableHTML }}
+    </td>
+    <td></td>
+    <td>
+      Exhibits that have been changed:<br>
+      <br>
+      <div style="height:100px;width:350px;overflow:auto;" class="container">
+        <ul>
+        {% for i in changedExhibits %}
+            <li>{{ i }}</li><br>
+        {% endfor %}
+        </ul>
+      </div>
+    </td>
+  </tr>
+</table>
 <br>
 <b>Summary of Changes between version {{ oldVer }} and {{ newVer }} of RatebookID {{ rbID }}:</b>
 <div class="container table-responsive">
 {{ diffTableHTML | safe }}
 </div>
 <script>
-    $(document).ready(function () {
-      $('#T_changes').DataTable({
-        paging: false,
-        searching: false,
-        info: false,
-        ordering: false,
-      });
-  });
-  $('#T_changes').addClass("table table-sm display compact cell-border");
-  </script>
+new DataTable('#T_changes', {
+
+  initComplete: function () {
+      this.api()
+          .columns([1])
+          .every(function () {
+              let column = this;
+
+              // Create select element
+              let select = document.createElement('select');
+              select.add(new Option(''));
+              column.header().prepend(select);
+
+              // Apply listener for user change in value
+              select.addEventListener('change', function () {
+                  var val = DataTable.util.escapeRegex(select.value);
+
+                  column
+                      .search(val ? '^' + val + '$' : '', true, false)
+                      .draw();
+              });
+
+              // Add list of options
+              column
+                  .data()
+                  .unique()
+                  .sort()
+                  .each(function (d, j) {
+                      select.add(new Option(d));
+                  });
+          });
+  }
+});
+$('#T_changes').addClass("table table-sm display compact cell-border");
+</script>
 {% endblock %}

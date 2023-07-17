@@ -65,11 +65,11 @@ def loadUpdatedRB(request):
                 Record[key] = rate_details[key]
 
     def searchAllExhibitsRow(newRecord):
-        identityKeys = ('Coverage', 'Exhibit',
+        identityKeys = ('RatebookID', 'Coverage', 'Exhibit',
                         'RatingVarName1', 'RatingVarValue1',
                         'RatingVarName2', 'RatingVarValue2')
         identityRateDetails = {key: newRecord.get(key) for key in identityKeys}
-
+        identityRateDetails['RecordStatus'] = 'Active'
         # Get the specific row with given key
         searchObj = AllExhibits.objects.get(**identityRateDetails)
         return searchObj
