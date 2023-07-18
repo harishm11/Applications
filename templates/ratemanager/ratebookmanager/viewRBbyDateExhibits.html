@@ -1,0 +1,86 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} View Exhibits {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %} 
+{% block maincontent %}
+<!-- Form to select table type and exhibit -->
+<form method="post" action="/ratemanager/viewRBbyDateExhibits/{{ rbID }}/">
+    {% csrf_token %}
+    <table class="table">
+      {% for field in exhibitForm %}
+        {%if forloop.counter|divisibleby:"2" %}
+          <td>
+            {{field.label}}:&emsp;{{field}}
+          </td>
+        </tr>
+        {%else%}
+        <tr>
+          <td>
+            {{field.label}}:&emsp;{{field}}
+          </td>
+        {%endif%}
+      {%endfor%}
+    </table>
+</form>
+<nav aria-label="Page navigation">
+  <ul class="pagination pagination-sm">
+     {% if page_obj.has_previous %}
+     <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}">Previous</a></li>
+     {% endif %}
+     {% for num in page_obj.paginator.page_range %}
+     {% if page_obj.number == num %}
+     <li class="page-item active"><a class="page-link" href="?page={{num}}">{{ num }}</a></li>
+     {% else %}
+     <li class="page-item"><a class="page-link" href="?page={{num}}">{{ num }}</a></li>
+     {% endif %}
+     {% endfor %}
+     {% if page_obj.has_next %}
+     <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}">Next</a></li>
+     {% endif %}
+  </ul>
+</nav>
+<div class="container table-responsive">          
+    <table id="example" class="table table-condensed cell-border">
+      <thead>
+        <tr>
+          <th>RatebookID</th>
+          <th>Coverage</th>
+          <th>Exhibit</th>
+          <th>Factor</th>
+          <th>RatingVarName1</th>
+          <th>RatingVarName2</th>
+          <th>RatingVarValue1</th>
+          <th>RatingVarValue2</th>							
+        </tr>
+      </thead>
+      <tbody>
+      {% if page_obj %}  
+        {% for obj in page_obj %}
+          <tr>
+            <td>{{obj.RatebookID}}</td>
+            <td>{{obj.Coverage}}</td>
+            <td>{{obj.Exhibit}}</td>
+            <td>{{obj.Factor}}</td>
+            <td>{{obj.RatingVarName1}}</td>
+            <td>{{obj.RatingVarValue1}}</td>
+            <td>{{obj.RatingVarName2}}</td>
+            <td>{{obj.RatingVarValue2}}</td>
+          </tr>
+        {% endfor %}
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+<script>
+  $(document).ready(function () {
+    $('#example').DataTable({
+      paging: false,
+      searching: false,
+      info: false
+    });
+});
+</script>
+
+{%endblock%}

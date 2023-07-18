@@ -5,10 +5,11 @@ from django.shortcuts import render
 import os
 import pandas as pd
 from myproj.settings import BASE_DIR
+import ratemanager.views.HelperFunctions as helperfuncs
 
 
 def rateManager(request):
-    options = ['createRB', 'viewRB']
+    options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
     return render(request, 'ratemanager/home.html', locals())
 

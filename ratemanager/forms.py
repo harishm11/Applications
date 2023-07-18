@@ -1,5 +1,6 @@
 from django import forms
 from django.apps import apps
+from datetime import datetime
 
 try:
     uwCompany = apps.get_model('systemtables', 'uwcompany')
@@ -96,21 +97,11 @@ class SelectExhibitForm(forms.ModelForm):
         if self.initial.get('TableCategory') != '':
             self.fields['Exhibit'].queryset = allexhibits.objects.\
                 filter(TableCategory=self.initial.get('TableCategory'),
-                       Ratebook=self.initial.get('Ratebook')).\
+                       RatebookID=self.initial.get('RatebookID')).\
                 values_list('Exhibit', flat=True).order_by('Exhibit').distinct()
 
 
 class UpdateForm(forms.Form):
-    RatebookCreationType = forms.ChoiceField(
-        label='Do you want to create a New Ratebook or Update Existing One?',
-        choices=(
-            ('new', 'New Ratebook'),
-            ('update', 'Update Existing')
-            ),
-        required=True,
-        widget=forms.Select(attrs={'id': 'RatebookCreationType'})
-        )
-
     RatebookUpdateType = forms.ChoiceField(
         label='Is it a minor update or major update?',
         choices=(
@@ -120,3 +111,22 @@ class UpdateForm(forms.Form):
         required=True,
         widget=forms.Select(attrs={'id': 'RatebookUpdateType'})
         )
+
+
+class SelectExhibitFormWithDate(SelectExhibitForm):
+    class Meta:
+        model = allexhibits
+        fields = ()
+        widgets = {
+            'date': forms.widgets.DateInput(attrs={'type': 'date'})
+        }
+    QueryDate = forms.DateField(
+        label='Query Date',
+        initial=datetime.today(),
+        widget=forms.widgets.DateInput(
+            attrs={
+                'type': 'date',
+                'onchange': 'this.form.submit();'
+                }
+        )
+    )
