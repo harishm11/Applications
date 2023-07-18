@@ -1,12 +1,12 @@
 {% extends 'body.html' %} {% load static %}
-{% block title %} Create Ratebook {% endblock %}
+{% block title %} Update Ratebook {% endblock %}
 {% block sidebarcontent %} 
   {% include 'ratemanager/sidebar.html' %} 
 {% endblock  %}
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
-<h1>Create new ratebook.</h1>
+<h1>Update ratebook.</h1>
 
 <div>
   {% if request.user.is_authenticated %}
@@ -16,18 +16,11 @@
         class="form-control"
         method="post"
         enctype="multipart/form-data"
-        action="/ratemanager/uploadNewRB/"
+        action="/ratemanager/loadUpdatedRB/"
         id="uploadform"
       >
           {% csrf_token%}
-          <!--
-          {{ form.RatebookCreationType.label }} :&emsp; {{ form.RatebookCreationType }}
-          <br><br>
-          <div id="RatebookUpdateType">
-            {{ form.RatebookUpdateType.label }} :&emsp; {{ form.RatebookUpdateType }}
-          </div>
-          <br>
-          -->
+          {{ form.as_ul }}
         <div class="mb-3">
           <label for="uploadform"> Select and upload the Excel file: </label>
           <input
@@ -42,7 +35,6 @@
             name="submit"
             value="Upload & Validate"
             class="btn btn-primary mb-3"
-            action="/ratemanager/uploadRB/"
           />
         </div>
       </form>
@@ -51,25 +43,10 @@
 
     {% if file_uploaded %}
     <div>
-      {% include "ratemanager/ratebookmanager/createuploadmessage.html" %}
+      {% include "ratemanager/ratebookmanager/UpdateUploadMessage.html" %}
     </div>
     {% endif %}
 
   {% endif %}
 </div>
-<!--
-<script>
-    function check_field_value() {
-        if($(this).val() != 'update') {  
-            $('#RatebookUpdateType').hide();
-        } else {
-            $('#RatebookUpdateType').show();
-        }
-    }
-    $(document).ready(function() {
-        $('#RatebookCreationType').change(check_field_value);
-        check_field_value.call($('#RatebookCreationType').get(0));
-    });
-</script>
--->
 {% endblock %}
