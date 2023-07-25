@@ -30,6 +30,7 @@ def loadUpdatedRB(request):
     # read from excel file and find the Ratebook details Sheet
     df = pd.read_excel(uploadUrl, sheet_name=None, header=None)
     extractedRBDetails = helperfuncs.extractRatebookDetails(df)
+    toExpireExhibits = helperfuncs.getToExpireExhibits(uploadUrl)['toExpire']
 
     rate_details = extractedRBDetails['details_df'].astype(str).to_dict()
     rbDetailsTable = extractedRBDetails['details_html']
@@ -132,6 +133,14 @@ def loadUpdatedRB(request):
                     Record = dict(row._asdict())
                     addMetadataToAllExhibitsRecord(Record=Record, rate_details=rate_details)
                     AllExhibits.objects.create(**Record)
+                # Expire deleted/renamed Exhibits
+                AllExhibits.objects.filter(
+                    RatebookID=rate_details['RatebookID'],
+                    Exhibit__in=toExpireExhibits).update(
+                        NewBusinessExpiryDate=rate_details['NewBusinessEffectiveDate'],
+                        RenewalExpiryDate=rate_details['RenewalEffectiveDate'],
+                        RecordStatus='Expired'
+                    )
 
                 loaded_to_dbExhibits = True
 

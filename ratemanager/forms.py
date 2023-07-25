@@ -117,11 +117,67 @@ class SelectExhibitFormWithDate(SelectExhibitForm):
     class Meta:
         model = allexhibits
         fields = ()
-        widgets = {
-            'date': forms.widgets.DateInput(attrs={'type': 'date'})
-        }
+
     QueryDate = forms.DateField(
         label='Query Date',
+        initial=datetime.today(),
+        widget=forms.widgets.DateInput(
+            attrs={
+                'type': 'date',
+                'onchange': 'this.form.submit();'
+                }
+        )
+    )
+
+
+class ViewRBFormWithDate(ViewRBForm):
+
+    NewBusinessEffectiveDate = forms.DateField(
+        label='New Business Effective Date',
+        initial=datetime.today(),
+        widget=forms.widgets.DateInput(
+            attrs={
+                'type': 'date',
+                'onchange': 'this.form.submit();'
+                }
+        )
+    )
+
+    RenewalEffectiveDate = forms.DateField(
+        label='Renewal Effective Date',
+        initial=datetime.today(),
+        widget=forms.widgets.DateInput(
+            attrs={
+                'type': 'date',
+                'onchange': 'this.form.submit();'
+                }
+        )
+    )
+
+    ActivationDate = forms.DateField(
+        label='Activation Date',
+        initial=datetime.today(),
+        widget=forms.widgets.DateInput(
+            attrs={
+                'type': 'date',
+                'onchange': 'this.form.submit();'
+                }
+        )
+    )
+
+    MigrationDate = forms.DateField(
+        label='Migration Date',
+        initial=datetime.today(),
+        widget=forms.widgets.DateInput(
+            attrs={
+                'type': 'date',
+                'onchange': 'this.form.submit();'
+                }
+        )
+    )
+
+    CreationDateTime = forms.DateField(
+        label='Creation/Upload Date',
         initial=datetime.today(),
         widget=forms.widgets.DateInput(
             attrs={

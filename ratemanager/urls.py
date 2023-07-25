@@ -1,6 +1,6 @@
 # from django.contrib import admin
 from django.urls import path
-from ratemanager.views import viewRB, views, createRB, updateRB, compareRB
+from ratemanager.views import viewRB, views, createRB, updateRB, compareRB, exportTemplate
 
 urlpatterns = [
     path('', views.rateManager, name='ratemanager'),
@@ -21,5 +21,7 @@ urlpatterns = [
     path('updateRB/', updateRB.updateRB, name="updateRB"),
     path('loadUpdatedRB/', updateRB.loadUpdatedRB, name="loadUpdatedRB"),
     # compare
-    path('compareRB/', compareRB.compareRB, name="compareRB")
+    path('compareRB/', compareRB.compareRB, name="compareRB"),
+    # export update template
+    path('exportTemplate/', exportTemplate.exportTemplate, name="exportTemplate")
 ]

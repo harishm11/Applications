@@ -1,7 +1,7 @@
 from django.db.models import Q, F
 from django.shortcuts import render
 from ratemanager.models import Ratebooks
-from ratemanager.forms import ViewRBForm, SelectExhibitForm, SelectExhibitFormWithDate
+from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import ratemanager.views.HelperFunctions as helperfuncs
 from django.db.models.expressions import Window
@@ -80,7 +80,7 @@ def viewRBbyDate(request):
         page_obj = paginator.page(1)
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
-    viewForm = ViewRBForm(initial=selected)
+    viewForm = ViewRBFormWithDate(initial=selected)
     return render(request, "ratemanager/ratebookmanager/viewRBbyDate.html", locals())
 
 
