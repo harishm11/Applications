@@ -8,19 +8,22 @@ from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.utils.html import format_html
 from copy import deepcopy
+import openpyxl
 
-SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB"]
+SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB", "viewRBbyDate", "viewRBbyVersion"]
 
 
-def transformRB(xl_url):
+def transformRB(xl_url=None, df_sheets=None):
     """Function to transform the excel file to required form
     to be able to load into postgres database."""
 
     msgs = []
-    df_sheets = pd.read_excel(xl_url, sheet_name=None)
+    if xl_url:
+        df_sheets = pd.read_excel(xl_url, sheet_name=None)
     df_out = pd.DataFrame(columns=["Exhibit", "Coverage", "Factor"])
 
     def create_rate_vars_cols(df, var_list):
+        # df = df[df.columns.sort_values().to_list()]
         rename_col_names = []
         for i in range(1, len(var_list) + 1):
             rename_col_names.append((var_list[i - 1], "RatingVarValue" + str(i)))
@@ -124,8 +127,9 @@ def transformRB(xl_url):
 
     df_out = df_out[df_out.columns.sort_values().to_list()]
     df_out = df_out.astype(object).replace('nan', None, regex=True)
+    excludeList = ["Ratebook Details", "DELETED_EXHIBITS", 'RENAMED_EXHIBITS']
     for i in set(df_sheets.keys()) - set(df_out["Exhibit"].unique()):
-        if i != "Ratebook Details" or i != 'Rate Details':
+        if i not in excludeList:
             msgs.append("Unable to transform {} table.".format(i))
 
     return df_out, msgs
@@ -286,6 +290,7 @@ def buildViewFilterQuery(selected: dict):
 
 
 def extractRatebookDetails(inputDataFrame):
+    """ Checks all the sheets for RB Details and returns it as DataFrame and HTML Table """
     df = inputDataFrame
     msgs = []
     sheet_name = findRBDetails(df)
@@ -333,6 +338,14 @@ def dataframe_difference(old_df, new_df):
             if 'factor' not in col.lower():
                 df[col] = df[col].astype(object)
         return df
+    stats = {}
+    stats['isEmpty'] = True
+    if new_df.empty:
+        return {
+            'modified': None,
+            'added': None,
+            'deleted': None,
+        }, stats
 
     old_df = convertToObject(old_df)
     new_df = convertToObject(new_df)
@@ -365,7 +378,6 @@ def dataframe_difference(old_df, new_df):
     added = added_deleted.loc[added_deleted._merge == 'right_only'].drop('_merge', axis=1)
     deleted = added_deleted.loc[added_deleted._merge == 'left_only'].drop('_merge', axis=1)
 
-    stats = {}
     stats['Number of rate revisions'] = len(modified)
     stats['Number of added factors'] = len(added)
     stats['Number of deleted factors'] = len(deleted)
@@ -417,3 +429,63 @@ def convert2Df(QuerySet):
     if not df.empty:
         df.drop(columns=toDropList, axis=1, inplace=True)
     return df
+
+
+def extractUpdateRBDetails(xl_url, withExhibitStatusHeader=False):
+    wb = openpyxl.load_workbook(xl_url)
+    rbDetailSheetName = None
+    for i in wb.sheetnames:
+        if 'rate' in i.lower() and 'details' in i.lower():
+            rbDetailSheetName = i
+    sheet = wb[rbDetailSheetName]
+    data = []
+    for row in sheet.iter_rows(values_only=True):
+        data.append(row)
+    df = pd.DataFrame(data)
+
+    # split to multiple tables
+    SheetTableList = []
+    table = []
+
+    for row in df.itertuples(index=False):
+        if any(row._asdict().values()):
+            table.append(list(row._asdict().values()))
+        elif len(table) > 0 and all([not x for x in row._asdict().values()]):
+            print('Found Table Ending')
+            SheetTableList.append(deepcopy(pd.DataFrame(table).dropna(axis=1, how='all')))
+            table.clear()
+    if len(table) != 0:
+        SheetTableList.append(deepcopy(pd.DataFrame(table).dropna(axis=1, how='all')))
+
+    toDelete = SheetTableList[1]
+    print(toDelete)
+    # df_out = transformRB(df_sheets=None)
+    return {'rbDetails'
+            'exhibitStatusSeries': None,
+            'deletedExhibits': toDelete}
+
+
+def getToExpireExhibits(xl_url):
+    '''
+    retutns
+        'deletedList': deletedList,
+        'renamedDict': renamedDict,
+        'toExpire': toExpire
+    '''
+    toExpire = []
+    deletedList = []
+    renamedDict = dict()
+    sheets = pd.read_excel(xl_url, sheet_name=None)
+    for sheet, df in sheets.items():
+        if sheet == 'DELETED_EXHIBITS':
+            deletedList = df['Deleted Exhibit Name'].tolist()
+            toExpire.append(deletedList)
+        if sheet == 'RENAMED_EXHIBITS':
+            renamedDict = df.to_dict()
+            toExpire.extend(renamedDict['Old Exhibit Name'].values())
+
+    return {
+        'deletedList': deletedList,
+        'renamedDict': renamedDict,
+        'toExpire': toExpire
+    }

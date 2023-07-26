@@ -6,7 +6,7 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
-<h2 class="text-center"><u><b>View Ratebook</b></u></h2>
+<h3>View Ratebook by Versions</h3>
 <form method="post" action="/ratemanager/viewRBbyVersion/">
   {% csrf_token %}
   <table class="table table-sm">
@@ -25,15 +25,16 @@
     {%endfor%}
   </table>
 
-  <div class="text-center">
-    <input type="submit" class="btn btn-primary" value="Apply Filters" />
+  <div>
+    <input type="submit" class="btn btn-secondary" value="Apply Filters" />
   </div>
 </form>
 
-<form action="/ratemanager/compareRB">
-<b>Select any two Ratebooks to Compare or click on the row to view it.</b>        
+<form action="/ratemanager/compareRB/">       
 <div class="text-left">
   <input id="compare_button" type="submit" class="btn btn-primary" value="Compare" disabled="true"/>
+  <input id="export_template_button" type="submit" class="btn btn-primary" value="Export Update Template" 
+  disabled="true" formaction="/ratemanager/exportTemplate/" formtarget="_blank"/>
 </div>
 <br>
 <nav aria-label="Page navigation">
@@ -84,7 +85,7 @@
     {% for obj in filteredRatebooks %}
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyVersionExhibits/{{ obj.RatebookID }}/{{ obj.RatebookVersion }}';">
         <td onclick="event.stopPropagation();">
-          <input type="checkbox" name="selectedRBs" value="{{ obj.RatebookID }}_{{obj.RatebookVersion}}">
+          <input type="checkbox" name="selectedRBs" value="{{ obj.RatebookID }}_{{obj.RatebookVersion}}_{{obj.RatebookName}}">
         </td>
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
@@ -112,34 +113,9 @@
   </table>
 </div>
 </form>
-<script>
-$(document).ready(function () {
-  $('#example').DataTable({
-    paging: false,
-    searching: false,
-    info: false,
-    order: [[9, 'desc']],
-    'columnDefs': [ {
-              'targets': [0],
-              'orderable': false,
-        }]
-  });
-});
-$('input[type=checkbox]').on('change', function (e) {
-    if ($('input[type=checkbox]:checked').length > 2)
-    {
-      $(this).prop('checked', false);
-      alert("Max allowed selections is 2");
-    }
-    else if ($('input[type=checkbox]:checked').length == 2)
-    {
-      $("#compare_button").prop("disabled", false);
-    }
-    else
-    {
-      $("#compare_button").prop("disabled", true);
-    }
-});
-</script>
 
 {% endblock %}
+
+{% block js%}
+  <script src ="{% static 'js/viewRBbyVersionScript.js' %}" type="text/javascript"></script>
+{% endblock js%}

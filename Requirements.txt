@@ -2,8 +2,12 @@ Django~=4.0.6
 tabula-py~=2.4.0
 openpyxl
 gunicorn
-psycopg2
+psycopg2-binary
 django-cors-headers
-django-crispy-forms
+django-crispy-forms==1.14
 xlrd
 jinja2
+django_htmx
+numpy
+pandas
+xlsxwriter
