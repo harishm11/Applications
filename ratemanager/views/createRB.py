@@ -32,7 +32,11 @@ def uploadNewRB(request):
         df = df[sheet_name]
         df[0] = df[0].str.replace(' ', '')
         df_view = pd.Series(index=list(df[0]), data=list(df[1]), name='Details')
-        rbDetailsTable = format_html(df_view.to_frame().to_html(justify='left', classes=['table', 'table-bordered']))
+        rbDetailsTable = format_html(
+            df_view.to_frame().to_html(
+                justify='left', classes=['table', 'table-bordered']
+            )
+        )
         request.session['rate_details'] = df_view.astype(str).to_dict()
 
     else:
