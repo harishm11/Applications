@@ -92,6 +92,17 @@ class SelectExhibitForm(forms.ModelForm):
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
+    PivotView = forms.ChoiceField(
+        choices=(
+            ('on', 'Spreadsheet Table View'),
+            ('off', 'Internal Table View')
+            ),
+        required=True,
+        initial='on',
+        widget=forms.Select(attrs={'id': 'RatebookUpdateType',
+                                   'onchange': 'this.form.submit();'})
+        )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.initial.get('TableCategory') != '':

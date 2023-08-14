@@ -1,4 +1,5 @@
 import os
+import re
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
@@ -9,6 +10,8 @@ from django.db.models import Q
 from django.utils.html import format_html
 from copy import deepcopy
 import openpyxl
+import sqlalchemy as sa
+from myproj.settings import DATABASES
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB", "viewRBbyDate", "viewRBbyVersion"]
 
@@ -198,9 +201,14 @@ def generateRatebookID():
 
 def loadtoAllExhibits(df):
     ''' This function loads a Dataframe to AllExhibits Model '''
-    for row in df.itertuples(index=False):
-        Record = dict(row._asdict())
-        AllExhibits.objects.create(**Record)
+    db_url = 'postgresql://' + DATABASES['default']['USER'] + ':' \
+        + DATABASES['default']['PASSWORD'] + '@'\
+        + DATABASES['default']['HOST'] + ':'\
+        + DATABASES['default']['PORT'] + '/'\
+        + DATABASES['default']['NAME']
+    engine = sa.create_engine(db_url)
+    df.to_sql('ratemanager_allexhibits', engine,
+              method='multi', if_exists='append', index=False)
 
 
 def findRBDetails(df):
@@ -421,7 +429,8 @@ def generate_html_diff(changes):
 def convert2Df(QuerySet):
     ''' Convert QuerySet to Dataframe and
     Drops fields not needed for comparision of Rate Factors '''
-    toDropList = ['id', 'RatebookID', 'Ratebook_id', "RatebookVersion", "RecordStatus"]
+    toDropList = ['id', 'RatebookID', 'Ratebook_id',
+                  "RatebookVersion", "RecordStatus", "TableCategory"]
     for i in [f.name for f in AllExhibits._meta.get_fields(include_hidden=False)]:
         if 'Date' in i or 'Time' in i:
             toDropList.extend([i])
@@ -489,3 +498,42 @@ def getToExpireExhibits(xl_url):
         'renamedDict': renamedDict,
         'toExpire': toExpire
     }
+
+
+def inverseTransform(df):
+    def pivotFromat(df, index, columns, values='Factor'):
+        idf = df.pivot(
+            index=index,
+            columns=columns,
+            values=values
+            )
+
+        idf = idf.reset_index(allow_duplicates=False)
+
+        idf.columns = list(idf.columns)
+
+        rename_dict = dict()
+        for i in df.columns:
+            if 'RatingVar' in i:
+                rename_dict[i] = df['RatingVarName'+i[-1]].unique()[0]
+
+        idf.rename(columns=rename_dict, inplace=True)
+        return idf
+    df.dropna(how='all', axis=1, inplace=True)
+
+    # for example base rates minor covs like tables
+    if not any([re.findall(r"\ARatingVar", x) for x in list(df.columns)]):
+        return df[['Coverage', 'Factor']]
+
+    varCount = sum([1 if re.match(r'\ARatingVar', x) else 0 for x in list(df.columns)])/2
+    varNames = [x for x in list(df.columns) if re.match(r'\ARatingVarValue', x)]
+
+    # one Rating variable and many covs
+    if varCount == 1:
+        return pivotFromat(df, index='RatingVarValue1', columns='Coverage')
+
+    if varCount >= 2:
+        if len(df['Coverage'].unique()) == 1:
+            return pivotFromat(df, index=varNames[1:], columns=varNames[0])
+        else:
+            return pivotFromat(df, index=varNames, columns='Coverage')

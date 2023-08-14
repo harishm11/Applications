@@ -1,12 +1,11 @@
-from django.db.models import Q, F
+from django.db.models import Q
 from django.shortcuts import render
 from ratemanager.models import Ratebooks
 from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import ratemanager.views.HelperFunctions as helperfuncs
-from django.db.models.expressions import Window
-from django.db.models.functions import RowNumber
 from datetime import datetime
+from django.utils.html import format_html
 
 
 def viewRB(request):
@@ -39,6 +38,7 @@ def viewRBbyVersionExhibits(request, rbID, rbVer):
     selected = {k: v[0] for k, v in dict(request.POST).items()}
     if request.method == 'GET':
         selected['Exhibit'] = ''
+        selected['PivotView'] = 'on'
     selected['RatebookID'] = rbID
     Query = Q()
     Query &= Q(RatebookID=rbID)
@@ -47,14 +47,20 @@ def viewRBbyVersionExhibits(request, rbID, rbVer):
     filteredExhibits = helperfuncs.fetchRatebookSpecificVersion(rbID=rbID, rbVersion=rbVer).\
         order_by('Coverage', 'Exhibit').filter(Query)
     exhibitForm = SelectExhibitForm(initial=selected)
-    page_number = request.GET.get('page')
-    paginator = Paginator(filteredExhibits, 1000)
-    try:
-        page_obj = paginator.get_page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
+    pivotview = selected['PivotView']
+    if pivotview == 'on' and selected.get('Exhibit') != '':
+        df = helperfuncs.convert2Df(filteredExhibits)
+        idf = helperfuncs.inverseTransform(df)
+        dfHTML = format_html(idf.to_html(table_id='example', index=False))
+    else:
+        page_number = request.GET.get('page')
+        paginator = Paginator(filteredExhibits, 1000)
+        try:
+            page_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = paginator.page(paginator.num_pages)
     return render(request, "ratemanager/ratebookmanager/viewRBbyVersionExhibits.html", locals())
 
 
@@ -63,15 +69,7 @@ def viewRBbyDate(request):
     appLabel = 'ratemanager'
     selected = {k: v[0] for k, v in dict(request.POST).items()}
     rbQuery = helperfuncs.buildViewFilterQuery(selected=selected)
-    filteredRatebooks = Ratebooks.objects.filter(rbQuery).alias(
-        sort_id=Window(
-            expression=RowNumber(),
-            partition_by=(
-                F("RatebookID")
-            ),
-            order_by=(F("RatebookVersion").desc()),
-        )
-    ).filter(sort_id=1).order_by('RatebookID')
+    filteredRatebooks = Ratebooks.objects.filter(rbQuery).distinct('RatebookID')
     page_number = request.GET.get('page')
     paginator = Paginator(filteredRatebooks, 50)
     try:

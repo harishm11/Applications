@@ -106,7 +106,9 @@ def loadUpdatedRB(request):
                 oldRB = oldRB.filter(Exhibit__in=df['Exhibit'].unique())
 
                 oldRB = helperfuncs.convert2Df(oldRB)
-                changes, stats = helperfuncs.dataframe_difference(old_df=oldRB, new_df=df)
+                changes, stats = helperfuncs.dataframe_difference(
+                    old_df=oldRB, new_df=df.drop(['TableCategory'], axis=1)
+                    )
                 if stats['isEmpty']:
                     msgs.append('No Changes found.')
                     raise EmptyDataError

@@ -24,6 +24,8 @@
       {%endfor%}
     </table>
 </form>
+
+{% if pivotview == 'off' %}
 <nav aria-label="Page navigation">
   <ul class="pagination pagination-sm">
      {% if page_obj.has_previous %}
@@ -73,6 +75,14 @@
       </tbody>
     </table>
   </div>
+
+{% else %}
+
+  {{ dfHTML }}
+
+{% endif %}
+
+
 <script>
   $(document).ready(function () {
     $('#example').DataTable({
@@ -81,6 +91,7 @@
       info: false
     });
 });
+$('#example').addClass("table table-sm display compact cell-border");
 </script>
 
 {%endblock%}
