@@ -141,7 +141,6 @@ class AllExhibits (models.Model):
     RatingVarName2 = models.CharField(max_length=100, null=True)
     RatingVarValue1 = models.CharField(max_length=100, null=True)
     RatingVarValue2 = models.CharField(max_length=100, null=True)
-    '''
     RatingVarName3 = models.CharField(max_length=100, null=True)
     RatingVarName4 = models.CharField(max_length=100, null=True)
     RatingVarValue3 = models.CharField(max_length=100, null=True)
@@ -154,7 +153,6 @@ class AllExhibits (models.Model):
     RatingVarName7 = models.CharField(max_length=100, null=True)
     RatingVarValue8 = models.CharField(max_length=100, null=True)
     RatingVarValue8 = models.CharField(max_length=100, null=True)
-    '''
     NewBusinessEffectiveDate = models.DateField(
         null=False,
         default=None
