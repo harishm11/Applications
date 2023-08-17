@@ -20,109 +20,268 @@ def transformRB(xl_url=None, df_sheets=None):
     """Function to transform the excel file to required form
     to be able to load into postgres database."""
 
+    # required for transform
+    separators_list = ['-', u'\u2013', '&', '/', 'to', '\\']
+    list_of_known_covs = [
+        'BI', 'PD', 'UMBI', 'UMPDC-1', 'UMPDC-2',
+        'MED', 'COMP', 'COLL', 'LOSS OF USE', 'RENT', 'TOW'
+    ]
+    exhibits_to_handle_manually = [
+        'DeductiblesbySymbol', 'DriverTrainingDiscount', 'UMPDC2BaseRatesbyDeductible',
+        'CollisionRatesTrailers', 'CCDRatesTrailers', 'CollisionRatesCampers', 'CCDRatesCampers'
+        ]
+    excludeList = ["Ratebook Details", "DELETED_EXHIBITS", 'RENAMED_EXHIBITS',
+                   'PointsAssignmentsDPS']
+    nonFactorExhibits = ["severitybands", "pointsassignment"]
+
     msgs = []
     if xl_url:
         df_sheets = pd.read_excel(xl_url, sheet_name=None)
+
+    df_dict = dict()
     df_out = pd.DataFrame(columns=["Exhibit", "Coverage", "Factor"])
 
-    def create_rate_vars_cols(df, var_list):
-        # df = df[df.columns.sort_values().to_list()]
+    def find_separator(s):
+        for x in separators_list:
+            if x in s:
+                return True, x
+        return None, None
+
+    def check_all_numeric(range, separator):
+        ls = range.split(separator)
+        if all([x.replace(' ', '').isnumeric() for x in ls]):
+            return True
+
+    def check_range(pds):
+        if not isinstance(pds, pd.Series):
+            pds = pds.to_series()
+
+        def found_separators(s):
+            if isinstance(s, str):
+                has_separator, separator = find_separator(s)
+                if any([has_separator and check_all_numeric(s, separator)
+                        for x in separators_list]):
+                    return True
+            return False
+        if pds.apply(found_separators).any():
+            return True
+        return False
+
+    def categorise(df, sheet_name):
+        # check for any coverages in the columns of dataframes
+        # (cov as a subset of col_name and vice versa)
+        def find_ratevars(possible_list):
+            blocklist = ['symbol']
+            for i in list_of_known_covs:
+                for index, j in enumerate(possible_list):
+                    i = i.lower()
+                    j = j.lower()
+                    if (((i == j) or (i in j) or (j in i)) or 'factor' in j) \
+                            and not any([x in j for x in blocklist]) \
+                            and ('unnamed:' not in j):
+                        ratevars = list(possible_list)[:index]
+                        if 'Coverage' in ratevars:
+                            ratevars.remove('Coverage')
+                        covs = list(possible_list)[index:]
+                        return ratevars, covs
+            return None, None
+
+        tabStruct = dict()
+        ratevars, covs = find_ratevars(df.columns)
+        tabStruct['ratevars'] = ratevars
+        tabStruct['covs'] = covs
+
+        # assumption if covs as rows there is a column called coverage
+        if any(['coverage' == x.lower() for x in list(df.columns)]):
+            tabStruct['category'] = 'covs as rows'
+
+        elif any(['factor' in x.lower() for x in list(df.columns)]):
+            tabStruct['category'] = 'no covs but factor in cols'
+
+        elif (ratevars or covs):
+            tabStruct['category'] = 'covs as cols'
+
+        elif not covs:
+            tabStruct['category'] = 'neither covs nor factor in cols'
+
+        tabStruct['hasRange'] = []
+
+        # check for range in columns
+        for i in df.columns:
+            if check_range(df[i]):
+                tabStruct['hasRange'].append(i)
+        return tabStruct
+
+    def create_rate_vars_cols(df_in, var_list):
         rename_col_names = []
-        for i in range(1, len(var_list) + 1):
-            rename_col_names.append((var_list[i - 1], "RatingVarValue" + str(i)))
+        df_in = df_in[df_in.columns.sort_values().to_list()]
+        for i in range(1, len(var_list)+1):
+            rename_col_names.append((var_list[i-1], 'RatingVarValue'+str(i)))
         rename_col_names = dict(rename_col_names)
-        for i in range(1, len(var_list) + 1):
-            df["RatingVarName" + str(i)] = var_list[i - 1]
-        df.rename(columns=rename_col_names, inplace=True)
+        for i in range(1, len(var_list)+1):
+            df_in['RatingVarName'+str(i)] = var_list[i-1]
+        df_in.rename(columns=rename_col_names, inplace=True)
+        return df_in
 
     def get_table_category(sheet_name):
-        if (
-            "severitybands" in sheet_name.lower()
-            or "pointsassignment" in sheet_name.lower()
-        ):
-            return "Miscellaneous"
+        if any([x.lower() in sheet_name.lower() for x in nonFactorExhibits]):
+            return "Non-Factor Table"
         else:
-            return "Pricing"
+            return "Factor Table"
+
+    def handle_manually(tabStruct, sheetname, df_in):
+        match sheetname:
+            case 'DeductiblesbySymbol':
+                df_in = df_in.melt(id_vars=tabStruct['ratevars'])
+                df_in.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+
+                df_in['Symbol1'] = pd.NA
+                df_in['Symbol2'] = pd.NA
+                for index, val in df_in['Coverage'].items():
+                    cov = r = None
+                    has_separator, separator = find_separator(val)
+                    if has_separator:
+                        cov, r = val.split()
+                    if separator == '-':
+                        df_in.loc[index, 'Coverage'] = cov
+                        df_in.loc[index, 'Symbol1'], \
+                            df_in.loc[index, 'Symbol2'] = r.split(separator)
+                    if separator == '&':
+                        df_in.loc[index, 'Coverage'] = cov
+                        a, b = r.split(separator)
+                        df_in.loc[index, 'Symbol1'] = a
+                        df_in.loc[int(df_in.index[-1])+1] = df_in.loc[index]
+                        df_in.loc[int(df_in.index[-1]), 'Symbol1'] = b
+                tabStruct['ratevars'].extend(['Symbol1', 'Symbol2'])
+                df_in = create_rate_vars_cols(df_in, tabStruct['ratevars'])
+                df_in['Exhibit'] = sheetname
+                return df_in
+            case 'DriverTrainingDiscount':
+                newdf = df_in.melt(id_vars=tabStruct['ratevars'])
+                newdf.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+                for index, val in newdf['Description'].items():
+                    if any([x.isnumeric() for x in val.split()]):
+                        cleanedVal = [x for x in val.split() if x.isnumeric()]
+                        if len(cleanedVal) >= 2:
+                            newdf.loc[index, 'Description'] = cleanedVal[0]
+                            for i in range(int(cleanedVal[0])+1, int(cleanedVal[1])+1):
+                                newdf.loc[int(newdf.index[-1])+1] = newdf.loc[index]
+                                newdf.loc[int(newdf.index[-1]), 'Description'] = str(i)
+                        else:
+                            newdf.loc[index, 'Description'] = cleanedVal[0]
+                newdf.sort_values(by=['Description', 'Coverage'], inplace=True)
+                newdf = create_rate_vars_cols(newdf, tabStruct['ratevars'])
+                newdf['Exhibit'] = sheetname
+                newdf.loc[newdf['RatingVarValue1'] == 'Senior Defensive', 'Exhibit'] = 'SeniorDefensive'
+                return newdf
+
+            case 'UMPDC2BaseRatesbyDeductible':
+                newdf = df_in.melt(id_vars='Deductible')
+                newdf.rename(columns={'variable': 'AffinityGroup', 'value': 'Factor'}, inplace=True)
+                newdf = create_rate_vars_cols(newdf, ['Deductible', 'AffinityGroup'])
+                newdf['Exhibit'] = sheetname
+                newdf['Coverage'] = 'UMPD'
+                return newdf
+
+            case 'CollisionRatesTrailers' | 'CCDRatesTrailers' | 'CollisionRatesCampers' | 'CCDRatesCampers':
+                df_in = df_in.melt(id_vars=df_in.columns[0:2])
+                df_in.rename(columns={'variable': 'Deductible', 'value': 'Factor'}, inplace=True)
+
+                def clean(string):
+                    if isinstance(string, str):
+                        return ''.join([x for x in string if x not in [' ', '$', '\n']])
+                df_in.apply(clean)
+                df_in['Amount1'] = pd.NA
+                df_in['Amount2'] = pd.NA
+                for index, val in df_in[df_in.columns[0]].items():
+                    val = ''.join([x for x in val if x not in [' ', '$']])
+                    r = None
+                    has_separator, separator = find_separator(val)
+                    if has_separator:
+                        r1, r2 = val.split(separator)
+                        if separator == '-' or separator == u'\u2013':
+                            df_in.loc[index, 'Amount1'], \
+                                df_in.loc[index, 'Amount2'] = r1, r2
+                        if separator == '&':
+                            df_in.loc[index, 'Amount1'] = r1
+                ratevars = ['Amount1', 'Amount2', 'Deductible']
+                ratevars.append(df_in.columns[1])
+                df_in.drop(df_in.columns[0], axis=1, inplace=True)
+                df_in = create_rate_vars_cols(df_in, ratevars)
+                df_in['Exhibit'] = sheetname
+                df_in['Coverage'] = 'COLL'
+                return df_in
+
+            case _:
+                return df_in
+
+    def transform(sheet_name, df):
+        pd.options.mode.copy_on_write = True
+        tabStruct = categorise(df, sheet_name)
+        newdf = pd.DataFrame()
+
+        def find_cov_name(sheetname):
+            for i in list_of_known_covs:
+                if i.lower() in sheetname.lower():
+                    return i
+            return 'All'
+
+        def handle_ranges(df_in):
+            if tabStruct['hasRange']:
+                for i in tabStruct['hasRange']:
+                    df_in[str(i)+'1'] = pd.NA
+                    df_in[str(i)+'2'] = pd.NA
+                    for index, val in df_in[i].items():
+                        has_separator, separator = find_separator(val)
+                        if has_separator:
+                            df_in.loc[index, str(i)+'1'], df_in.loc[index, str(i)+'2'] = val.split(separator)
+                        else:
+                            df_in.loc[index, str(i)+'1'] = val
+                    df_in.drop([i], axis=1, inplace=True)
+                    tabStruct['ratevars'].remove(i)
+                    tabStruct['ratevars'].extend([str(i)+'1', str(i)+'2'])
+
+        if sheet_name in exhibits_to_handle_manually:
+            newdf = handle_manually(tabStruct, sheet_name, df)
+        else:
+            match tabStruct['category']:
+                case 'covs as cols':
+                    df = df.melt(id_vars=tabStruct['ratevars'])
+                    df.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+                    handle_ranges(df)
+                    newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
+                    newdf['Exhibit'] = sheet_name
+                case 'covs as rows':
+                    df.rename(columns={'Factor Amt.': 'Factor'}, inplace=True)
+                    handle_ranges(df)
+                    newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
+                    newdf['Exhibit'] = sheet_name
+                case 'no covs but factor in cols':
+                    df.rename(columns={'Factor Amt.': 'Factor'}, inplace=True)
+                    handle_ranges(df)
+                    newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
+                    newdf['Coverage'] = find_cov_name(sheet_name)
+                    newdf['Exhibit'] = sheet_name
+                case 'neither covs nor factor in cols':
+                    return df
+
+                case _:
+                    return df
+
+        return newdf
 
     for sheet_name, df in df_sheets.items():
-        # Categorize Tables based on column features and type of transformation
-        idvars = []
-        table_sig = ""
-        for i in df.columns:
-            if df.columns[0] == "BI":
-                table_sig = "only coverages"
-            elif i == "Coverage":
-                table_sig = "coverage as rows"
-                break
-            elif "UMPD" not in sheet_name and not any(
-                [
-                    (x == i or (x in i and "Symbol" not in i))
-                    for x in ["BI", "COMP", "PD", "UM", "UMBI", "MED", "COLL", "Factor"]
-                ]
-            ):
-                table_sig = "coverage as columns"
-                idvars.append(i)
-            else:
-                break
+        df_dict[sheet_name] = transform(sheet_name, df)
+        print(sheet_name, 'transformed')
+        df_dict[sheet_name]['TableCategory'] = get_table_category(sheet_name)
+        df_dict[sheet_name] = df_dict[sheet_name].astype(object)
+        if sheet_name not in excludeList:
+            try:
+                df_out = df_out.merge(df_dict[sheet_name], how='outer')
+            except Exception as err:
+                print("Unable to transform {} table due to {}".format(sheet_name, err))
 
-        # handle transformation based on each category
-        if table_sig == "coverage as columns":
-            df = df.melt(id_vars=idvars)
-            create_rate_vars_cols(df, idvars)
-            df.rename(columns={"variable": "Coverage", "value": "Factor"}, inplace=True)
-            df["Exhibit"] = sheet_name
-            df["TableCategory"] = get_table_category(sheet_name)
-
-            df = df.astype(str)
-            if not df.empty:
-                df_out = pd.merge(df_out, df, how="outer")
-            df_out = df_out.astype(str)
-
-        elif table_sig == "coverage as rows":
-            df.rename(columns={"Factor Amt.": "Factor"}, inplace=True)
-            rate_vars = []
-            for i in df.columns:
-                if i != "Factor" and i != "Coverage":
-                    rate_vars.append(i)
-            create_rate_vars_cols(df, rate_vars)
-            df["Exhibit"] = sheet_name
-            df["TableCategory"] = get_table_category(sheet_name)
-
-            df = df.astype(str)
-            if not df.empty:
-                df_out = pd.merge(df_out, df, how="outer")
-            df_out = df_out.astype(str)
-
-        elif "UMPD" in sheet_name:
-            idvars = []
-            for i in df.columns:
-                if i == "Deductible":
-                    idvars.append(i)
-            df = df.melt(id_vars=idvars)
-            df.rename(
-                columns={"variable": "Description", "value": "Factor"}, inplace=True
-            )
-            create_rate_vars_cols(df, list(set(df.columns) - set({"Factor"})))
-            df["Exhibit"] = sheet_name
-            df["Coverage"] = "UMPD"
-            df["TableCategory"] = get_table_category(sheet_name)
-
-            df = df.astype(str)
-            if not df.empty:
-                df_out = pd.merge(df_out, df, how="outer")
-            df_out = df_out.astype(str)
-
-        elif table_sig == "only coverages":
-            df = df.T.reset_index()
-            df.rename(columns={"index": "Coverage", 0: "Factor"}, inplace=True)
-            df["Exhibit"] = sheet_name
-            df["TableCategory"] = get_table_category(sheet_name)
-            df = df.astype(str)
-            if not df.empty:
-                df_out = pd.merge(df_out, df, how="outer")
-            df_out = df_out.astype(str)
-
-    numRatingVars = 2
+    numRatingVars = 8
     for i in range(1, numRatingVars+1):
         if 'RatingVarName' + str(i) not in df_out.columns:
             df_out['RatingVarName' + str(i)] = None
@@ -130,11 +289,11 @@ def transformRB(xl_url=None, df_sheets=None):
 
     df_out = df_out[df_out.columns.sort_values().to_list()]
     df_out = df_out.astype(object).replace('nan', None, regex=True)
-    excludeList = ["Ratebook Details", "DELETED_EXHIBITS", 'RENAMED_EXHIBITS']
+
     for i in set(df_sheets.keys()) - set(df_out["Exhibit"].unique()):
         if i not in excludeList:
             msgs.append("Unable to transform {} table.".format(i))
-
+    print(msgs)
     return df_out, msgs
 
 
@@ -201,13 +360,15 @@ def generateRatebookID():
 
 def loadtoAllExhibits(df):
     ''' This function loads a Dataframe to AllExhibits Model '''
+    print('starting load to database')
     db_url = 'postgresql://' + DATABASES['default']['USER'] + ':' \
         + DATABASES['default']['PASSWORD'] + '@'\
         + DATABASES['default']['HOST'] + ':'\
         + DATABASES['default']['PORT'] + '/'\
         + DATABASES['default']['NAME']
+    print('Connecting to {}'.format(db_url))
     engine = sa.create_engine(db_url)
-    df.to_sql('ratemanager_allexhibits', engine,
+    df.to_sql('ratemanager_allexhibits', engine, chunksize=1000,
               method='multi', if_exists='append', index=False)
 
 
