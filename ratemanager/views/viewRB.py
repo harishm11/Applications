@@ -51,6 +51,7 @@ def viewRBbyVersionExhibits(request, rbID, rbVer):
     if pivotview == 'on' and selected.get('Exhibit') != '':
         df = helperfuncs.convert2Df(filteredExhibits)
         idf = helperfuncs.inverseTransform(df)
+        idf = idf.fillna('')
         dfHTML = format_html(idf.to_html(table_id='example', index=False))
     else:
         page_number = request.GET.get('page')

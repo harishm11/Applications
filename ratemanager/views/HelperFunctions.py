@@ -12,8 +12,10 @@ from copy import deepcopy
 import openpyxl
 import sqlalchemy as sa
 from myproj.settings import DATABASES
+from difflib import get_close_matches
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB", "viewRBbyDate", "viewRBbyVersion"]
+pd.options.mode.copy_on_write = True
 
 
 def transformRB(xl_url=None, df_sheets=None):
@@ -30,7 +32,8 @@ def transformRB(xl_url=None, df_sheets=None):
         'DeductiblesbySymbol', 'DriverTrainingDiscount', 'UMPDC2BaseRatesbyDeductible',
         'CollisionRatesTrailers', 'CCDRatesTrailers', 'CollisionRatesCampers', 'CCDRatesCampers'
         ]
-    excludeList = ["Ratebook Details", "DELETED_EXHIBITS", 'RENAMED_EXHIBITS',
+    excludeList = ["Ratebook Details", "Rate Details", "RatebookDetails",
+                   "DELETED_EXHIBITS", 'RENAMED_EXHIBITS',
                    'PointsAssignmentsDPS']
     nonFactorExhibits = ["severitybands", "pointsassignment"]
 
@@ -189,7 +192,7 @@ def transformRB(xl_url=None, df_sheets=None):
 
                 def clean(string):
                     if isinstance(string, str):
-                        return ''.join([x for x in string if x not in [' ', '$', '\n']])
+                        return ''.join([x for x in string if x not in [' ', '$', '\n', u'\24']])
                 df_in.apply(clean)
                 df_in['Amount1'] = pd.NA
                 df_in['Amount2'] = pd.NA
@@ -293,7 +296,9 @@ def transformRB(xl_url=None, df_sheets=None):
     for i in set(df_sheets.keys()) - set(df_out["Exhibit"].unique()):
         if i not in excludeList:
             msgs.append("Unable to transform {} table.".format(i))
-    print(msgs)
+    # print(msgs)
+    map_covs_and_vars(df_out)
+    # df_out.to_excel('./uploads/check_transform.xlsx')
     return df_out, msgs
 
 
@@ -694,7 +699,76 @@ def inverseTransform(df):
         return pivotFromat(df, index='RatingVarValue1', columns='Coverage')
 
     if varCount >= 2:
+        if df['Coverage'].unique()[0] == 'All':
+            return pivotFromat(df, index=varNames, columns='Factor')
         if len(df['Coverage'].unique()) == 1:
             return pivotFromat(df, index=varNames[1:], columns=varNames[0])
         else:
             return pivotFromat(df, index=varNames, columns='Coverage')
+
+
+def map_covs_and_vars(df):
+    cov_mapping = {
+        'UMPD': 'UninsuredMotoristPD',
+        'BI': 'BodilyInjury',
+        'PD': 'PropertyDamage',
+        'UM': 'UninsuredMotoristBI',
+        'MED': 'Medical',
+        'COMP': 'Comprehensive',
+        'COLL': 'Collission',
+        'ADD EQUI': 'AdditionaEquipment',
+        'RENTAL RE': 'RentalReembursement',
+        'LOSS OF USE': 'LossOfUse',
+        'TOWING': 'Towing',
+        'ALL OTHER COVERAGES': 'Other',
+        'All': 'All'
+    }
+    ratevars = [
+        'TermLength',
+        'UMPDOption',
+        'DPS',
+        'Symbol',
+        'ModelYear ',
+        'HighPerfInd ',
+        'VehHistInd ',
+        'PassiveResType',
+        'AntiLockInd ',
+        'AntitheftInd',
+        'AltFuelInd ',
+        'EscInd ',
+        'DriverClass',
+        'YearsDrivingExperience',
+        'StudentAwayInd',
+        'VehUseCode',
+        'HouseholdCompostion',
+        'FrequencyBand',
+        'SeverityBand',
+        'MultiPolicy',
+        'GoodDriverDiscInd',
+        'PermissiveUserOption',
+        'VehicleAge1',
+        'RideShareInd',
+        'Deductible1',
+        'Deductible2',
+        'DriverClassCode',
+        'VehicleAge2',
+        'Limit1',
+        'Limit2',
+        'Mielage1',
+        'Mileage2']
+    ratevar_mappings = dict()
+    uniq_ratevars = []
+    for i in df.columns:
+        if 'RatingVarName' in i:
+            uniq_ratevars.extend(list(df[i].unique()))
+
+    uniq_ratevars = [x for x in uniq_ratevars if isinstance(x, str)]
+
+    for i in uniq_ratevars:
+        matches = get_close_matches(i, ratevars, n=1)
+        ratevar_mappings[i] = matches[0] if matches else i
+
+    for i in df.columns:
+        if 'RatingVarName' in i:
+            df[i] = df[i].replace(ratevar_mappings)
+    df['Coverage'] = df['Coverage'].replace(cov_mapping)

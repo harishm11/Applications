@@ -11,3 +11,4 @@ django_htmx
 numpy
 pandas
 xlsxwriter
+SQLAlchemy

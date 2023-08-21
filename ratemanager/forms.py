@@ -97,6 +97,7 @@ class SelectExhibitForm(forms.ModelForm):
             ('on', 'Spreadsheet Table View'),
             ('off', 'Internal Table View')
             ),
+        label='',
         required=True,
         initial='on',
         widget=forms.Select(attrs={'id': 'RatebookUpdateType',

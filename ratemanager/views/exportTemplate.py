@@ -3,12 +3,13 @@ import pandas as pd
 from django.http import FileResponse
 import ratemanager.views.HelperFunctions as hf
 from ratemanager.models import Ratebooks
+from django.apps import apps
 
 
 def exportTemplate(request):
     obj_id_list = request.GET.getlist('selectedRBs')
     rbID, rbVer, _, _ = obj_id_list[0].split('_')
-    rbMeta = Ratebooks.objects.select_related().filter(RatebookID=rbID, RatebookVersion=rbVer).values()[0]
+    rbMeta = Ratebooks.objects.filter(RatebookID=rbID, RatebookVersion=rbVer).values()[0]
     requiredRbQS = hf.fetchRatebookSpecificVersion(rbID=rbID, rbVersion=rbVer)
     df = hf.convert2Df(requiredRbQS)
     xl = io.BytesIO()
@@ -31,9 +32,14 @@ def exportTemplate(request):
         'Project ID'
     ]
     print(rbMeta)
-    data = [
-        rbMeta.get(x.replace(' ', '')) for x in export_details
-    ]
+    data = []
+    for x in export_details:
+        toIn = rbMeta.get(x.replace(' ', ''))
+        if toIn:
+            data.append(toIn)
+        else:
+            model = apps.get_model("systemtables", x.replace(' ', '').lower())
+            data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
 
     pd.Series(index=export_details,
               data=data
