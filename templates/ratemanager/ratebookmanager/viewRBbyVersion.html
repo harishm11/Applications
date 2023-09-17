@@ -81,8 +81,8 @@
       </tr>
     </thead>
     <tbody>
-    {% if filteredRatebooks %}
-    {% for obj in filteredRatebooks %}
+    {% if filteredRatebookMetadata %}
+    {% for obj in filteredRatebookMetadata %}
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyVersionExhibits/{{ obj.RatebookID }}/{{ obj.RatebookVersion }}';">
         <td onclick="event.stopPropagation();">
           <input type="checkbox" name="selectedRBs" value="{{ obj.RatebookID }}_{{obj.RatebookVersion}}_{{obj.RatebookName}}">

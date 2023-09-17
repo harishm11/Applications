@@ -1,7 +1,7 @@
 import traceback
 import pandas as pd
 from django.shortcuts import render
-from ratemanager.models import Ratebooks
+from ratemanager.models import RatebookMetadata
 from django.utils.html import format_html
 import ratemanager.views.HelperFunctions as helperfuncs
 from datetime import datetime
@@ -72,8 +72,8 @@ def loadNewRBtoDB(request):
 
         rate_details['RatebookVersion'] = 0.0
         rate_details['RatebookID'] = helperfuncs.generateRatebookID()
-        if Ratebooks.objects.filter(**identityRateDetails).count() == 0:
-            rbObj, loaded_to_dbBooks = Ratebooks.objects.get_or_create(**rate_details)
+        if RatebookMetadata.objects.filter(**identityRateDetails).count() == 0:
+            rbObj, loaded_to_dbBooks = RatebookMetadata.objects.get_or_create(**rate_details)
         else:
             msgs.append('Another Ratebook with similar details already exists\
                         You may want to use Update.')
@@ -84,21 +84,29 @@ def loadNewRBtoDB(request):
                 # transform the data to usable form
                 df, errors = helperfuncs.transformRB(xl_url=request.session['upload_url'])
                 msgs.extend(errors)
+
+                helperfuncs. updateRatingExhibits(df)
+                helperfuncs. updateRatingVars(uploadURL=request.session["upload_url"])
+
                 df['Ratebook_id'] = rbObj.id
                 df['RatebookVersion'] = rate_details['RatebookVersion']
                 df['RatebookID'] = rate_details['RatebookID']
                 df['RecordStatus'] = 'Active'
+
                 for key in rate_details:
                     if 'Date' in key or 'Time' in key:
                         df[key] = rate_details[key]
-                helperfuncs.loadtoAllExhibits(df)
+
+                helperfuncs.loadtoRatingFactors(df)
                 loaded_to_dbExhibits = True
+
             except Exception as err:
                 traceback.print_exc()
                 msgs.append(repr(err))
                 loaded_to_dbExhibits = False
                 if rbObj:
-                    Ratebooks.objects.get(pk=rbObj.id).delete()
+                    RatebookMetadata.objects.get(pk=rbObj.id).delete()
+
         else:
             msgs.append('Record already exists')
 
@@ -108,6 +116,7 @@ def loadNewRBtoDB(request):
         else:
             msgs.append('Unable to load to Database.')
             load_failed = True
+
     except Exception as err:
         load_failed = True
         msgs.append(err)

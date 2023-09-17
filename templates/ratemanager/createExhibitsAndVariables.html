@@ -1,0 +1,79 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} Create Template {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %}
+<h2>Create Template</h2>
+<form method="post">
+{% for hidden_field in form.hidden_fields %}
+{{ hidden_field.errors }}
+{{ hidden_field }}
+{% endfor %}
+
+{% csrf_token %}
+
+{{ form.management_form }}
+{{ form.non_form_errors }}
+
+{% for exhibit_form in form.forms %}
+
+<hr>
+
+<h2>
+  {% if exhibit_form.instance.id %}
+    Exhibit #{{ exhibit_form.instance.id }}</h2>
+  {% else %}
+    {% if form.forms|length > 1 %}
+      Add another Exhibit
+    {% else %}
+      Add an Exhibit
+    {% endif %}
+  {% endif %}
+</h2>
+
+{% for hidden_field in exhibit_form.hidden_fields %}
+  {{ hidden_field.errors }}
+{% endfor %}
+
+  {{ exhibit_form }}
+
+{% if exhibit_form.nested %}
+  <div class="indent text-center">
+    <br>
+    <h3>Rating Variables</h3>
+
+    {{ exhibit_form.nested.management_form }}
+    {{ exhibit_form.nested.non_form_errors }}
+
+      {% for ratingvars_form in exhibit_form.nested.forms %}
+            <em>
+              {% if ratingvars_form.instance.id %}
+                Rating Variable #{{ ratingvars_form.instance.id }}
+              {% else %}
+                Add another variable
+                &nbsp;
+              {% endif %}
+            </em>
+            {% for hidden_field in ratingvars_form.hidden_fields %}
+              {{ hidden_field.errors }}
+            {% endfor %}
+              {{ ratingvars_form }}
+              <br>
+      {% endfor %}
+    <input class="btn btn-primary" type="submit" value="Update to add another Rating Variable">
+  </div>
+{% endif %}
+
+{% endfor %}
+
+<hr>
+
+<p>
+<input class="btn btn-primary" type="submit" value="Update to add another Exhibit">
+&nbsp; &nbsp;
+<a href="/ratemanager/exportTemplate/{{pk}}/">Export Template</a>
+</p>
+</form>
+{% endblock %}

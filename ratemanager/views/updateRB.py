@@ -3,7 +3,7 @@ import pandas as pd
 from django.shortcuts import render
 import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.forms import UpdateForm
-from ratemanager.models import Ratebooks, AllExhibits
+from ratemanager.models import RatebookMetadata, RatingFactors
 from datetime import datetime
 from pandas.errors import EmptyDataError
 
@@ -20,6 +20,7 @@ def loadUpdatedRB(request):
     appLabel = "ratemanager"
     # save the uploaded file from the form upload file and get form values
     uploadUrl = helperfuncs.uploadFile(request)
+    request.session['upload_url'] = uploadUrl
     file_uploaded = True
     msgs = []
     rbChangesTable = None
@@ -50,13 +51,13 @@ def loadUpdatedRB(request):
     identityRateDetails = {key: rate_details.get(key) for key in identityKeys}
 
     # get last version RatebookID with similar details
-    rbObjLastVersion = Ratebooks.objects.filter(**identityRateDetails).\
+    rbObjLastVersion = RatebookMetadata.objects.filter(**identityRateDetails).\
         order_by("-RatebookVersion").first()
     rate_details["RatebookID"] = (
         rbObjLastVersion.RatebookID if rbObjLastVersion is not None else None
     )
 
-    def addMetadataToAllExhibitsRecord(Record, rate_details):
+    def addMetadataToFactorsRecord(Record, rate_details):
         Record["Ratebook_id"] = rbObj.id
         Record["RatebookVersion"] = rate_details["RatebookVersion"]
         Record["RatebookID"] = rate_details["RatebookID"]
@@ -65,17 +66,18 @@ def loadUpdatedRB(request):
             if 'Date' in key or 'Time' in key:
                 Record[key] = rate_details[key]
 
-    def searchAllExhibitsRow(newRecord):
-        identityKeys = ('RatebookID', 'Coverage', 'Exhibit',
-                        'RatingVarName1', 'RatingVarValue1',
-                        'RatingVarName2', 'RatingVarValue2')
+    def searchRatingFactorsRow(newRecord):
+        identityKeys = ['RatebookID', 'Coverage', 'Exhibit']
+        for i in [f.name for f in RatingFactors._meta.get_fields(include_hidden=False)]:
+            if 'RatingVar' in i:
+                identityKeys.append(i)
         identityRateDetails = {key: newRecord.get(key) for key in identityKeys}
         identityRateDetails['RecordStatus'] = 'Active'
         # Get the specific row with given key
-        searchObj = AllExhibits.objects.get(**identityRateDetails)
+        searchObj = RatingFactors.objects.get(**identityRateDetails)
         return searchObj
 
-    def expireAllExhibitsRow(Obj, newRecord: dict):
+    def expireRatingFactorsRow(Obj, newRecord: dict):
         ''' Expire a Old Record with dates from New Record '''
         Obj.NewBusinessExpiryDate = newRecord['NewBusinessEffectiveDate']
         Obj.RenewalExpiryDate = newRecord['RenewalEffectiveDate']
@@ -88,10 +90,10 @@ def loadUpdatedRB(request):
     else:
         if updateFormValues.get("RatebookUpdateType") == "minor":
             rate_details["RatebookVersion"] = rbObjLastVersion.RatebookVersion + 0.1
-            rbObj, loaded_to_dbBooks = Ratebooks.objects.get_or_create(**rate_details)
+            rbObj, loaded_to_dbBooks = RatebookMetadata.objects.get_or_create(**rate_details)
         elif updateFormValues.get("RatebookUpdateType") == "major":
             rate_details["RatebookVersion"] = rbObjLastVersion.RatebookVersion + 1
-            rbObj, loaded_to_dbBooks = Ratebooks.objects.get_or_create(**rate_details)
+            rbObj, loaded_to_dbBooks = RatebookMetadata.objects.get_or_create(**rate_details)
 
         loaded_to_dbExhibits = False
         if loaded_to_dbBooks:
@@ -120,23 +122,23 @@ def loadUpdatedRB(request):
                     del Record['Factor_Old']
                     Record['Factor'] = Record['Factor_New']
                     del Record['Factor_New']
-                    addMetadataToAllExhibitsRecord(Record=Record, rate_details=rate_details)
-                    searchedObj = searchAllExhibitsRow(Record)
-                    expireAllExhibitsRow(searchedObj, newRecord=Record)
-                    AllExhibits.objects.create(**Record)
+                    addMetadataToFactorsRecord(Record=Record, rate_details=rate_details)
+                    searchedObj = searchRatingFactorsRow(Record)
+                    expireRatingFactorsRow(searchedObj, newRecord=Record)
+                    RatingFactors.objects.create(**Record)
                 # Expire the Deleted Rows
                 for row in changes['deleted'].itertuples(index=False):
                     Record = dict(row._asdict())
-                    addMetadataToAllExhibitsRecord(Record=Record, rate_details=rate_details)
-                    searchedObj = searchAllExhibitsRow(Record)
-                    expireAllExhibitsRow(searchedObj, newRecord=Record)
+                    addMetadataToFactorsRecord(Record=Record, rate_details=rate_details)
+                    searchedObj = searchRatingFactorsRow(Record)
+                    expireRatingFactorsRow(searchedObj, newRecord=Record)
                 # Add the newly added rows
                 for row in changes['added'].itertuples(index=False):
                     Record = dict(row._asdict())
-                    addMetadataToAllExhibitsRecord(Record=Record, rate_details=rate_details)
-                    AllExhibits.objects.create(**Record)
+                    addMetadataToFactorsRecord(Record=Record, rate_details=rate_details)
+                    RatingFactors.objects.create(**Record)
                 # Expire deleted/renamed Exhibits
-                AllExhibits.objects.filter(
+                RatingFactors.objects.filter(
                     RatebookID=rate_details['RatebookID'],
                     Exhibit__in=toExpireExhibits).update(
                         NewBusinessExpiryDate=rate_details['NewBusinessEffectiveDate'],
@@ -151,7 +153,7 @@ def loadUpdatedRB(request):
                 msgs.append(repr(err))
                 loaded_to_dbExhibits = False
                 if rbObj:
-                    Ratebooks.objects.get(pk=rbObj.id).delete()
+                    RatebookMetadata.objects.get(pk=rbObj.id).delete()
 
         else:
             msgs.append("Record already exists")
