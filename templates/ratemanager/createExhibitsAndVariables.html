@@ -21,7 +21,7 @@
 
 <hr>
 
-<h2>
+<b><u>
   {% if exhibit_form.instance.id %}
     Exhibit #{{ exhibit_form.instance.id }}</h2>
   {% else %}
@@ -31,18 +31,19 @@
       Add an Exhibit
     {% endif %}
   {% endif %}
-</h2>
+</u></b>
 
 {% for hidden_field in exhibit_form.hidden_fields %}
   {{ hidden_field.errors }}
 {% endfor %}
 
-  {{ exhibit_form }}
-
+  <table>
+  {{ exhibit_form.as_table }}
+  </table>
 {% if exhibit_form.nested %}
   <div class="indent text-center">
     <br>
-    <h3>Rating Variables</h3>
+    <b><u>Rating Variables</u></b><br>
 
     {{ exhibit_form.nested.management_form }}
     {{ exhibit_form.nested.non_form_errors }}
@@ -59,7 +60,9 @@
             {% for hidden_field in ratingvars_form.hidden_fields %}
               {{ hidden_field.errors }}
             {% endfor %}
-              {{ ratingvars_form }}
+            <table class="mx-auto">
+              {{ ratingvars_form.as_table }}
+            </table>
               <br>
       {% endfor %}
     <input class="btn btn-primary" type="submit" value="Update to add another Rating Variable">

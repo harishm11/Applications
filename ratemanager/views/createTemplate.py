@@ -15,18 +15,28 @@ def createTemplate(request):
     if request.method == 'POST':
         rate_details = request.POST.copy()
         form = createTempleteForm(rate_details)
-        if form.is_valid():
-            rbMeta = form.save(commit=False)
-            rbMeta.RatebookRevisionType = 'Template'
-            rbMeta.RatebookStatusType = 'Template'
-            rbMeta.RatebookChangeType = 'Template'
-            rbMeta.CreationDateTime = datetime.now()
-            rbMeta.RatebookID = helperfuncs.generateRatebookID()
-            rbMeta.RatebookVersion = 0.0
-            rbMeta.save()
-            return redirect('ratemanager:createExhibitsAndVariables', pk=rbMeta.id)
-    else:
-        rate_details = {
+        if rate_details['CreateIntent'] == 'new':
+            if form.is_valid():
+                rbMeta = form.save(commit=False)
+                rbMeta.RatebookRevisionType = 'Template'
+                rbMeta.RatebookStatusType = 'Template'
+                rbMeta.RatebookChangeType = 'Template'
+                rbMeta.CreationDateTime = datetime.now()
+                rbMeta.RatebookID = helperfuncs.generateRatebookID()
+                rbMeta.RatebookVersion = 0.0
+                rbMeta.save()
+                return redirect('ratemanager:createExhibitsAndVariables', pk=rbMeta.id)
+        if rate_details['CreateIntent'] == 'raterevision':
+            ids = helperfuncs.extractIdentityDetails(rate_details)
+            foundRB = RatebookMetadata.objects.all().filter(**ids).order_by('-RatebookVersion').first()
+            if not foundRB:
+                messages.add_message(request, messages.ERROR, "No Ratebook found with the given details")
+                return redirect('ratemanager:createTemplate')
+            else:
+                return redirect('/ratemanager/exportRB/?selectedRBs=' + '_'.join([foundRB.RatebookID, str(foundRB.RatebookVersion), foundRB.RatebookName]))
+
+    if request.method == 'GET':
+        initial = {
             'NewBusinessEffectiveDate': datetime.today(),
             'RenewalEffectiveDate': datetime.today(),
             'ActivationDate': datetime.today(),
@@ -35,41 +45,14 @@ def createTemplate(request):
             'MigrationTime': datetime.now()
         }
 
-        form = createTempleteForm(initial=rate_details)
+        form = createTempleteForm(initial=initial)
 
-    return render(request, 'ratemanager/createTemplate.html',
-                  {
-                    'form': form,
-                    'options': options,
-                    'appLabel': appLabel
-                  })
-
-
-'''
-def createExhibitsAndVariables(request, rb_id):
-    options = helperfuncs.SIDEBAR_OPTIONS
-    appLabel = 'ratemanager'
-
-    rb = get_object_or_404(RatebookMetadata, id=rb_id)
-
-    if request.method == 'POST':
-        data = request.POST
-        print(data)
-        formset = createRatingExhibitsFromSet(data, instance=rb)
-        if formset.is_valid():
-            formset.save_all()
-            return redirect('ratemanager:createExhibitsAndVariables', rb_id=rb_id)
-    else:
-        formset = createRatingExhibitsFromSet(instance=rb)
-
-    return render(request, 'ratemanager/createExhibitsAndVariables.html',
-                  {
-                      'rb_id': rb_id,
-                      'formset': formset,
-                      'options': options,
-                      'appLabel': appLabel
-                  })
-'''
+        return render(request, 'ratemanager/createTemplate.html',
+                      {
+                        'form': form,
+                        'options': options,
+                        'appLabel': appLabel
+                        })
 
 
 class createExhibitsAndVariables(SingleObjectMixin, FormView):
@@ -109,4 +92,6 @@ class createExhibitsAndVariables(SingleObjectMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super(createExhibitsAndVariables, self).get_context_data(**kwargs)
         context['pk'] = self.kwargs['pk']
+        context['options'] = helperfuncs.SIDEBAR_OPTIONS
+        context['appLabel'] = 'ratemanager'
         return context

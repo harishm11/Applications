@@ -30,11 +30,12 @@
   </div>
 </form>
 
-<form action="/ratemanager/compareRB/">       
+<form action="/ratemanager/compareRB/"
+      method="get">
 <div class="text-left">
   <input id="compare_button" type="submit" class="btn btn-primary" value="Compare" disabled="true"/>
   <input id="export_template_button" type="submit" class="btn btn-primary" value="Export Update Template" 
-  disabled="true" formaction="/ratemanager/exportTemplate/" formtarget="_blank"/>
+  disabled="true" formaction="/ratemanager/exportRB/" formtarget="_blank"/>
 </div>
 <br>
 <nav aria-label="Page navigation">
@@ -68,9 +69,9 @@
         <th>Migration Time</th>
         <th>Activation Date</th>
         <th>Activation Time</th>
-        <th>RatebookRevisionType</th>
-        <th>RatebookStatusType</th>
-        <th>RatebookChangeType</th>
+        <th>Ratebook Revision Type</th>
+        <th>Ratebook Status Type</th>
+        <th>Ratebook Change Type</th>
         <th>Carrier</th>
         <th>State</th>
         <th>Line of Business</th>

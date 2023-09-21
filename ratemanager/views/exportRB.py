@@ -4,6 +4,8 @@ from django.http import FileResponse
 import ratemanager.views.HelperFunctions as hf
 from ratemanager.models import RatebookMetadata, RatingExhibits, RatingVariables
 from django.apps import apps
+from django.shortcuts import render
+from ratemanager.forms import exportRBForm
 
 export_details = [
     'Carrier',
@@ -23,36 +25,60 @@ export_details = [
 
 
 def exportRB(request):
-    obj_id_list = request.GET.getlist('selectedRBs')
-    rbID, rbVer, _, _ = obj_id_list[0].split('_')
-    rbMeta = RatebookMetadata.objects.filter(RatebookID=rbID, RatebookVersion=rbVer).values()[0]
-    requiredRbQS = hf.fetchRatebookSpecificVersion(rbID=rbID, rbVersion=rbVer)
-    df = hf.convert2Df(requiredRbQS)
-    xl = io.BytesIO()
-    writer = pd.ExcelWriter(xl, engine='xlsxwriter')
+    options = hf.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
 
-    data = []
-    for x in export_details:
-        toIn = rbMeta.get(x.replace(' ', ''))
-        if toIn:
-            data.append(toIn)
-        elif 'projectid' not in x.lower():
-            model = apps.get_model("systemtables", x.replace(' ', '').lower())
-            data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
-    data.append(rbMeta['ProjectID'])
-    export_details.append('Project ID')
-    pd.Series(index=export_details,
-              data=data
-              ).to_excel(writer, sheet_name='Ratebook Details', index=True, header=None)
-    pd.DataFrame(
-        [], columns=['Deleted Exhibit Name']
-        ).to_excel(writer, sheet_name='DELETED_EXHIBITS', index=False)
-    for i in df['Exhibit'].unique():
-        hf.inverseTransform(df[df['Exhibit'] == i]).to_excel(writer, sheet_name=i, index=False)
+    if request.method == 'GET':
+        obj_id_list = request.GET.getlist('selectedRBs')
+        rbID, rbVer, rbState, rbCode = obj_id_list[0].split('_')
+        requiredRbQS = hf.fetchRatebookSpecificVersion(rbID=rbID, rbVersion=rbVer)
+        form = exportRBForm()
+        CHOICES = requiredRbQS.all().values_list('Exhibit', flat=True).distinct()
+        form.fields['toExportExhibits'].choices = ((x, ' '.join(hf.camel_case_split(x))) for x in CHOICES)
+        return render(request, 'ratemanager/exportRB.html',
+                      {
+                        'form': form,
+                        'options': options,
+                        'appLabel': appLabel,
+                        'rbID': rbID,
+                        'rbVer': rbVer,
+                        'rbState': rbState,
+                        'rbCode': rbCode
+                        })
+    if request.method == 'POST':
+        rbID, rbVer = request.POST['rbID'], request.POST['rbVer']
+        rbMeta = RatebookMetadata.objects.filter(RatebookID=rbID, RatebookVersion=rbVer)
+        if rbMeta:
+            rbMeta = rbMeta.values()[0]
+        else:
+            raise Exception('Ratebook not found')
+        requiredRbQS = hf.fetchRatebookSpecificVersion(rbID=rbID, rbVersion=rbVer)
+        df = hf.convert2Df(requiredRbQS)
+        xl = io.BytesIO()
+        writer = pd.ExcelWriter(xl, engine='xlsxwriter')
 
-    writer.close()
-    xl.seek(0)
-    return FileResponse(xl, filename=obj_id_list[0]+'.xlsx')
+        data = []
+        for x in export_details:
+            toIn = rbMeta.get(x.replace(' ', ''))
+            if toIn:
+                data.append(toIn)
+            elif 'projectid' not in x.lower():
+                model = apps.get_model("systemtables", x.replace(' ', '').lower())
+                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
+        data.append(rbMeta['ProjectID'])
+        export_details.append('Project ID')
+        pd.Series(index=export_details,
+                  data=data
+                  ).to_excel(writer, sheet_name='Ratebook Details', index=True, header=None)
+        pd.DataFrame(
+            [], columns=['Deleted Exhibit Name']
+            ).to_excel(writer, sheet_name='DELETED_EXHIBITS', index=False)
+        for i in request.POST.getlist('toExportExhibits'):
+            hf.inverseTransform(df[df['Exhibit'] == i]).to_excel(writer, sheet_name=i, index=False)
+
+        writer.close()
+        xl.seek(0)
+        return FileResponse(xl, filename='_'.join([str(rbID), str(rbVer), str(request.POST['rbState']), str(request.POST['rbCode']), '.xlsx']))
 
 
 def exportTemplate(request, pk):
@@ -63,6 +89,7 @@ def exportTemplate(request, pk):
     xl = io.BytesIO()
     writer = pd.ExcelWriter(xl, engine='xlsxwriter')
 
+    # write the ratebook details to the excel file
     data = []
     for x in export_details:
         toIn = rbMeta.get(x.replace(' ', ''))
@@ -77,6 +104,7 @@ def exportTemplate(request, pk):
               data=data
               ).to_excel(writer, sheet_name='Ratebook Details', index=True, header=None)
 
+    # write only the selected exhibits to the excel file
     for i in exbList:
         rvs = RatingVariables.objects.filter(Exhibit=i).values()
         cols = [rv['RatingVarName'] for rv in rvs]
@@ -88,4 +116,4 @@ def exportTemplate(request, pk):
     writer.close()
     xl.seek(0)
     filename = '_'.join(list(map(str, [rbMeta['RatebookID'], rbMeta['State_id'], rbMeta['ProductCode_id'], '.xlsx'])))
-    return FileResponse(xl, filename=filename)
+    return FileResponse(xl, filename=filename, as_attachment=True)

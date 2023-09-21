@@ -13,6 +13,7 @@ import openpyxl
 import sqlalchemy as sa
 from myproj.settings import DATABASES
 from difflib import get_close_matches
+import ratemanager.views.configs as configs
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
@@ -222,6 +223,11 @@ def get_table_category(sheet_name):
 
 
 def transform(sheet_name, df):
+    '''
+    Takes the sheet name i.e. Exhibit Name and the excel sheets data as
+    Pandas DataFrame and converts it to UnPivot View i.e. required for
+    database storage.
+    '''
     pd.options.mode.copy_on_write = True
     tabStruct = categoriseTransformType(df, sheet_name)
     newdf = pd.DataFrame()
@@ -685,6 +691,7 @@ def inverseTransform(df):
 
         idf.rename(columns=rename_dict, inplace=True)
         return idf
+
     df.dropna(how='all', axis=1, inplace=True)
 
     # for example base rates minor covs like tables
@@ -708,56 +715,8 @@ def inverseTransform(df):
 
 
 def map_covs_and_vars(df):
-    cov_mapping = {
-        'UMPD': 'UninsuredMotoristPD',
-        'BI': 'BodilyInjury',
-        'PD': 'PropertyDamage',
-        'UM': 'UninsuredMotoristBI',
-        'MED': 'Medical',
-        'COMP': 'Comprehensive',
-        'COLL': 'Collission',
-        'ADD EQUI': 'AdditionaEquipment',
-        'RENTAL RE': 'RentalReembursement',
-        'LOSS OF USE': 'LossOfUse',
-        'TOWING': 'Towing',
-        'TOW': 'Towing',
-        'ALL OTHER COVERAGES': 'Other',
-        'RENT': 'RentalReembursement',
-        'All': 'All'
-    }
-    ratevars = [
-        'TermLength',
-        'UMPDOption',
-        'DPS',
-        'Symbol',
-        'ModelYear ',
-        'HighPerfInd ',
-        'VehHistInd ',
-        'PassiveResType',
-        'AntiLockInd ',
-        'AntitheftInd',
-        'AltFuelInd ',
-        'EscInd ',
-        'DriverClass',
-        'YearsDrivingExperience',
-        'StudentAwayInd',
-        'VehUseCode',
-        'HouseholdCompostion',
-        'FrequencyBand',
-        'SeverityBand',
-        'MultiPolicy',
-        'GoodDriverDiscInd',
-        'PermissiveUserOption',
-        'VehicleAge1',
-        'RideShareInd',
-        'Deductible1',
-        'Deductible2',
-        'DriverClassCode',
-        'VehicleAge2',
-        'Limit1',
-        'Limit2',
-        'Mielage1',
-        'Mileage2']
+
+    ratevars = configs.ratevars
     ratevar_mappings = dict()
     uniq_ratevars = []
     for i in df.columns:
@@ -773,7 +732,7 @@ def map_covs_and_vars(df):
     for i in df.columns:
         if 'RatingVarName' in i:
             df[i] = df[i].replace(ratevar_mappings)
-    df['Coverage'] = df['Coverage'].replace(cov_mapping)
+    df['Coverage'] = df['Coverage'].replace(configs.cov_mapping)
 
 
 def camel_case_split(str):
@@ -827,3 +786,10 @@ def updateRatingVars(uploadURL):
                     RatingVariables.objects.create(
                         **Rec
                     )
+
+
+def extractIdentityDetails(dictionary: dict) -> dict:
+    identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
+                    'PolicyType', 'PolicySubType', 'ProductCode')
+    identityRateDetails = {key: dictionary.get(key) for key in identityKeys}
+    return identityRateDetails

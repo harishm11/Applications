@@ -206,6 +206,18 @@ class ViewRBFormWithDate(ViewRBForm):
 
 
 class createTempleteForm(forms.ModelForm):
+
+    CHOICES = [('new', 'New'),
+               ('raterevision', 'Rate Revision'),
+               ('refresh', 'Refresh/Update(Add/Remove Exhibits)'),
+               ('factorcorrection', 'Factor Correction')]
+    CreateIntent = forms.ChoiceField(
+        label='Create Intent',
+        choices=CHOICES,
+        required=True,
+        widget=forms.Select(),
+        )
+
     class Meta:
         model = RatebookMetadata
 
@@ -213,8 +225,9 @@ class createTempleteForm(forms.ModelForm):
                    'UWCompany', 'PolicyType', 'PolicySubType',
                    'ProductCode', 'ProjectID',
                    'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
+                   'MigrationDate', 'MigrationTime',
                    'ActivationDate', 'ActivationTime',
-                   'MigrationDate', 'MigrationTime'])
+                   ])
 
         # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
 
@@ -226,9 +239,9 @@ class createTempleteForm(forms.ModelForm):
             'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
             'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
             'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time'}),
+            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
             'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time'})
+            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'})
         }
 
 
@@ -252,7 +265,7 @@ class BaseRatebookFormset(BaseInlineFormSet):
             instance=form.instance,
             data=form.data if form.is_bound else None,
             files=form.files if form.is_bound else None,
-            prefix="bookimage-%s-%s"
+            prefix="RatingVariables-%s-%s"
             % (form.prefix, createRatingVariablesFromSet.get_default_prefix())
         )
 
@@ -273,7 +286,7 @@ class BaseRatebookFormset(BaseInlineFormSet):
         """
         If a parent form has no data, but its nested forms do, we should
         return an error, because we can't save the parent.
-        For example, if the Book form is empty, but there are Images.
+        For example, if the Exhibit form is empty, but there are RatingVars.
         """
         super().clean()
 
@@ -307,7 +320,7 @@ class BaseRatebookFormset(BaseInlineFormSet):
     def _is_adding_nested_inlines_to_empty_form(self, form):
         """
         Are we trying to add data in nested inlines to a form that has no data?
-        e.g. Adding Images to a new Book whose data we haven't entered?
+        e.g. Adding RatingVars to a new Exhibit whose data we haven't entered?
         """
         def is_empty_form(form):
             """
@@ -365,5 +378,17 @@ createRatingExhibitsFromSet = inlineformset_factory(
     formset=BaseRatebookFormset,
     extra=1,
     can_delete=True,
-    max_num=200
+    max_num=200,
+    widgets={
+        'Coverages': forms.CheckboxSelectMultiple()
+    }
     )
+
+
+class exportRBForm(forms.Form):
+    CHOICES = [(None, None)]
+    toExportExhibits = forms.MultipleChoiceField(
+        choices=CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        label='Select Exhibits to Export'
+        )

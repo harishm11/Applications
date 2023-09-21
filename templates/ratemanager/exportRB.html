@@ -1,0 +1,57 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} View Ratebook {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %} 
+
+<h3>Export Exphbits of the selected Ratebook</h3>
+<p>
+  Currectly selected Ratebook: <br>
+  State: {{ rbState }} &emsp;
+  RatebookID: {{ rbID }} &emsp;
+  Version: {{ rbVer }} &emsp;
+  Product Code: {{ rbCode }} &emsp;
+</p>
+
+<form class="form-control"
+      method="post"
+      id="rbMetadataForm"
+      action="/ratemanager/exportRB/">
+      {% csrf_token %}
+      <input type="hidden" name="rbID" value="{{ rbID }}">
+      <input type="hidden" name="rbVer" value="{{ rbVer }}">
+      <input type="hidden" name="rbState" value="{{ rbState }}">
+      <input type="hidden" name="rbCode" value="{{ rbCode }}">
+      <table>
+        {{ form.as_p }}
+      </table>
+      <br>
+<div class="row justify-content-around">
+  <button
+  type="button"
+  name="back"
+  class="btn btn-secondary col-md-3"
+  onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+  >Back</button>
+
+
+  <input
+      type="submit"
+      name="submit"
+      value="Download"
+      class="btn btn-primary col-md-3"
+      action="/ratemanager/exportRB/"
+    />
+
+    <button
+    type="button"
+    name="next"
+    class="btn btn-primary col-md-3"
+    onclick="window.location.href='/ratemanager/updateRB/';"
+    >Next</button>
+
+  </div>
+</form>
+{% endblock %}

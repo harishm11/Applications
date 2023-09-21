@@ -210,6 +210,20 @@ class RatingFactors (models.Model):
         )
 
 
+class RatingCoverages(models.Model):
+    Carrier = models.ForeignKey(
+        carrier.Carrier,
+        on_delete=models.CASCADE,
+        default=None
+        )
+
+    CoverageCode = models.CharField(max_length=200, null=True, blank=True)
+    DisplayName = models.CharField(max_length=200)
+
+    def __str__(self) -> str:
+        return self.DisplayName
+
+
 class RatingExhibits(models.Model):
     Ratebook = models.ForeignKey(
         RatebookMetadata,
@@ -217,10 +231,13 @@ class RatingExhibits(models.Model):
     )
     RatingItemCode = models.CharField(max_length=100, null=True)
     Exhibit = models.CharField(max_length=100, null=True)
-    Coverages = ArrayField(models.CharField(max_length=200), null=True, blank=True)
+    Coverages = models.ManyToManyField(RatingCoverages)
     RatingVarNames = ArrayField(models.CharField(max_length=200), null=True, blank=True)
     TableDescription = models.CharField(max_length=100, null=True)
     Version = models.FloatField(max_length=100, null=True)
+
+    def __str__(self) -> str:
+        return self.Exhibit
 
 
 class RatingVariables(models.Model):
@@ -234,3 +251,6 @@ class RatingVariables(models.Model):
     RatingVarLength = models.CharField(max_length=200)
     RatingVarFormat = models.CharField(max_length=200)
     RateVarCategory = models.CharField(max_length=200)
+
+    def __str__(self) -> str:
+        return self.DisplayName
