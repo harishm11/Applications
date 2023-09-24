@@ -2,7 +2,7 @@
 from django.urls import path
 from ratemanager.views import exportRB, viewRB, \
     views, createRB, updateRB, compareRB, \
-    createTemplate, viewTemplate
+    createTemplate, viewTemplate, cloneRB
 
 app_name = 'ratemanager'
 
@@ -33,5 +33,7 @@ urlpatterns = [
     path('createTemplate/', createTemplate.createTemplate, name="createTemplate"),
     path('createExhibitsAndVariables/<int:pk>/', createTemplate.createExhibitsAndVariables.as_view(), name="createExhibitsAndVariables"),
     # view rb template
-    path('viewTemplate/', viewTemplate.viewTemplate, name="viewTemplate")
+    path('viewTemplate/', viewTemplate.viewTemplate, name="viewTemplate"),
+    # clone
+    path('cloneOptions/<int:pk>', cloneRB.cloneOptions, name="cloneOptions"),
 ]

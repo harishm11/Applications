@@ -49,3 +49,20 @@ ratevars = [
         'Limit2',
         'Mielage1',
         'Mileage2']
+
+
+export_details = [
+    'Carrier',
+    'State',
+    'Line of Business',
+    'Policy Type',
+    'Policy Sub Type',
+    'Product Code',
+    'UW Company',
+    'New Business Effective Date',
+    'Renewal Effective Date',
+    'Activation Date',
+    'Activation Time',
+    'Migration Date',
+    'Migration Time'
+]

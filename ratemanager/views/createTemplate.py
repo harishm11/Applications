@@ -25,7 +25,8 @@ def createTemplate(request):
                 rbMeta.RatebookID = helperfuncs.generateRatebookID()
                 rbMeta.RatebookVersion = 0.0
                 rbMeta.save()
-                return redirect('ratemanager:createExhibitsAndVariables', pk=rbMeta.id)
+                return redirect('ratemanager:cloneOptions', pk=rbMeta.id)
+                # return redirect('ratemanager:createExhibitsAndVariables', pk=rbMeta.id)
         if rate_details['CreateIntent'] == 'raterevision':
             ids = helperfuncs.extractIdentityDetails(rate_details)
             foundRB = RatebookMetadata.objects.all().filter(**ids).order_by('-RatebookVersion').first()

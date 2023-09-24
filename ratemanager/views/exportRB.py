@@ -6,28 +6,14 @@ from ratemanager.models import RatebookMetadata, RatingExhibits, RatingVariables
 from django.apps import apps
 from django.shortcuts import render
 from ratemanager.forms import exportRBForm
-
-export_details = [
-    'Carrier',
-    'State',
-    'Line of Business',
-    'Policy Type',
-    'Policy Sub Type',
-    'Product Code',
-    'UW Company',
-    'New Business Effective Date',
-    'Renewal Effective Date',
-    'Activation Date',
-    'Activation Time',
-    'Migration Date',
-    'Migration Time'
-]
+import ratemanager.views.configs as configs
 
 
 def exportRB(request):
     options = hf.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
+    export_details = configs.export_details
     if request.method == 'GET':
         obj_id_list = request.GET.getlist('selectedRBs')
         rbID, rbVer, rbState, rbCode = obj_id_list[0].split('_')
@@ -62,11 +48,10 @@ def exportRB(request):
             toIn = rbMeta.get(x.replace(' ', ''))
             if toIn:
                 data.append(toIn)
-            elif 'projectid' not in x.lower():
+            else:
                 model = apps.get_model("systemtables", x.replace(' ', '').lower())
                 data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
-        data.append(rbMeta['ProjectID'])
-        export_details.append('Project ID')
+
         pd.Series(index=export_details,
                   data=data
                   ).to_excel(writer, sheet_name='Ratebook Details', index=True, header=None)
@@ -85,6 +70,7 @@ def exportTemplate(request, pk):
     rbMeta = RatebookMetadata.objects.filter(pk=pk)
     exbList = RatingExhibits.objects.filter(Ratebook=rbMeta[0])
     rbMeta = rbMeta.values()[0]
+    export_details = configs.export_details
 
     xl = io.BytesIO()
     writer = pd.ExcelWriter(xl, engine='xlsxwriter')
@@ -98,8 +84,7 @@ def exportTemplate(request, pk):
         else:
             model = apps.get_model("systemtables", x.replace(' ', '').lower())
             data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
-    data.append(rbMeta['ProjectID'])
-    export_details.append('Project ID')
+
     pd.Series(index=export_details,
               data=data
               ).to_excel(writer, sheet_name='Ratebook Details', index=True, header=None)
@@ -108,12 +93,12 @@ def exportTemplate(request, pk):
     for i in exbList:
         rvs = RatingVariables.objects.filter(Exhibit=i).values()
         cols = [rv['RatingVarName'] for rv in rvs]
-        cols.extend(i.Coverages)
+        cols.extend(i.Coverages.all())
         pd.DataFrame(
             data=[], columns=cols
         ).to_excel(writer, sheet_name=i.Exhibit, index=False)
 
     writer.close()
     xl.seek(0)
-    filename = '_'.join(list(map(str, [rbMeta['RatebookID'], rbMeta['State_id'], rbMeta['ProductCode_id'], '.xlsx'])))
+    filename = '_'.join(list(map(str, [rbMeta['RatebookID'], rbMeta['RatebookName'], '.xlsx'])))
     return FileResponse(xl, filename=filename, as_attachment=True)
