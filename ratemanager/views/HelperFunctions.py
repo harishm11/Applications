@@ -3,7 +3,7 @@ import re
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
-from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables
+from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatingCoverages
 from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
@@ -17,7 +17,8 @@ import ratemanager.views.configs as configs
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
-                   "createTemplate", "viewTemplate"]
+                   "createTemplate", "viewTemplate",
+                   'EditCoverages']
 pd.options.mode.copy_on_write = True
 
 list_of_known_covs = [
@@ -744,7 +745,33 @@ def generateRatebookItemCode(ExhibitName):
     return 1234
 
 
-def updateRatingExhibits(tdf):
+def determine_all_ratevars(df, tabStruct):
+    pass
+
+
+def updateRatingVars(uploadURL, Exid):
+    sheetname = RatingExhibits.objects.get(id=Exid).Exhibit
+    try:
+        df = pd.read_excel(uploadURL, sheet_name=sheetname)
+    except ValueError:
+        return
+    if sheetname not in excludeList:
+        tabStruct = categoriseTransformType(df, sheetname)
+        if tabStruct['category'] == 'neither covs nor factor in cols':
+            determine_all_ratevars(df, tabStruct)
+        guessed_dtypes_df = df.convert_dtypes()
+        for index, col in enumerate(df.columns):
+            Rec = dict()
+            if tabStruct['ratevars'] is not None and col in tabStruct['ratevars']:
+                Rec["DisplayName"] = col
+                Rec["RatingVarType"] = guessed_dtypes_df.dtypes[col]
+                Rec["Exhibit_id"] = Exid
+                RatingVariables.objects.create(
+                    **Rec
+                )
+
+
+def updateRatingExhibits(tdf, rbid, uploadURL):
     ExList = tdf["Exhibit"].unique()
 
     for i in ExList:
@@ -753,39 +780,25 @@ def updateRatingExhibits(tdf):
         Rec['RatingVarNames'] = []
         Rec['Version'] = 0
         Rec['RatingItemCode'] = generateRatebookItemCode(i)
+        Rec['Ratebook_id'] = rbid
         df = tdf[tdf["Exhibit"] == i]
         for col in tdf.columns:
             if "RatingVarName" in col:
                 for i in df[col].unique():
                     if i is not None:
                         Rec['RatingVarNames'].append(i)
-
-        Rec['Coverages'] = df['Coverage'].unique().tolist()
-        RatingExhibits.objects.create(
+        # Need to use set for ManytoMany fields
+        # Rec['Coverages'] = df['Coverage'].unique().tolist()
+        ExObj = RatingExhibits.objects.create(
             **Rec
         )
-
-
-def determine_all_ratevars(df, tabStruct):
-    pass
-
-
-def updateRatingVars(uploadURL):
-    wb = pd.read_excel(uploadURL, sheet_name=None)
-    for sheetname, df in wb.items():
-        if sheetname not in excludeList:
-            tabStruct = categoriseTransformType(df, sheetname)
-            if tabStruct['category'] == 'neither covs nor factor in cols':
-                determine_all_ratevars(df, tabStruct)
-            guessed_dtypes_df = df.convert_dtypes()
-            for index, col in enumerate(df.columns):
-                Rec = dict()
-                if tabStruct['ratevars'] is not None and col in tabStruct['ratevars']:
-                    Rec["DisplayName"] = col
-                    Rec["RatingVarType"] = guessed_dtypes_df.dtypes[col]
-                    RatingVariables.objects.create(
-                        **Rec
-                    )
+        for i in df['Coverage'].unique().tolist():
+            try:
+                cov = RatingCoverages.objects.get(CoverageCode=i)
+                ExObj.Coverages.add(cov)
+            except:
+                continue
+        updateRatingVars(uploadURL=uploadURL, Exid=ExObj.id)
 
 
 def extractIdentityDetails(dictionary: dict) -> dict:
@@ -793,3 +806,45 @@ def extractIdentityDetails(dictionary: dict) -> dict:
                     'PolicyType', 'PolicySubType', 'ProductCode')
     identityRateDetails = {key: dictionary.get(key) for key in identityKeys}
     return identityRateDetails
+
+
+def clone_object(obj, attrs={}):
+
+    # we start by building a "flat" clone
+    clone = obj._meta.model.objects.get(pk=obj.pk)
+    clone.pk = None
+
+    # if caller specified some attributes to be overridden,
+    # use them
+    for key, value in attrs.items():
+        setattr(clone, key, value)
+
+    # save the partial clone to have a valid ID assigned
+    clone.save()
+
+    # Scan field to further investigate relations
+    fields = clone._meta.get_fields()
+    for field in fields:
+
+        # Manage M2M fields by replicating all related records
+        # found on parent "obj" into "clone"
+        if not field.auto_created and field.many_to_many:
+            for row in getattr(obj, field.name).all():
+                getattr(clone, field.name).add(row)
+
+        # Manage 1-N and 1-1 relations by cloning child objects
+        if field.auto_created and field.is_relation:
+            if field.many_to_many:
+                # do nothing
+                pass
+            else:
+                # provide "clone" object to replace "obj"
+                # on remote field
+                attrs = {
+                    field.remote_field.name: clone
+                }
+                children = field.related_model.objects.filter(**{field.remote_field.name: obj})
+                for child in children:
+                    clone_object(child, attrs)
+
+    return clone

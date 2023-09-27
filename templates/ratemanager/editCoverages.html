@@ -1,0 +1,86 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} Create Template {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %}
+<h2>Edit Covergaes</h2>
+<template id="id_coverage_empty_form">
+  <hr>
+  <b><u>
+    {% if Coverage_form.instance.id %}
+      Coverage #{{ Coverage_form.instance.id }}</h2>
+    {% else %}
+      {% if form.forms|length > 1 %}
+        Add another Coverage
+      {% else %}
+        Add a Coverage
+      {% endif %}
+    {% endif %}
+  </u></b>
+
+  {% for hidden_field in Coverage_form.hidden_fields %}
+    {{ hidden_field.errors }}
+  {% endfor %}
+  <table>
+  {{ form.empty_form }}
+  </table>
+</template>
+<form method="post" autocomplete="off">
+{% for hidden_field in form.hidden_fields %}
+{{ hidden_field.errors }}
+{{ hidden_field }}
+{% endfor %}
+
+{% csrf_token %}
+
+{{ form.management_form }}
+{{ form.non_form_errors }}
+<div id="coverage-formset">
+  {% for Coverage_form in form.forms %}
+
+    <hr>
+
+    <b><u>
+      {% if Coverage_form.instance.id %}
+        Coverage #{{ Coverage_form.instance.id }}</h2>
+      {% else %}
+        {% if form.forms|length > 1 %}
+          Add another Coverage
+        {% else %}
+          Add an Coverage
+        {% endif %}
+      {% endif %}
+    </u></b>
+
+    {% for hidden_field in Coverage_form.hidden_fields %}
+      {{ hidden_field.errors }}
+    {% endfor %}
+
+      <table>
+      {{ Coverage_form.as_table }}
+      </table>
+        
+  {% endfor %}
+</div>
+<hr>
+  <div class="row justify-content-center">
+    <input class="btn btn-sm btn-outline-primary col-md-2" type="button" id="add-coverage" value="Add another Coverage">
+  </div>
+  <br>
+  <div class="row justify-content-around">
+    <button
+    type="button"
+    name="back"
+    class="btn btn-secondary col-md-3"
+    onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+    >Back</button>
+    <input class="btn btn-success col-md-3" type="submit" id="submit" value="Update">
+  </div>
+
+</form>
+{% endblock %}
+{% block js%}
+  <script src ="{% static 'js/add_delete_nested_formsets.js' %}" type="text/javascript"></script>
+{% endblock js%}

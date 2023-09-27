@@ -24,8 +24,9 @@ def createTemplate(request):
                 rbMeta.CreationDateTime = datetime.now()
                 rbMeta.RatebookID = helperfuncs.generateRatebookID()
                 rbMeta.RatebookVersion = 0.0
-                rbMeta.save()
-                return redirect('ratemanager:cloneOptions', pk=rbMeta.id)
+                request.session['createTemplateFormData'] = rate_details
+                # rbMeta.save()
+                return redirect('ratemanager:cloneOptions', prodCode=rbMeta.ProductCode_id)
                 # return redirect('ratemanager:createExhibitsAndVariables', pk=rbMeta.id)
         if rate_details['CreateIntent'] == 'raterevision':
             ids = helperfuncs.extractIdentityDetails(rate_details)

@@ -1,12 +1,12 @@
 window.addEventListener('load', (event) => {
     // get form template and total number of forms from management form
-    const templateForm = document.getElementById('id_exhibit_empty_form');
+    const templateForm = document.getElementById('id_coverage_empty_form');
     const inputTotalForms = document.querySelector('input[id$="-TOTAL_FORMS"]');
     const inputInitialForms = document.querySelector('input[id$="-INITIAL_FORMS"]');
 
     // get our container (e.g. <table>, <ul>, or <div>) and "Add" button
-    const containerFormSet = document.getElementById('exhibit-formset');
-    const buttonAdd = document.getElementById('add-exhibit');
+    const containerFormSet = document.getElementById('coverage-formset');
+    const buttonAdd = document.getElementById('add-coverage');
     const buttonSubmit = document.getElementById('submit');
 
     // event handlers

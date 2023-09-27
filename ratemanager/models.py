@@ -211,11 +211,11 @@ class RatingFactors (models.Model):
 
 
 class RatingCoverages(models.Model):
-    Carrier = models.ForeignKey(
-        carrier.Carrier,
-        on_delete=models.CASCADE,
-        default=None
-        )
+    # Carrier = models.ForeignKey(
+    #     carrier.Carrier,
+    #     on_delete=models.CASCADE,
+    #     default=None
+    #     )
 
     CoverageCode = models.CharField(max_length=200, null=True, blank=True)
     DisplayName = models.CharField(max_length=200)

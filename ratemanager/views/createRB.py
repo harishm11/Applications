@@ -85,8 +85,10 @@ def loadNewRBtoDB(request):
                 df, errors = helperfuncs.transformRB(xl_url=request.session['upload_url'])
                 msgs.extend(errors)
 
-                # helperfuncs. updateRatingExhibits(df)
-                # helperfuncs. updateRatingVars(uploadURL=request.session["upload_url"])
+                # update the rating exhibits and rating variables
+                helperfuncs. updateRatingExhibits(
+                    df, rbid=rbObj.id, uploadURL=request.session["upload_url"]
+                    )
                 df['Ratebook_id'] = rbObj.id
                 df['RatebookVersion'] = rate_details['RatebookVersion']
                 df['RatebookID'] = rate_details['RatebookID']

@@ -1,58 +1,37 @@
-# create a view to clone a ratebook metadata object with related objects also cloned
-
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from ratemanager.models import RatebookMetadata, RatingExhibits, RatingVariables
+from ratemanager.models import RatebookMetadata
 from ratemanager.views import HelperFunctions as helperfuncs
+from datetime import datetime
+from ratemanager.forms import createTempleteForm
 
 
-def cloneOptions(request, pk):
+def cloneOptions(request, prodCode):
+    '''
+    This view displays the options for cloning a ratebook.  The user can choose to clone the ratebook form the same product code only.
+    '''
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
-    rb = RatebookMetadata.objects.get(pk=pk)
-    similarRBs = RatebookMetadata.objects.filter(ProductCode_id=rb.ProductCode_id)
+    similarRBs = RatebookMetadata.objects.filter(ProductCode_id=prodCode).exclude(RatebookStatusType="Template").order_by('ProductCode')
 
     return render(request, 'ratemanager/cloneOptions.html', locals())
 
 
-def clone_ratebook(request, ratebook_id):
-    # Get the RatebookMetadata object to be cloned
-    ratebook = RatebookMetadata.objects.get(id=ratebook_id)
-
-    # Create a new RatebookMetadata object with the same attributes as the original
-    new_ratebook = RatebookMetadata.objects.create(
-        name=ratebook.name + ' (Clone)',
-        description=ratebook.description,
-        effective_date=ratebook.effective_date,
-        expiration_date=ratebook.expiration_date,
-        status=ratebook.status,
-        created_by=request.user,
-        modified_by=request.user
-    )
-
-    # Clone all related RatingExhibits objects
-    for exhibit in ratebook.rating_exhibits.all():
-        RatingExhibits.objects.create(
-            ratebook=new_ratebook,
-            name=exhibit.name,
-            description=exhibit.description,
-            order=exhibit.order,
-            created_by=request.user,
-            modified_by=request.user
-        )
-
-    # Clone all related RatingVariables objects
-    for variable in ratebook.rating_variables.all():
-        RatingVariables.objects.create(
-            ratebook=new_ratebook,
-            name=variable.name,
-            description=variable.description,
-            order=variable.order,
-            created_by=request.user,
-            modified_by=request.user
-        )
-
-    # Redirect to the cloned RatebookMetadata object's detail view
-    messages.success(request, 'Ratebook cloned successfully.')
-    return redirect('ratebook_detail', ratebook_id=new_ratebook.id)
+def cloneRB(request):
+    '''
+    This view clones the ratebook and all of its associated exhibits and variables.
+    '''
+    rbid = request.POST.get('toCloneRB')
+    rb = RatebookMetadata.objects.get(pk=rbid)
+    createTemplateFormData = request.session.get('createTemplateFormData')
+    formObj = createTempleteForm(createTemplateFormData)
+    attrs = {k: v for k, v in formObj.save(commit=False).__dict__.items() if v is not None}
+    clonedRB = helperfuncs.clone_object(rb, attrs)
+    clonedRB.RatebookRevisionType = 'Cloned Template'
+    clonedRB.RatebookStatusType = 'Cloned Template'
+    clonedRB.RatebookChangeType = 'Cloned Template'
+    clonedRB.CreationDateTime = datetime.now()
+    clonedRB.RatebookID = helperfuncs.generateRatebookID()
+    clonedRB.RatebookVersion = 0.0
+    clonedRB.save()
+    return redirect('ratemanager:createExhibitsAndVariables', pk=clonedRB.id)

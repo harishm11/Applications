@@ -15,8 +15,9 @@
     onclick="window.location.href = '/ratemanager/createExhibitsAndVariables/{{ pk }}/'"
     >Skip</button>
   </div>
-<form action="/ratemanager/cloneOptions/"
-      method="get">
+<form action="/ratemanager/cloneRB/"
+      method="post">
+      {% csrf_token %}
 <div class="container table-responsive">          
     <table id="example" class="table table-sm table-condensed cell-border table-hover">
       <thead>
@@ -48,7 +49,7 @@
       {% for obj in similarRBs %}
         <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyVersionExhibits/{{ obj.RatebookID }}/{{ obj.RatebookVersion }}';">
           <td onclick="event.stopPropagation();">
-            <input type="checkbox" name="selectedRBs" value="{{ obj.RatebookID }}_{{obj.RatebookVersion}}_{{obj.RatebookName}}">
+            <input type="checkbox" name="toCloneRB" value="{{ obj.id }}">
           </td>
           <td>{{obj.RatebookName}}</td>
           <td>{{obj.RatebookID}}</td>
@@ -75,19 +76,45 @@
       </tbody>
     </table>
   </div>
+  <div class="row justify-content-around">
+      <button
+      type="button"
+      name="back"
+      class="btn btn-secondary col-md-3"
+      onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+      >Back</button>
+      <input class="btn btn-success col-md-3" type="submit" id="submit" value="Clone and Next">
+  </div>
 </form>
-
-<div class="row justify-content-around">
-    <button
-    type="button"
-    name="back"
-    class="btn btn-secondary col-md-3"
-    onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
-    >Back</button>
-    <input class="btn btn-success col-md-3" type="submit" id="submit" value="Clone and Next">
-</div>
-
 {% endblock %}
 {% block js%}
-  <script src ="{% static 'js/viewRBbyVersionScript.js' %}" type="text/javascript"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('#example').DataTable({
+        paging: false,
+        searching: false,
+        info: false,
+        order: [[9, 'desc']],
+        'columnDefs': [ {
+                  'targets': [0],
+                  'orderable': false,
+            }]
+      });
+    });
+    $('input[type=checkbox]').on('change', function (e) {
+      if ($('input[type=checkbox]:checked').length > 1)
+      {
+        $(this).prop('checked', false);
+        alert("Max allowed selections is 1");
+      }
+      else if ($('input[type=checkbox]:checked').length == 1){
+          $("#submit").prop("disabled", false);
+      }
+      else
+      {
+        $("#compare_button").prop("disabled", true);
+        $("#export_template_button").prop("disabled", true);
+      }
+    });
+  </script>
 {% endblock js%}

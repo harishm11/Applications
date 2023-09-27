@@ -35,5 +35,7 @@ urlpatterns = [
     # view rb template
     path('viewTemplate/', viewTemplate.viewTemplate, name="viewTemplate"),
     # clone
-    path('cloneOptions/<int:pk>', cloneRB.cloneOptions, name="cloneOptions"),
+    path('cloneOptions/<int:prodCode>/', cloneRB.cloneOptions, name="cloneOptions"),
+    path('cloneRB/', cloneRB.cloneRB, name="cloneRB"),
+    path('EditCoverages/', views.EditCoverages, name="EditCoverages"),
 ]

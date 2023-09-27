@@ -248,7 +248,7 @@ class createTempleteForm(forms.ModelForm):
 createRatingVariablesFromSet = inlineformset_factory(
     RatingExhibits,
     RatingVariables,
-    fields=(['RatingVarName', 'RatingVarType']),
+    fields=(['RatingVarName', 'RatingVarType', 'DisplayName']),
     extra=1,
     can_delete=True,
     max_num=15
