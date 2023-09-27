@@ -10,13 +10,6 @@
     &emsp; - {{ i }}<br>
     {% endfor %}
   </b><br>
-  {% if not loaded_to_db and not load_failed %}
-  <div class="text-center">
-    <a href='/ratemanager/loadUpdatedRBtoDB/'>
-    <input type="submit" class="btn btn-primary" value="Load to Database" action="" />
-    </a>
-  </div>  
-  {% endif %}
 </div>
 <script>
   $(document).ready(function () {

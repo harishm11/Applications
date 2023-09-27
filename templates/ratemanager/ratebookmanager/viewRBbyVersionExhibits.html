@@ -24,6 +24,8 @@
       {%endfor%}
     </table>
 </form>
+
+{% if pivotview == 'off' %}
 <nav aria-label="Page navigation">
   <ul class="pagination pagination-sm">
      {% if page_obj.has_previous %}
@@ -41,38 +43,15 @@
      {% endif %}
   </ul>
 </nav>
-<div class="container table-responsive">          
-    <table id="example" class="table table-condensed cell-border">
-      <thead>
-        <tr>
-          <th>RatebookID</th>
-          <th>Coverage</th>
-          <th>Exhibit</th>
-          <th>Factor</th>
-          <th>RatingVarName1</th>
-          <th>RatingVarName2</th>
-          <th>RatingVarValue1</th>
-          <th>RatingVarValue2</th>							
-        </tr>
-      </thead>
-      <tbody>
-      {% if page_obj %}  
-        {% for obj in page_obj %}
-          <tr>
-            <td>{{obj.RatebookID}}</td>
-            <td>{{obj.Coverage}}</td>
-            <td>{{obj.Exhibit}}</td>
-            <td>{{obj.Factor}}</td>
-            <td>{{obj.RatingVarName1}}</td>
-            <td>{{obj.RatingVarValue1}}</td>
-            <td>{{obj.RatingVarName2}}</td>
-            <td>{{obj.RatingVarValue2}}</td>
-          </tr>
-        {% endfor %}
-      {% endif %}
-      </tbody>
-    </table>
-  </div>
+{% include 'ratemanager/ratebookmanager/viewrbTable.html' %}
+
+{% else %}
+
+  {{ dfHTML }}
+
+{% endif %}
+
+
 <script>
   $(document).ready(function () {
     $('#example').DataTable({
@@ -81,6 +60,7 @@
       info: false
     });
 });
+$('#example').addClass("table table-sm display compact cell-border");
 </script>
 
 {%endblock%}

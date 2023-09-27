@@ -30,11 +30,12 @@
   </div>
 </form>
 
-<form action="/ratemanager/compareRB/">       
+<form action="/ratemanager/compareRB/"
+      method="get">
 <div class="text-left">
   <input id="compare_button" type="submit" class="btn btn-primary" value="Compare" disabled="true"/>
   <input id="export_template_button" type="submit" class="btn btn-primary" value="Export Update Template" 
-  disabled="true" formaction="/ratemanager/exportTemplate/" formtarget="_blank"/>
+  disabled="true" formaction="/ratemanager/exportRB/" formtarget="_blank"/>
 </div>
 <br>
 <nav aria-label="Page navigation">
@@ -68,9 +69,9 @@
         <th>Migration Time</th>
         <th>Activation Date</th>
         <th>Activation Time</th>
-        <th>RatebookRevisionType</th>
-        <th>RatebookStatusType</th>
-        <th>RatebookChangeType</th>
+        <th>Ratebook Revision Type</th>
+        <th>Ratebook Status Type</th>
+        <th>Ratebook Change Type</th>
         <th>Carrier</th>
         <th>State</th>
         <th>Line of Business</th>
@@ -81,15 +82,15 @@
       </tr>
     </thead>
     <tbody>
-    {% if filteredRatebooks %}
-    {% for obj in filteredRatebooks %}
+    {% if filteredRatebookMetadata %}
+    {% for obj in filteredRatebookMetadata %}
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyVersionExhibits/{{ obj.RatebookID }}/{{ obj.RatebookVersion }}';">
         <td onclick="event.stopPropagation();">
           <input type="checkbox" name="selectedRBs" value="{{ obj.RatebookID }}_{{obj.RatebookVersion}}_{{obj.RatebookName}}">
         </td>
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
-        <td>{{obj.RatebookVersion}}</td>
+        <td>{{obj.RatebookVersion|floatformat:1}}</td>
         <td>{{obj.NewBusinessEffectiveDate}}</td>
         <td>{{obj.RenewalEffectiveDate}}</td>
         <td>{{obj.MigrationDate}}</td>

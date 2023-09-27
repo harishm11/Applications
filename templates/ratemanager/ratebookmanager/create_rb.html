@@ -20,14 +20,6 @@
         id="uploadform"
       >
           {% csrf_token%}
-          <!--
-          {{ form.RatebookCreationType.label }} :&emsp; {{ form.RatebookCreationType }}
-          <br><br>
-          <div id="RatebookUpdateType">
-            {{ form.RatebookUpdateType.label }} :&emsp; {{ form.RatebookUpdateType }}
-          </div>
-          <br>
-          -->
         <div class="mb-3">
           <label for="uploadform"> Select and upload the Excel file: </label>
           <input
@@ -57,19 +49,4 @@
 
   {% endif %}
 </div>
-<!--
-<script>
-    function check_field_value() {
-        if($(this).val() != 'update') {  
-            $('#RatebookUpdateType').hide();
-        } else {
-            $('#RatebookUpdateType').show();
-        }
-    }
-    $(document).ready(function() {
-        $('#RatebookCreationType').change(check_field_value);
-        check_field_value.call($('#RatebookCreationType').get(0));
-    });
-</script>
--->
 {% endblock %}

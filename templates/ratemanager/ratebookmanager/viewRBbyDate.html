@@ -55,14 +55,14 @@
       <tr>
         <th>Ratebook Name</th>
         <th>Ratebook ID</th>
-        <th>RatebookRevisionType</th>
-        <th>RatebookStatusType</th>
-        <th>RatebookChangeType</th>
+        <th>Ratebook RevisionType</th>
+        <th>Ratebook Status Type</th>
+        <th>Ratebook Change Type</th>
       </tr>
     </thead>
     <tbody>
-    {% if filteredRatebooks %}  
-    {% for obj in filteredRatebooks %}
+    {% if filteredRatebookMetadata %}  
+    {% for obj in filteredRatebookMetadata %}
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyDateExhibits/{{ obj.RatebookID }}';">
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
