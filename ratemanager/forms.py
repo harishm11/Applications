@@ -392,3 +392,7 @@ class exportRBForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         label='Select Exhibits to Export'
         )
+
+
+class inputPKForm(forms.Form):
+    pk = forms.IntegerField(label='Enter Ratebook Primary Key', required=True)
