@@ -2,10 +2,17 @@ from django.db import models
 from systemtables.models import \
     state, carrier, lineofbusiness, \
     uwcompany, productcode, policytype, policysubtype
-from django.contrib.postgres.fields import ArrayField
 
 
 class RatebookMetadata(models.Model):
+    id = models.CharField(
+        max_length=50,
+        unique=True,
+        default=None,
+        null=False,
+        primary_key=True,
+        editable=False
+        )
     RatebookID = models.CharField(
         max_length=50,
         blank=True,
@@ -116,6 +123,7 @@ class RatebookMetadata(models.Model):
 
     def save(self, *args, **kwargs):
         self.RatebookName = str(self.State) + '_' + str(self.ProductCode)
+        self.id = self.RatebookID + '_' + str(self.RatebookVersion)
         super(RatebookMetadata, self).save(*args, **kwargs)
 
 
@@ -134,38 +142,38 @@ class RatingFactors (models.Model):
         null=False,
         default=None
         )
-    TableCategory = models.CharField(max_length=100, null=False)
-    Coverage = models.CharField(max_length=100, null=False)
-    Exhibit = models.CharField(max_length=100, null=False)
-    Factor = models.CharField(max_length=100, null=True)
-    RatingVarName1 = models.CharField(max_length=100, null=True)
-    RatingVarName2 = models.CharField(max_length=100, null=True)
-    RatingVarValue1 = models.CharField(max_length=100, null=True)
-    RatingVarValue2 = models.CharField(max_length=100, null=True)
-    RatingVarName3 = models.CharField(max_length=100, null=True)
-    RatingVarName4 = models.CharField(max_length=100, null=True)
-    RatingVarValue3 = models.CharField(max_length=100, null=True)
-    RatingVarValue4 = models.CharField(max_length=100, null=True)
-    RatingVarName5 = models.CharField(max_length=100, null=True)
-    RatingVarName6 = models.CharField(max_length=100, null=True)
-    RatingVarValue5 = models.CharField(max_length=100, null=True)
-    RatingVarValue6 = models.CharField(max_length=100, null=True)
-    RatingVarName7 = models.CharField(max_length=100, null=True)
-    RatingVarName8 = models.CharField(max_length=100, null=True)
-    RatingVarValue7 = models.CharField(max_length=100, null=True)
-    RatingVarValue8 = models.CharField(max_length=100, null=True)
-    RatingVarName9 = models.CharField(max_length=100, null=True)
-    RatingVarName10 = models.CharField(max_length=100, null=True)
-    RatingVarValue9 = models.CharField(max_length=100, null=True)
-    RatingVarValue10 = models.CharField(max_length=100, null=True)
-    RatingVarName11 = models.CharField(max_length=100, null=True)
-    RatingVarName12 = models.CharField(max_length=100, null=True)
-    RatingVarValue11 = models.CharField(max_length=100, null=True)
-    RatingVarValue12 = models.CharField(max_length=100, null=True)
-    RatingVarName13 = models.CharField(max_length=100, null=True)
-    RatingVarName14 = models.CharField(max_length=100, null=True)
-    RatingVarValue13 = models.CharField(max_length=100, null=True)
-    RatingVarValue14 = models.CharField(max_length=100, null=True)
+    TableCategory = models.CharField(max_length=100, null=False, default=None)
+    Coverage = models.CharField(max_length=100, null=False, default=None)
+    Exhibit = models.CharField(max_length=100, null=False, default=None)
+    Factor = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName1 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName2 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue1 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue2 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName3 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName4 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue3 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue4 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName5 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName6 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue5 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue6 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName7 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName8 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue7 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue8 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName9 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName10 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue9 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue10 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName11 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName12 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue11 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue12 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName13 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarName14 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue13 = models.CharField(max_length=100, null=True, default=None)
+    RatingVarValue14 = models.CharField(max_length=100, null=True, default=None)
     NewBusinessEffectiveDate = models.DateField(
         null=False,
         default=None
@@ -211,46 +219,45 @@ class RatingFactors (models.Model):
 
 
 class RatingCoverages(models.Model):
-    # Carrier = models.ForeignKey(
-    #     carrier.Carrier,
-    #     on_delete=models.CASCADE,
-    #     default=None
-    #     )
-
-    CoverageCode = models.CharField(max_length=200, null=True, blank=True)
-    DisplayName = models.CharField(max_length=200)
+    CoverageCode = models.CharField(max_length=200, null=True, blank=True, default=None)
+    DisplayName = models.CharField(max_length=200, null=True, default=None)
 
     def __str__(self) -> str:
-        return self.DisplayName
+        return self.CoverageCode
 
 
 class RatingExhibits(models.Model):
-    Ratebook = models.ForeignKey(
-        RatebookMetadata,
-        on_delete=models.CASCADE
-    )
-    RatingItemCode = models.CharField(max_length=100, null=True)
-    Exhibit = models.CharField(max_length=100, null=True)
+    RatingItemCode = models.CharField(max_length=100, null=True, default=None)
+    Exhibit = models.CharField(max_length=100, unique=True, default=None)
     Coverages = models.ManyToManyField(RatingCoverages)
-    RatingVarNames = ArrayField(models.CharField(max_length=200), null=True, blank=True)
-    TableDescription = models.CharField(max_length=100, null=True)
-    Version = models.FloatField(max_length=100, null=True)
+    Version = models.FloatField(max_length=100, null=True, default=None)
+    SequenceNo = models.IntegerField(null=True, default=None)
 
     def __str__(self) -> str:
         return self.Exhibit
 
 
 class RatingVariables(models.Model):
-    Exhibit = models.ForeignKey(
-        RatingExhibits,
-        on_delete=models.CASCADE
-        )
-    RatingVarName = models.CharField(max_length=200, null=True, blank=True)
-    DisplayName = models.CharField(max_length=200)
-    RatingVarType = models.CharField(max_length=200)
-    RatingVarLength = models.CharField(max_length=200)
-    RatingVarFormat = models.CharField(max_length=200)
-    RateVarCategory = models.CharField(max_length=200)
+    RateVarCategory = models.CharField(null=True, max_length=200, default=None)
+    RatingVarName = models.CharField(null=True, max_length=200, default=None)
+    DisplayName = models.CharField(null=True, max_length=200, default=None)
+    RatingVarType = models.CharField(null=True, max_length=200, default=None)
+    RatingVarLength = models.CharField(null=True, max_length=200, default=None)
+    RatingVarFormat = models.CharField(null=True, max_length=200, default=None)
 
     def __str__(self) -> str:
-        return self.DisplayName
+        return self.RatingVarName
+
+
+class RatebookTemplate(models.Model):
+    RatebookID = models.CharField(
+        max_length=50,
+        blank=True,
+        null=False,
+        default=None,
+        editable=False
+        )
+
+    RatebookExhibit = models.ForeignKey(RatingExhibits, on_delete=models.DO_NOTHING)
+    ExhibitVariables = models.ManyToManyField(RatingVariables)
+    ExhibitCoverages = models.ManyToManyField(RatingCoverages)

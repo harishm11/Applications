@@ -6,8 +6,8 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
-<h3>View Ratebook by Versions</h3>
-<form method="post" action="/ratemanager/viewRBbyVersion/">
+<h3>View Ratebook by Date</h3>
+<form method="post" action="/ratemanager/viewTemplateOptions/">
   {% csrf_token %}
   <table class="table table-sm">
     {% for field in viewForm %}
@@ -27,16 +27,10 @@
 
   <div>
     <input type="submit" class="btn btn-secondary" value="Apply Filters" />
-  </div>
+  </div>  
+
 </form>
 
-<form action="/ratemanager/compareRB/"
-      method="get">
-<div class="text-left">
-  <input id="compare_button" type="submit" class="btn btn-primary" value="Compare" disabled="true"/>
-  <input id="export_template_button" type="submit" class="btn btn-primary" value="Export Update Template" 
-  disabled="true" formaction="/ratemanager/exportRB/" formtarget="_blank"/>
-</div>
 <br>
 <nav aria-label="Page navigation">
   <ul class="pagination pagination-sm">
@@ -59,64 +53,37 @@
   <table id="example" class="table table-sm table-condensed cell-border table-hover">
     <thead>
       <tr>
-        <th class="no-sort" onclick="event.stopPropagation();">Select</th>
         <th>Ratebook Name</th>
         <th>Ratebook ID</th>
-        <th>Ratebook Version</th>
-        <th>New Business Effective Date</th>
-        <th>Renewal Effective Date</th>
-        <th>Migration Date</th>
-        <th>Migration Time</th>
-        <th>Activation Date</th>
-        <th>Activation Time</th>
-        <th>Ratebook Revision Type</th>
+        <th>Ratebook RevisionType</th>
         <th>Ratebook Status Type</th>
         <th>Ratebook Change Type</th>
-        <th>Carrier</th>
-        <th>State</th>
-        <th>Line of Business</th>
-        <th>UW Company</th>
-        <th>Policy Type</th>
-        <th>Policy SubType</th>
-        <th>Product Code</th>
       </tr>
     </thead>
     <tbody>
-    {% if page_obj %}
+    {% if page_obj %}  
     {% for obj in page_obj %}
-      <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyVersionExhibits/{{ obj.id }}/';">
-        <td onclick="event.stopPropagation();">
-          <input type="checkbox" name="selectedRBs" value="{{ obj.RatebookID }}_{{obj.RatebookVersion}}_{{obj.RatebookName}}">
-        </td>
+      <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewTemplate/{{ obj.RatebookID }}/';">
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
-        <td>{{obj.RatebookVersion|floatformat:1}}</td>
-        <td>{{obj.NewBusinessEffectiveDate}}</td>
-        <td>{{obj.RenewalEffectiveDate}}</td>
-        <td>{{obj.MigrationDate}}</td>
-        <td>{{obj.MigrationTime}}</td>
-        <td>{{obj.ActivationDate}}</td>
-        <td>{{obj.ActivationTime}}</td>
         <td>{{obj.RatebookRevisionType}}</td>
         <td>{{obj.RatebookStatusType}}</td>
         <td>{{obj.RatebookChangeType}}</td>
-        <td>{{obj.Carrier}}</td>
-        <td>{{obj.State}}</td>
-        <td>{{obj.LineofBusiness}}</td>
-        <td>{{obj.UWCompany}}</td>
-        <td>{{obj.PolicyType}}</td>
-        <td>{{obj.PolicySubType}}</td>
-        <td>{{obj.ProductCode}}</td>
       </tr>
     {% endfor %}
     {% endif %}
     </tbody>
   </table>
 </div>
-</form>
 
+<script>
+  $(document).ready(function () {
+    $('#example').DataTable({
+      paging: false,
+      searching: false,
+      info: false,
+      order: [[1, 'desc']],
+    });
+});
+</script>
 {% endblock %}
-
-{% block js%}
-  <script src ="{% static 'js/viewRBbyVersionScript.js' %}" type="text/javascript"></script>
-{% endblock js%}

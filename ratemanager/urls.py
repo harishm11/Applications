@@ -2,7 +2,7 @@
 from django.urls import path
 from ratemanager.views import exportRB, viewRB, \
     views, createRB, updateRB, compareRB, \
-    createTemplate, viewTemplate, cloneRB
+    createTemplate, cloneRB
 
 app_name = 'ratemanager'
 
@@ -18,7 +18,7 @@ urlpatterns = [
     # view rb
     path('viewRB/', viewRB.viewRB, name="viewRB"),
     path('viewRBbyVersion/', viewRB.viewRBbyVersion, name="viewRBbyVersion"),
-    path('viewRBbyVersionExhibits/<str:rbID>/<str:rbVer>/', viewRB.viewRBbyVersionExhibits, name='viewRBbyVersionExhibits'),
+    path('viewRBbyVersionExhibits/<str:rbid>/', viewRB.viewRBbyVersionExhibits, name='viewRBbyVersionExhibits'),
     path('viewRBbyDate/', viewRB.viewRBbyDate, name="viewRBbyDate"),
     path('viewRBbyDateExhibits/<str:rbID>/', viewRB.viewRBbyDateExhibits, name='viewRBbyDateExhibits'),
     # update rb
@@ -28,14 +28,18 @@ urlpatterns = [
     path('compareRB/', compareRB.compareRB, name="compareRB"),
     # export update RB & Empty template
     path('exportRB/', exportRB.exportRB, name="exportRB"),
-    path('exportTemplate/<int:pk>/', exportRB.exportTemplate, name="exportTemplate"),
+    path('exportTemplate/<str:pk>/', exportRB.exportTemplate, name="exportTemplate"),
     # create rb template
     path('createTemplate/', createTemplate.createTemplate, name="createTemplate"),
-    path('createExhibitsAndVariables/<int:pk>/', createTemplate.createExhibitsAndVariables.as_view(), name="createExhibitsAndVariables"),
+    path('listExhibits/<str:pk>/', createTemplate.listExhibits, name="listExhibits"),
+    path('addExhibit2Template/', createTemplate.addExhibit2Template, name="addExhibit2Template"),
+    path('editExhibitTemplate/<str:pk>/', createTemplate.editExhibitTemplate, name="editExhibitTemplate"),
+    path('deleteExhibitTemplate/<str:pk>/', createTemplate.deleteExhibitTemplate, name="deleteExhibitTemplate"),
+    path('EditCoverages/', views.EditCoverages, name="EditCoverages"),
     # view rb template
-    path('viewTemplate/', viewTemplate.viewTemplate, name="viewTemplate"),
+    path('viewTemplateOptions/', viewRB.viewTemplateOptions, name="viewTemplateOptions"),
+    path('viewTemplate/<str:rbID>/', viewRB.viewTemplate, name="viewTemplate"),
     # clone
     path('cloneOptions/<int:prodCode>/', cloneRB.cloneOptions, name="cloneOptions"),
     path('cloneRB/', cloneRB.cloneRB, name="cloneRB"),
-    path('EditCoverages/', views.EditCoverages, name="EditCoverages"),
 ]

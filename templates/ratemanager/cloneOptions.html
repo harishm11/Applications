@@ -6,15 +6,27 @@
 {% load crispy_forms_tags %}
 {% block maincontent %}
 
-<div class="row justify-content-around">
+<div>
     <h3 class="col-md-8">Found some similar ratebooks, select any one to clone.</h3>
+    <form method="POST" action="/ratemanager/cloneOptions/{{ prodCode }}/">
+      {% csrf_token %}
+    <div class="row justify-content-around">
     <button
-    type="button"
-    name="back"
+    type="submit"
+    name="skip"
     class="btn btn-warning col-md-3"
-    onclick="window.location.href = '/ratemanager/createExhibitsAndVariables/{{ pk }}/'"
-    >Skip</button>
+    value="skip"
+    >Skip to Create Exhibits from Scratch</button>
   </div>
+  </form>
+  </div>
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
 <form action="/ratemanager/cloneRB/"
       method="post">
       {% csrf_token %}
@@ -47,7 +59,7 @@
       <tbody>
       {% if similarRBs %}
       {% for obj in similarRBs %}
-        <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyVersionExhibits/{{ obj.RatebookID }}/{{ obj.RatebookVersion }}';">
+        <tr>
           <td onclick="event.stopPropagation();">
             <input type="checkbox" name="toCloneRB" value="{{ obj.id }}">
           </td>

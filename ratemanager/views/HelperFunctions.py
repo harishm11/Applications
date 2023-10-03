@@ -3,7 +3,7 @@ import re
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
-from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatingCoverages
+from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatingCoverages, RatebookTemplate
 from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
@@ -17,8 +17,8 @@ import ratemanager.views.configs as configs
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
-                   "createTemplate", "viewTemplate",
-                   'EditCoverages']
+                   "createTemplate",
+                   "viewTemplateOptions", 'EditCoverages']
 pd.options.mode.copy_on_write = True
 
 list_of_known_covs = [
@@ -737,68 +737,75 @@ def map_covs_and_vars(df):
 
 
 def camel_case_split(str):
+    ''' split camel case string to list of words '''
     return re.findall(r'[A-Z](?:[a-z]+|[A-Z]*(?=[A-Z]|$))', str)
 
 
 def generateRatebookItemCode(ExhibitName):
+    ''' generate ratebook item code from exhibit name '''
     # return ''.join(list(map(str, map(ord, ''.join(camel_case_split(ExhibitName))))))[:100]
     return 1234
 
 
 def determine_all_ratevars(df, tabStruct):
+    ''' if no ratevars are specified in the sheet, then determine all ratevars '''
     pass
 
 
-def updateRatingVars(uploadURL, Exid):
-    sheetname = RatingExhibits.objects.get(id=Exid).Exhibit
+def updateRatingVars(uploadURL, TemplateID):
+    TempObj = RatebookTemplate.objects.get(id=TemplateID)
+    ExhibitObj = TempObj.RatebookExhibit
+    sheetname = ExhibitObj.Exhibit
+
+    # check if sheetname exists in original excel file
+    # will happen in case new exhibits are created from existing ones
+    # if dosen't exist, return because nothing to do
     try:
         df = pd.read_excel(uploadURL, sheet_name=sheetname)
     except ValueError:
         return
+
+    # update ratevars in template and their Unique Tables if not already exists
     if sheetname not in excludeList:
+        # fetch the Table Structure it contains RatingVars and Coverage
         tabStruct = categoriseTransformType(df, sheetname)
+        # if no ratevars are specified in the sheet, then determine all ratevars
         if tabStruct['category'] == 'neither covs nor factor in cols':
             determine_all_ratevars(df, tabStruct)
+        # guess the datatypes of the columns using pandas builtin function
         guessed_dtypes_df = df.convert_dtypes()
-        for index, col in enumerate(df.columns):
-            Rec = dict()
+        # iterate over the columns and create RatingVar objects if not already exists
+        for _, col in enumerate(df.columns):
             if tabStruct['ratevars'] is not None and col in tabStruct['ratevars']:
-                Rec["DisplayName"] = col
-                Rec["RatingVarType"] = guessed_dtypes_df.dtypes[col]
-                Rec["Exhibit_id"] = Exid
-                RatingVariables.objects.create(
-                    **Rec
-                )
+                RatingVarObj, _ = RatingVariables.objects.get_or_create(RatingVarName=col)
+                RatingVarObj.DisplayName = col
+                RatingVarObj.RatingVarType = guessed_dtypes_df.dtypes[col]
+                RatingVarObj.save()
+                # add the RatingVar to the current Template
+                TempObj.ExhibitVariables.add(RatingVarObj)
 
 
 def updateRatingExhibits(tdf, rbid, uploadURL):
-    ExList = tdf["Exhibit"].unique()
+    ''' update rating exhibits and rating variables in template and their Unique Tables'''
+    # check if Template already exists for this Ratebook id and return if it does
+    if RatebookTemplate.objects.filter(RatebookID=rbid).exists():
+        return
 
+    # get Exhibits list from the dataframe
+    ExList = tdf["Exhibit"].unique()
     for i in ExList:
-        Rec = dict()
-        Rec['Exhibit'] = i
-        Rec['RatingVarNames'] = []
-        Rec['Version'] = 0
-        Rec['RatingItemCode'] = generateRatebookItemCode(i)
-        Rec['Ratebook_id'] = rbid
+        TempRec = RatebookTemplate()
+        TempRec.RatebookID = rbid.split('_')[0]  # remove version from rbid
+        ExhibitObj, _ = RatingExhibits.objects.get_or_create(Exhibit=i)
+        TempRec.RatebookExhibit = ExhibitObj
         df = tdf[tdf["Exhibit"] == i]
-        for col in tdf.columns:
-            if "RatingVarName" in col:
-                for i in df[col].unique():
-                    if i is not None:
-                        Rec['RatingVarNames'].append(i)
-        # Need to use set for ManytoMany fields
-        # Rec['Coverages'] = df['Coverage'].unique().tolist()
-        ExObj = RatingExhibits.objects.create(
-            **Rec
-        )
+        TempRec.save()
         for i in df['Coverage'].unique().tolist():
-            try:
-                cov = RatingCoverages.objects.get(CoverageCode=i)
-                ExObj.Coverages.add(cov)
-            except:
-                continue
-        updateRatingVars(uploadURL=uploadURL, Exid=ExObj.id)
+            cov, _ = RatingCoverages.objects.get_or_create(CoverageCode=i)
+            # add the Coverage to the current Template
+            TempRec.ExhibitCoverages.add(cov)
+
+        updateRatingVars(uploadURL=uploadURL, TemplateID=TempRec.id)
 
 
 def extractIdentityDetails(dictionary: dict) -> dict:
@@ -809,7 +816,9 @@ def extractIdentityDetails(dictionary: dict) -> dict:
 
 
 def clone_object(obj, attrs={}):
-
+    '''
+    recursively clone an object and all its related objects
+    '''
     # we start by building a "flat" clone
     clone = obj._meta.model.objects.get(pk=obj.pk)
     clone.pk = None
@@ -846,5 +855,4 @@ def clone_object(obj, attrs={}):
                 children = field.related_model.objects.filter(**{field.remote_field.name: obj})
                 for child in children:
                     clone_object(child, attrs)
-
     return clone

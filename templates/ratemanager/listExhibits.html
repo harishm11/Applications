@@ -1,0 +1,44 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} Create Ratebook {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %} 
+
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% if not ExhibitObjs %}
+  <h2>No Exhibits Added to this Ratebook yet, Click on add more to Add an exhibit</h2>
+
+{% else %}
+
+  <h2>Exhibits List</h2>
+  <p>Showing for {{ rbname }}; ID: {{ rbid }}; Version: {{ rbver }};</p> 
+  <hr>
+  <button 
+    type="button" 
+    class="btn btn-primary" 
+    onclick="window.location.href='/ratemanager/addExhibit2Template/';">
+    Add an Exhibit
+  </button>
+  <hr>
+  <table class="table table-sm table-condensed cell-border">
+    {% for exhibit in ExhibitObjs %}
+    <tr>
+      <td>{{ exhibit.RatebookExhibit }}</td>
+      <td><a href="{% url 'ratemanager:editExhibitTemplate' exhibit.id %}">Edit</a></td>
+      <td><a href="{% url 'ratemanager:deleteExhibitTemplate' exhibit.id %}">Delete</a></td>
+    </tr>
+  {% endfor %}
+  </table>
+
+{% endif %}
+
+{% endblock %}

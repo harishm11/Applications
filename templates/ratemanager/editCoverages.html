@@ -6,7 +6,7 @@
 {% load crispy_forms_tags %}
 {% block maincontent %}
 <h2>Edit Covergaes</h2>
-<template id="id_coverage_empty_form">
+<template id="empty_form">
   <hr>
   <b><u>
     {% if Coverage_form.instance.id %}
@@ -37,7 +37,7 @@
 
 {{ form.management_form }}
 {{ form.non_form_errors }}
-<div id="coverage-formset">
+<div id="formset">
   {% for Coverage_form in form.forms %}
 
     <hr>
@@ -66,7 +66,7 @@
 </div>
 <hr>
   <div class="row justify-content-center">
-    <input class="btn btn-sm btn-outline-primary col-md-2" type="button" id="add-coverage" value="Add another Coverage">
+    <input class="btn btn-sm btn-outline-primary col-md-2" type="button" id="add-button" value="Add another Coverage">
   </div>
   <br>
   <div class="row justify-content-around">

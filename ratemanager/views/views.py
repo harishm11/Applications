@@ -80,7 +80,7 @@ def EditCoverages(request):
     my_objects = RatingCoverages.objects.all()
 
     # Create a formset for RatingCoverages instances
-    RatingCoveragesFormSet = modelformset_factory(RatingCoverages, fields=('__all__'))
+    RatingCoveragesFormSet = modelformset_factory(RatingCoverages, fields=('__all__'), can_delete=True, extra=0)
     formset = RatingCoveragesFormSet(queryset=my_objects)
 
     if request.method == 'POST':

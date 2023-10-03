@@ -1,0 +1,50 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} Create Template {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %}
+<h2>Add Exhibit to Template</h2>
+<form class="form-control" method="post" action="/ratemanager/addExhibit2Template/">
+  {% csrf_token %}
+    <div class="form-group">
+      <label for="{{ form.RatebookExhibit.id_for_label }}">{{ form.RatebookExhibit.label }}</label>
+      {{ form.RatebookExhibit }}
+      {% if form.RatebookExhibit.help_text %}
+        <small class="form-text text-muted">{{ form.RatebookExhibit.help_text }}</small>
+      {% endif %}
+      {% for error in form.RatebookExhibit.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.ExhibitVariables.id_for_label }}">{{ form.ExhibitVariables.label }}</label>
+      <div style="border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll;">
+      {{ form.ExhibitVariables }}
+      </div>
+      {% if form.ExhibitVariables.help_text %}
+        <small class="form-text text-muted">{{ form.ExhibitVariables.help_text }}</small>
+      {% endif %}
+      {% for error in form.ExhibitVariables.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.ExhibitCoverages.id_for_label }}">{{ form.ExhibitCoverages.label }}</label>
+      <div style="border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll;">
+      {{ form.ExhibitCoverages }}
+      </div>
+      {% if form.ExhibitCoverages.help_text %}
+        <small class="form-text text-muted">{{ form.ExhibitCoverages.help_text }}</small>
+      {% endif %}
+      {% for error in form.ExhibitCoverages.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      <br>
+    <input type="submit" class="btn btn-primary" formmethod="post" formaction="/ratemanager/addExhibit2Template/" value="Save">
+    </div>
+</form>
+{% endblock %}
