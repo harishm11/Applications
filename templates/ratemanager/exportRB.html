@@ -24,9 +24,10 @@
       <input type="hidden" name="rbVer" value="{{ rbVer }}">
       <input type="hidden" name="rbState" value="{{ rbState }}">
       <input type="hidden" name="rbCode" value="{{ rbCode }}">
-      <table>
-        {{ form.as_p }}
-      </table>
+      {{ form.toExportExhibits.label }}
+        <div style="border:2px solid #ccc; width:500px; height: 200px; overflow-y: scroll;">
+          {{ form.toExportExhibits }}
+        </div>
       <br>
 <div class="row justify-content-around">
   <button

@@ -162,18 +162,7 @@ class RatingFactors (models.Model):
     RatingVarName8 = models.CharField(max_length=100, null=True, default=None)
     RatingVarValue7 = models.CharField(max_length=100, null=True, default=None)
     RatingVarValue8 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarName9 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarName10 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarValue9 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarValue10 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarName11 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarName12 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarValue11 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarValue12 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarName13 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarName14 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarValue13 = models.CharField(max_length=100, null=True, default=None)
-    RatingVarValue14 = models.CharField(max_length=100, null=True, default=None)
+
     NewBusinessEffectiveDate = models.DateField(
         null=False,
         default=None
@@ -229,7 +218,6 @@ class RatingCoverages(models.Model):
 class RatingExhibits(models.Model):
     RatingItemCode = models.CharField(max_length=100, null=True, default=None)
     Exhibit = models.CharField(max_length=100, unique=True, default=None)
-    Coverages = models.ManyToManyField(RatingCoverages)
     Version = models.FloatField(max_length=100, null=True, default=None)
     SequenceNo = models.IntegerField(null=True, default=None)
 

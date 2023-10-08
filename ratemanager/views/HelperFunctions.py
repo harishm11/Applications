@@ -85,6 +85,9 @@ def categoriseTransformType(df, sheet_name):
     # check for any coverages in the columns of dataframes
     # (cov as a subset of col_name and vice versa)
     def find_ratevars(possible_list):
+        '''
+        possible_list: list of df column names
+        '''
         blocklist = ['symbol', 'band']
         for i in list_of_known_covs:
             for index, j in enumerate(possible_list):
@@ -129,6 +132,18 @@ def categoriseTransformType(df, sheet_name):
 
 
 def handle_manually(tabStruct, sheetname, df_in):
+    """
+    This function takes in a tabStruct, sheetname, and a dataframe (df_in) as input.
+    It then performs various operations on the dataframe based on the sheetname and returns the modified dataframe.
+
+    Parameters:
+    tabStruct (dict): A dictionary containing various parameters for the function.
+    sheetname (str): The name of the sheet to be processed.
+    df_in (pandas.DataFrame): The input dataframe to be processed.
+
+    Returns:
+    pandas.DataFrame: The modified dataframe after performing various operations based on the sheetname.
+    """
     match sheetname:
         case 'DeductiblesbySymbol':
             df_in = df_in.melt(id_vars=tabStruct['ratevars'])
@@ -211,6 +226,23 @@ def handle_manually(tabStruct, sheetname, df_in):
             df_in['Coverage'] = 'COLL'
             return df_in
 
+        case x if x.startswith('FrequencyandSeverity'):
+            keySubstrings = ['FREQ BAND', 'SEV BAND']
+
+            def filterAndTransform(keySubstring, df):
+                filtered_cols = ['ZIP CODE'] + [col for col in df.columns if keySubstring in col]
+                filtered = df[filtered_cols]
+                new_cols = [col.replace(keySubstring, '').strip() for col in filtered.columns]
+                filtered.columns = new_cols
+                filtered = filtered.melt(id_vars=['ZIP CODE'], value_vars=filtered.columns[1:])
+                filtered.rename(columns={'variable': 'Coverage', 'value': keySubstring}, inplace=True)
+                return filtered
+
+            to_joins = [filterAndTransform(i, df=df_in) for i in keySubstrings]
+            merged = pd.merge(to_joins[0], to_joins[1], on=['ZIP CODE', 'Coverage'])
+            merged['Exhibit'] = sheetname
+            return create_rate_vars_cols(merged, ['ZIP CODE', 'FREQ BAND', 'SEV BAND'])
+
         case _:
             return df_in
 
@@ -254,7 +286,7 @@ def transform(sheet_name, df):
                 tabStruct['ratevars'].remove(i)
                 tabStruct['ratevars'].extend([str(i)+'1', str(i)+'2'])
 
-    if sheet_name in exhibits_to_handle_manually:
+    if sheet_name in exhibits_to_handle_manually or 'FrequencyandSeverity' in sheet_name:
         newdf = handle_manually(tabStruct, sheet_name, df)
     else:
         match tabStruct['category']:
@@ -312,7 +344,7 @@ def transformRB(xl_url=None, df_sheets=None):
             except Exception as err:
                 print("Unable to transform {} table due to {}".format(sheet_name, err))
 
-    numRatingVars = 8
+    numRatingVars = configs.NO_OF_RATING_VARIABLES
     for i in range(1, numRatingVars+1):
         if 'RatingVarName' + str(i) not in df_out.columns:
             df_out['RatingVarName' + str(i)] = None
@@ -325,7 +357,7 @@ def transformRB(xl_url=None, df_sheets=None):
         if i not in excludeList:
             msgs.append("Unable to transform {} table.".format(i))
     map_covs_and_vars(df_out)
-    df_out.to_excel('./uploads/check_transform.xlsx')
+    # df_out.to_excel('./uploads/check_transform.xlsx')
     return df_out, msgs
 
 
@@ -616,6 +648,10 @@ def convert2Df(QuerySet):
 
 
 def extractUpdateRBDetails(xl_url, withExhibitStatusHeader=False):
+    '''
+    It was to be used to extract the exhibit status from the excel file in each sheet.
+    Not used/needed anymore. can be removed.
+    '''
     wb = openpyxl.load_workbook(xl_url)
     rbDetailSheetName = None
     for i in wb.sheetnames:
@@ -674,6 +710,12 @@ def getToExpireExhibits(xl_url):
 
 
 def inverseTransform(df):
+    '''
+    This function takes the UnPivot View of the Dataframe and converts it to
+    Pivot View i.e. the original excel sheet view. This is used to export the
+    data from database to excel file and download it and also to display the
+    data in the frontend.
+    '''
     def pivotFromat(df, index, columns, values='Factor'):
         idf = df.pivot(
             index=index,
@@ -695,6 +737,8 @@ def inverseTransform(df):
 
     df.dropna(how='all', axis=1, inplace=True)
 
+    if 'Factor' not in df.columns:
+        df['Factor'] = None
     # for example base rates minor covs like tables
     if not any([re.findall(r"\ARatingVar", x) for x in list(df.columns)]):
         return df[['Coverage', 'Factor']]
@@ -716,7 +760,12 @@ def inverseTransform(df):
 
 
 def map_covs_and_vars(df):
+    '''
+    This function maps the Coverage and RatingVarName columns to their respective codes
+    as per the system tables/policy processing system.
 
+    Right now it is using the configs.py file to map the Coverage and RatingVarName columns
+    '''
     ratevars = configs.ratevars
     ratevar_mappings = dict()
     uniq_ratevars = []
@@ -753,6 +802,12 @@ def determine_all_ratevars(df, tabStruct):
 
 
 def updateRatingVars(uploadURL, TemplateID):
+    '''
+    This function is called by update rating Exhibits to
+    update rating variables in template and their Unique Tables.
+
+    Only called when a new template is created from excel file.
+    '''
     TempObj = RatebookTemplate.objects.get(id=TemplateID)
     ExhibitObj = TempObj.RatebookExhibit
     sheetname = ExhibitObj.Exhibit
@@ -786,7 +841,14 @@ def updateRatingVars(uploadURL, TemplateID):
 
 
 def updateRatingExhibits(tdf, rbid, uploadURL):
-    ''' update rating exhibits and rating variables in template and their Unique Tables'''
+    '''
+    This function updates rating exhibits and rating variables in template and their Unique Tables
+    Only called when a new template is created from excel file.
+
+    Takes the transformed dataframe and ratebook id as input and excel file path as input,
+    excel file path is used by the updateRatingVars function to update rating variables in the order
+    maintaind in the excel file.
+    '''
     # check if Template already exists for this Ratebook id and return if it does
     if RatebookTemplate.objects.filter(RatebookID=rbid).exists():
         return
@@ -809,6 +871,8 @@ def updateRatingExhibits(tdf, rbid, uploadURL):
 
 
 def extractIdentityDetails(dictionary: dict) -> dict:
+    ''' extract identity details (like Carrier, State, . . . e.t.c given in identity keys)
+      from dictionary input and return a dictionary of identity details excluding all other keys '''
     identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
                     'PolicyType', 'PolicySubType', 'ProductCode')
     identityRateDetails = {key: dictionary.get(key) for key in identityKeys}

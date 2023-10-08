@@ -1,9 +1,8 @@
 from django import forms
 from django.apps import apps
 from datetime import datetime
-from django.forms import inlineformset_factory
-from ratemanager.models import RatebookMetadata, RatingFactors,\
-    RatingExhibits, RatingVariables, RatebookTemplate
+from ratemanager.models import RatebookMetadata, RatingFactors, \
+    RatingExhibits, RatebookTemplate
 import ratemanager.views.HelperFunctions as helperfuncs
 
 
@@ -269,3 +268,17 @@ class editExhibitForm(forms.ModelForm):
         labels = dict()
         for i in fields:
             labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+        labels['RatebookExhibit'] = 'Exhibit Name'
+
+
+class addExhibitForm(forms.ModelForm):
+    class Meta:
+        # fields from RatebookTemplate model
+        model = RatingExhibits
+        fields = (['Exhibit'])
+        labels = {
+            'Exhibit': 'Exhibit Name'
+        }
+        # labels = dict()
+        # for i in fields:
+        #     labels[i] = ' '.join(helperfuncs.camel_case_split(i))

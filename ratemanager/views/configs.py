@@ -66,3 +66,5 @@ export_details = [
     'Migration Date',
     'Migration Time'
 ]
+
+NO_OF_RATING_VARIABLES = 8
