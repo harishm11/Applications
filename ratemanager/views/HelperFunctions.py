@@ -3,7 +3,7 @@ import re
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
-from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables
+from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatingCoverages, RatebookTemplate
 from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
@@ -17,7 +17,8 @@ import ratemanager.views.configs as configs
 
 SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
-                   "createTemplate", "viewTemplate"]
+                   "createTemplate",
+                   "viewTemplateOptions", 'EditCoverages']
 pd.options.mode.copy_on_write = True
 
 list_of_known_covs = [
@@ -84,6 +85,9 @@ def categoriseTransformType(df, sheet_name):
     # check for any coverages in the columns of dataframes
     # (cov as a subset of col_name and vice versa)
     def find_ratevars(possible_list):
+        '''
+        possible_list: list of df column names
+        '''
         blocklist = ['symbol', 'band']
         for i in list_of_known_covs:
             for index, j in enumerate(possible_list):
@@ -128,6 +132,18 @@ def categoriseTransformType(df, sheet_name):
 
 
 def handle_manually(tabStruct, sheetname, df_in):
+    """
+    This function takes in a tabStruct, sheetname, and a dataframe (df_in) as input.
+    It then performs various operations on the dataframe based on the sheetname and returns the modified dataframe.
+
+    Parameters:
+    tabStruct (dict): A dictionary containing various parameters for the function.
+    sheetname (str): The name of the sheet to be processed.
+    df_in (pandas.DataFrame): The input dataframe to be processed.
+
+    Returns:
+    pandas.DataFrame: The modified dataframe after performing various operations based on the sheetname.
+    """
     match sheetname:
         case 'DeductiblesbySymbol':
             df_in = df_in.melt(id_vars=tabStruct['ratevars'])
@@ -210,6 +226,23 @@ def handle_manually(tabStruct, sheetname, df_in):
             df_in['Coverage'] = 'COLL'
             return df_in
 
+        case x if x.startswith('FrequencyandSeverity'):
+            keySubstrings = ['FREQ BAND', 'SEV BAND']
+
+            def filterAndTransform(keySubstring, df):
+                filtered_cols = ['ZIP CODE'] + [col for col in df.columns if keySubstring in col]
+                filtered = df[filtered_cols]
+                new_cols = [col.replace(keySubstring, '').strip() for col in filtered.columns]
+                filtered.columns = new_cols
+                filtered = filtered.melt(id_vars=['ZIP CODE'], value_vars=filtered.columns[1:])
+                filtered.rename(columns={'variable': 'Coverage', 'value': keySubstring}, inplace=True)
+                return filtered
+
+            to_joins = [filterAndTransform(i, df=df_in) for i in keySubstrings]
+            merged = pd.merge(to_joins[0], to_joins[1], on=['ZIP CODE', 'Coverage'])
+            merged['Exhibit'] = sheetname
+            return create_rate_vars_cols(merged, ['ZIP CODE', 'FREQ BAND', 'SEV BAND'])
+
         case _:
             return df_in
 
@@ -253,7 +286,7 @@ def transform(sheet_name, df):
                 tabStruct['ratevars'].remove(i)
                 tabStruct['ratevars'].extend([str(i)+'1', str(i)+'2'])
 
-    if sheet_name in exhibits_to_handle_manually:
+    if sheet_name in exhibits_to_handle_manually or 'FrequencyandSeverity' in sheet_name:
         newdf = handle_manually(tabStruct, sheet_name, df)
     else:
         match tabStruct['category']:
@@ -311,7 +344,7 @@ def transformRB(xl_url=None, df_sheets=None):
             except Exception as err:
                 print("Unable to transform {} table due to {}".format(sheet_name, err))
 
-    numRatingVars = 8
+    numRatingVars = configs.NO_OF_RATING_VARIABLES
     for i in range(1, numRatingVars+1):
         if 'RatingVarName' + str(i) not in df_out.columns:
             df_out['RatingVarName' + str(i)] = None
@@ -324,7 +357,7 @@ def transformRB(xl_url=None, df_sheets=None):
         if i not in excludeList:
             msgs.append("Unable to transform {} table.".format(i))
     map_covs_and_vars(df_out)
-    df_out.to_excel('./uploads/check_transform.xlsx')
+    # df_out.to_excel('./uploads/check_transform.xlsx')
     return df_out, msgs
 
 
@@ -615,6 +648,10 @@ def convert2Df(QuerySet):
 
 
 def extractUpdateRBDetails(xl_url, withExhibitStatusHeader=False):
+    '''
+    It was to be used to extract the exhibit status from the excel file in each sheet.
+    Not used/needed anymore. can be removed.
+    '''
     wb = openpyxl.load_workbook(xl_url)
     rbDetailSheetName = None
     for i in wb.sheetnames:
@@ -673,6 +710,12 @@ def getToExpireExhibits(xl_url):
 
 
 def inverseTransform(df):
+    '''
+    This function takes the UnPivot View of the Dataframe and converts it to
+    Pivot View i.e. the original excel sheet view. This is used to export the
+    data from database to excel file and download it and also to display the
+    data in the frontend.
+    '''
     def pivotFromat(df, index, columns, values='Factor'):
         idf = df.pivot(
             index=index,
@@ -694,6 +737,8 @@ def inverseTransform(df):
 
     df.dropna(how='all', axis=1, inplace=True)
 
+    if 'Factor' not in df.columns:
+        df['Factor'] = None
     # for example base rates minor covs like tables
     if not any([re.findall(r"\ARatingVar", x) for x in list(df.columns)]):
         return df[['Coverage', 'Factor']]
@@ -715,7 +760,12 @@ def inverseTransform(df):
 
 
 def map_covs_and_vars(df):
+    '''
+    This function maps the Coverage and RatingVarName columns to their respective codes
+    as per the system tables/policy processing system.
 
+    Right now it is using the configs.py file to map the Coverage and RatingVarName columns
+    '''
     ratevars = configs.ratevars
     ratevar_mappings = dict()
     uniq_ratevars = []
@@ -736,60 +786,137 @@ def map_covs_and_vars(df):
 
 
 def camel_case_split(str):
+    ''' split camel case string to list of words '''
     return re.findall(r'[A-Z](?:[a-z]+|[A-Z]*(?=[A-Z]|$))', str)
 
 
 def generateRatebookItemCode(ExhibitName):
+    ''' generate ratebook item code from exhibit name '''
     # return ''.join(list(map(str, map(ord, ''.join(camel_case_split(ExhibitName))))))[:100]
     return 1234
 
 
-def updateRatingExhibits(tdf):
-    ExList = tdf["Exhibit"].unique()
-
-    for i in ExList:
-        Rec = dict()
-        Rec['Exhibit'] = i
-        Rec['RatingVarNames'] = []
-        Rec['Version'] = 0
-        Rec['RatingItemCode'] = generateRatebookItemCode(i)
-        df = tdf[tdf["Exhibit"] == i]
-        for col in tdf.columns:
-            if "RatingVarName" in col:
-                for i in df[col].unique():
-                    if i is not None:
-                        Rec['RatingVarNames'].append(i)
-
-        Rec['Coverages'] = df['Coverage'].unique().tolist()
-        RatingExhibits.objects.create(
-            **Rec
-        )
-
-
 def determine_all_ratevars(df, tabStruct):
+    ''' if no ratevars are specified in the sheet, then determine all ratevars '''
     pass
 
 
-def updateRatingVars(uploadURL):
-    wb = pd.read_excel(uploadURL, sheet_name=None)
-    for sheetname, df in wb.items():
-        if sheetname not in excludeList:
-            tabStruct = categoriseTransformType(df, sheetname)
-            if tabStruct['category'] == 'neither covs nor factor in cols':
-                determine_all_ratevars(df, tabStruct)
-            guessed_dtypes_df = df.convert_dtypes()
-            for index, col in enumerate(df.columns):
-                Rec = dict()
-                if tabStruct['ratevars'] is not None and col in tabStruct['ratevars']:
-                    Rec["DisplayName"] = col
-                    Rec["RatingVarType"] = guessed_dtypes_df.dtypes[col]
-                    RatingVariables.objects.create(
-                        **Rec
-                    )
+def updateRatingVars(uploadURL, TemplateID):
+    '''
+    This function is called by update rating Exhibits to
+    update rating variables in template and their Unique Tables.
+
+    Only called when a new template is created from excel file.
+    '''
+    TempObj = RatebookTemplate.objects.get(id=TemplateID)
+    ExhibitObj = TempObj.RatebookExhibit
+    sheetname = ExhibitObj.Exhibit
+
+    # check if sheetname exists in original excel file
+    # will happen in case new exhibits are created from existing ones
+    # if dosen't exist, return because nothing to do
+    try:
+        df = pd.read_excel(uploadURL, sheet_name=sheetname)
+    except ValueError:
+        return
+
+    # update ratevars in template and their Unique Tables if not already exists
+    if sheetname not in excludeList:
+        # fetch the Table Structure it contains RatingVars and Coverage
+        tabStruct = categoriseTransformType(df, sheetname)
+        # if no ratevars are specified in the sheet, then determine all ratevars
+        if tabStruct['category'] == 'neither covs nor factor in cols':
+            determine_all_ratevars(df, tabStruct)
+        # guess the datatypes of the columns using pandas builtin function
+        guessed_dtypes_df = df.convert_dtypes()
+        # iterate over the columns and create RatingVar objects if not already exists
+        for _, col in enumerate(df.columns):
+            if tabStruct['ratevars'] is not None and col in tabStruct['ratevars']:
+                RatingVarObj, _ = RatingVariables.objects.get_or_create(RatingVarName=col)
+                RatingVarObj.DisplayName = col
+                RatingVarObj.RatingVarType = guessed_dtypes_df.dtypes[col]
+                RatingVarObj.save()
+                # add the RatingVar to the current Template
+                TempObj.ExhibitVariables.add(RatingVarObj)
+
+
+def updateRatingExhibits(tdf, rbid, uploadURL):
+    '''
+    This function updates rating exhibits and rating variables in template and their Unique Tables
+    Only called when a new template is created from excel file.
+
+    Takes the transformed dataframe and ratebook id as input and excel file path as input,
+    excel file path is used by the updateRatingVars function to update rating variables in the order
+    maintaind in the excel file.
+    '''
+    # check if Template already exists for this Ratebook id and return if it does
+    if RatebookTemplate.objects.filter(RatebookID=rbid).exists():
+        return
+
+    # get Exhibits list from the dataframe
+    ExList = tdf["Exhibit"].unique()
+    for i in ExList:
+        TempRec = RatebookTemplate()
+        TempRec.RatebookID = rbid.split('_')[0]  # remove version from rbid
+        ExhibitObj, _ = RatingExhibits.objects.get_or_create(Exhibit=i)
+        TempRec.RatebookExhibit = ExhibitObj
+        df = tdf[tdf["Exhibit"] == i]
+        TempRec.save()
+        for i in df['Coverage'].unique().tolist():
+            cov, _ = RatingCoverages.objects.get_or_create(CoverageCode=i)
+            # add the Coverage to the current Template
+            TempRec.ExhibitCoverages.add(cov)
+
+        updateRatingVars(uploadURL=uploadURL, TemplateID=TempRec.id)
 
 
 def extractIdentityDetails(dictionary: dict) -> dict:
+    ''' extract identity details (like Carrier, State, . . . e.t.c given in identity keys)
+      from dictionary input and return a dictionary of identity details excluding all other keys '''
     identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
                     'PolicyType', 'PolicySubType', 'ProductCode')
     identityRateDetails = {key: dictionary.get(key) for key in identityKeys}
     return identityRateDetails
+
+
+def clone_object(obj, attrs={}):
+    '''
+    recursively clone an object and all its related objects
+    '''
+    # we start by building a "flat" clone
+    clone = obj._meta.model.objects.get(pk=obj.pk)
+    clone.pk = None
+
+    # if caller specified some attributes to be overridden,
+    # use them
+    for key, value in attrs.items():
+        setattr(clone, key, value)
+
+    # save the partial clone to have a valid ID assigned
+    clone.save()
+
+    # Scan field to further investigate relations
+    fields = clone._meta.get_fields()
+    for field in fields:
+
+        # Manage M2M fields by replicating all related records
+        # found on parent "obj" into "clone"
+        if not field.auto_created and field.many_to_many:
+            for row in getattr(obj, field.name).all():
+                getattr(clone, field.name).add(row)
+
+        # Manage 1-N and 1-1 relations by cloning child objects
+        if field.auto_created and field.is_relation:
+            if field.many_to_many:
+                # do nothing
+                pass
+            else:
+                # provide "clone" object to replace "obj"
+                # on remote field
+                attrs = {
+                    field.remote_field.name: clone
+                }
+                children = field.related_model.objects.filter(**{field.remote_field.name: obj})
+                for child in children:
+                    clone_object(child, attrs)
+    return clone

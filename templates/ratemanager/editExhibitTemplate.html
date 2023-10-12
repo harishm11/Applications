@@ -1,0 +1,67 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} Create Template {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %}
+<h2>Edit Exhibit Template</h2>
+<form class="form-control" method="post" action="/ratemanager/editExhibitTemplate/{{ pk }}/">
+  {% csrf_token %}
+
+    <div class="form-group">
+      <label for="{{ form.RatebookExhibit.id_for_label }}">{{ form.RatebookExhibit.label }}</label>
+      {{ form.RatebookExhibit }}
+      {% if form.RatebookExhibit.help_text %}
+        <small class="form-text text-muted">{{ form.RatebookExhibit.help_text }}</small>
+      {% endif %}
+      {% for error in form.RatebookExhibit.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <hr>
+
+    <div class="row justify-content-around align-items-start">
+    <div class="form-group col-md-2">
+      <label for="{{ form.ExhibitVariables.id_for_label }}">{{ form.ExhibitVariables.label }}</label>
+      <div style="border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll;">
+      {{ form.ExhibitVariables }}
+      </div>
+      {% if form.ExhibitVariables.help_text %}
+        <small class="form-text text-muted">{{ form.ExhibitVariables.help_text }}</small>
+      {% endif %}
+      {% for error in form.ExhibitVariables.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+
+    <div class="form-group col-md-2">
+      <label for="{{ form.ExhibitCoverages.id_for_label }}">{{ form.ExhibitCoverages.label }}</label>
+      <div style="border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll;">
+      {{ form.ExhibitCoverages }}
+      </div>
+      {% if form.ExhibitCoverages.help_text %}
+        <small class="form-text text-muted">{{ form.ExhibitCoverages.help_text }}</small>
+      {% endif %}
+      {% for error in form.ExhibitCoverages.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+    </div>
+
+    <hr>
+    <div class="row justify-content-around align-items-start">
+    <button
+    type="button"
+    name="back"
+    class="btn btn-secondary col-md-1"
+    onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+    >Back</button>
+
+    <div class="form-group col-md-2">
+    <input type="submit" class="btn btn-primary" formmethod="post" formaction="/ratemanager/editExhibitTemplate/{{ pk }}/" value="Save">
+    </div>
+  </div>
+</form>
+{% endblock %}

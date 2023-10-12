@@ -1,11 +1,13 @@
 import json
 from pathlib import Path
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import os
 import pandas as pd
 from myproj.settings import BASE_DIR
 import ratemanager.views.HelperFunctions as helperfuncs
+from django.forms import modelformset_factory
+from ratemanager.models import RatingCoverages
 
 
 def rateManager(request):
@@ -70,3 +72,22 @@ def openexhibit(request):
             {'Error': err}), content_type='application/json')
         response.status_code = 400
         return response
+
+
+# view to edit the Coverage records
+def EditCoverages(request):
+    # Get all instances of RatingCoverages
+    my_objects = RatingCoverages.objects.all()
+
+    # Create a formset for RatingCoverages instances
+    RatingCoveragesFormSet = modelformset_factory(RatingCoverages, fields=('__all__'), can_delete=True, extra=0)
+    formset = RatingCoveragesFormSet(queryset=my_objects)
+
+    if request.method == 'POST':
+        # Process the formset data
+        formset = RatingCoveragesFormSet(request.POST, queryset=my_objects)
+        if formset.is_valid():
+            formset.save()
+            return redirect('ratemanager:EditCoverages')
+
+    return render(request, 'ratemanager/editCoverages.html', {'form': formset})

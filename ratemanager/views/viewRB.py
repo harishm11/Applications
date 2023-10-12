@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import render
-from ratemanager.models import RatebookMetadata
+from ratemanager.models import RatebookMetadata, RatebookTemplate
 from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import ratemanager.views.HelperFunctions as helperfuncs
@@ -58,13 +58,14 @@ def viewRBbyVersion(request):
     return render(request, "ratemanager/ratebookmanager/viewRBbyVersion.html", locals())
 
 
-def viewRBbyVersionExhibits(request, rbID, rbVer):
+def viewRBbyVersionExhibits(request, rbid):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
     selected = {k: v[0] for k, v in dict(request.POST).items()}
     if request.method == 'GET':
         selected['Exhibit'] = ''
         selected['PivotView'] = 'on'
+    rbID, rbVer = rbid.split('_')
     selected['RatebookID'] = rbID
     Query = Q()
     Query &= Q(RatebookID=rbID)
@@ -133,3 +134,48 @@ def viewRBbyDateExhibits(request, rbID):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
     return render(request, "ratemanager/ratebookmanager/viewRBbyDateExhibits.html", locals())
+
+
+def viewTemplateOptions(request):
+    options = helperfuncs.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
+    selected = {k: v[0] for k, v in dict(request.POST).items()}
+    rbQuery = buildViewFilterQuery(selected=selected)
+    filteredRatebookMetadata = RatebookMetadata.objects.filter(rbQuery).order_by('RatebookID').distinct('RatebookID')
+    page_number = request.GET.get('page')
+    paginator = Paginator(filteredRatebookMetadata, 50)
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+    viewForm = ViewRBForm(initial=selected)
+    return render(request, 'ratemanager/viewTemplateOptions.html',
+                  {
+                    'page_obj': page_obj,
+                    'viewForm': viewForm,
+                    'options': options,
+                    'appLabel': appLabel
+                    })
+
+
+def viewTemplate(request, rbID):
+    options = helperfuncs.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
+
+    ExhibitObjs = None
+    if RatebookTemplate.objects.filter(RatebookID=rbID).exists():
+        ExhibitObjs = RatebookTemplate.objects.filter(RatebookID=rbID)
+    TempleteObjectHeirarchy = dict()
+    for i in ExhibitObjs:
+        currentExhibitHeirarchy = dict()
+        currentExhibitHeirarchy['Rating Variables'] = i.ExhibitVariables.all()
+        currentExhibitHeirarchy['Coverages'] = i.ExhibitCoverages.all()
+        TempleteObjectHeirarchy[i.RatebookExhibit.Exhibit] = currentExhibitHeirarchy
+    return render(request, 'ratemanager/viewTemplate.html',
+                  {
+                    'TempleteObjectHeirarchy': TempleteObjectHeirarchy,
+                    'options': options,
+                    'appLabel': appLabel
+                    })
