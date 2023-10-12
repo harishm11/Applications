@@ -22,15 +22,15 @@ SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB",
 pd.options.mode.copy_on_write = True
 
 list_of_known_covs = [
-        'BI', 'PD', 'UMBI', 'UMPDC-1', 'UMPDC-2',
-        'MED', 'COMP', 'COLL', 'LOSS OF USE', 'RENT', 'TOW'
-    ]
+    'BI', 'PD', 'UMBI', 'UMPDC-1', 'UMPDC-2',
+    'MED', 'COMP', 'COLL', 'LOSS OF USE', 'RENT', 'TOW'
+]
 separators_list = ['-', u'\u2013', '&', '/', 'to', '\\']
 # required for transform
 exhibits_to_handle_manually = [
     'DeductiblesbySymbol', 'DriverTrainingDiscount', 'UMPDC2BaseRatesbyDeductible',
     'CollisionRatesTrailers', 'CCDRatesTrailers', 'CollisionRatesCampers', 'CCDRatesCampers'
-    ]
+]
 example_values_of_last_ratingVar = {
     "Affinity Group": ("GROUP I", "GROUP II"),
 }
@@ -255,11 +255,6 @@ def get_table_category(sheet_name):
 
 
 def transform(sheet_name, df):
-    '''
-    Takes the sheet name i.e. Exhibit Name and the excel sheets data as
-    Pandas DataFrame and converts it to UnPivot View i.e. required for
-    database storage.
-    '''
     pd.options.mode.copy_on_write = True
     tabStruct = categoriseTransformType(df, sheet_name)
     newdf = pd.DataFrame()
@@ -278,7 +273,8 @@ def transform(sheet_name, df):
                 for index, val in df_in[i].items():
                     has_separator, separator = find_separator(val)
                     if has_separator:
-                        df_in.loc[index, str(i)+'1'], df_in.loc[index, str(i)+'2'] = val.split(separator)
+                        df_in.loc[index, str(
+                            i)+'1'], df_in.loc[index, str(i)+'2'] = val.split(separator)
                     else:
                         df_in.loc[index, str(i)+'1'] = val
                 df_in.drop([i], axis=1, inplace=True)
@@ -290,7 +286,8 @@ def transform(sheet_name, df):
     else:
         if tabStruct['category'] == 'covs as cols':
             df = df.melt(id_vars=tabStruct['ratevars'])
-            df.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+            df.rename(columns={'variable': 'Coverage',
+                      'value': 'Factor'}, inplace=True)
             handle_ranges(df)
             newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
             newdf['Exhibit'] = sheet_name
@@ -314,7 +311,6 @@ def transform(sheet_name, df):
             newdf['Exhibit'] = sheet_name
             newdf['Coverage'] = find_cov_name(sheet_name)
             return newdf
-
         else:
             return df
 
@@ -335,12 +331,14 @@ def transformRB(xl_url=None, df_sheets=None):
     for sheet_name, df in df_sheets.items():
         if sheet_name not in excludeList:
             df_dict[sheet_name] = transform(sheet_name, df)
-            df_dict[sheet_name]['TableCategory'] = get_table_category(sheet_name)
+            df_dict[sheet_name]['TableCategory'] = get_table_category(
+                sheet_name)
             df_dict[sheet_name] = df_dict[sheet_name].astype(object)
             try:
                 df_out = df_out.merge(df_dict[sheet_name], how='outer')
             except Exception as err:
-                print("Unable to transform {} table due to {}".format(sheet_name, err))
+                print("Unable to transform {} table due to {}".format(
+                    sheet_name, err))
 
     numRatingVars = configs.NO_OF_RATING_VARIABLES
     for i in range(1, numRatingVars+1):
@@ -387,7 +385,8 @@ def fetchForeignFields(rate_details):
     policyType = apps.get_model("systemtables", "policytype")
     policySubType = apps.get_model("systemtables", "policysubtype")
     productCode = apps.get_model("systemtables", "productcode")
-    rate_details["Carrier"] = carrier.objects.get(CarrierName=rate_details["Carrier"])
+    rate_details["Carrier"] = carrier.objects.get(
+        CarrierName=rate_details["Carrier"])
     rate_details["State"] = state.objects.get(StateName=rate_details["State"])
     rate_details["LineofBusiness"] = lineOfBusiness.objects.get(
         LobName=rate_details["LineofBusiness"]
@@ -452,7 +451,8 @@ def uploadFile(request):
     # save and get uploaded file path
     upfile = request.FILES.get("file")
     root = os.path.join(BASE_DIR, "uploads")
-    path = os.path.abspath(os.path.join(root, str(upfile.name.replace(" ", ""))))
+    path = os.path.abspath(os.path.join(
+        root, str(upfile.name.replace(" ", ""))))
     fileexists = False
     if not fileexists:
         filstg = FileSystemStorage(base_url=str(BASE_DIR))
@@ -466,7 +466,7 @@ def fetchRatebookSpecificVersion(rbID, rbVersion):
     ActivationDate = RatebookMetadata.objects.get(
         RatebookID=rbID,
         RatebookVersion=rbVersion
-        ).ActivationDate
+    ).ActivationDate
 
     current_version = fetchRatebookbyDate(rbID, ActivationDate)
 
@@ -486,7 +486,8 @@ def fetchRatebookbyDate(rbID, qDate):
         Q(NewBusinessEffectiveDate__lte=qDate)
         & Q(RenewalEffectiveDate__lt=qDate)
         & (
-            (Q(NewBusinessExpiryDate__isnull=True) & Q(RenewalExpiryDate__isnull=True))
+            (Q(NewBusinessExpiryDate__isnull=True)
+             & Q(RenewalExpiryDate__isnull=True))
             | (Q(NewBusinessExpiryDate__gt=qDate) & Q(RenewalExpiryDate__gt=qDate))
         )
         & (Q(ActivationDate__lte=qDate))
@@ -504,7 +505,8 @@ def extractRatebookDetails(inputDataFrame):
         msgs.append("Found Ratebook Details")
         df = df[sheet_name]
         df[0] = df[0].str.replace(" ", "")
-        df_view = pd.Series(index=list(df[0]), data=list(df[1]), name="Details")
+        df_view = pd.Series(index=list(
+            df[0]), data=list(df[1]), name="Details")
         df_view.astype(str).replace("nan", None, inplace=True)
         rbDetailsTable = format_html(
             df_view.to_frame().to_html(
@@ -560,7 +562,8 @@ def dataframe_difference(old_df, new_df):
         how='outer'
     )
 
-    comparison_df = comparison_df.astype(object).where(pd.notnull(comparison_df), None)
+    comparison_df = comparison_df.astype(
+        object).where(pd.notnull(comparison_df), None)
 
     deleted_old = comparison_df.loc[comparison_df._merge == 'left_only']
     added_new = comparison_df.loc[comparison_df._merge == 'right_only']
@@ -579,13 +582,16 @@ def dataframe_difference(old_df, new_df):
     modified = modified.astype(object).where(pd.notnull(modified), None)
 
     added_deleted = comparison_df.drop_duplicates(
-        subset=[x for x in list(new_df.columns) if x not in ('Factor', '_merge')],
+        subset=[x for x in list(new_df.columns)
+                if x not in ('Factor', '_merge')],
         ignore_index=True,
         keep=False
-        )
+    )
 
-    added = added_deleted.loc[added_deleted._merge == 'right_only'].drop('_merge', axis=1)
-    deleted = added_deleted.loc[added_deleted._merge == 'left_only'].drop('_merge', axis=1)
+    added = added_deleted.loc[added_deleted._merge ==
+                              'right_only'].drop('_merge', axis=1)
+    deleted = added_deleted.loc[added_deleted._merge ==
+                                'left_only'].drop('_merge', axis=1)
 
     added = added.astype(object).where(pd.notnull(added), None)
     deleted = deleted.astype(object).where(pd.notnull(deleted), None)
@@ -598,7 +604,8 @@ def dataframe_difference(old_df, new_df):
     stats['changed_exhibits'].extend(deleted['Exhibit'].unique())
     stats['changed_exhibits'].extend(modified['Exhibit'].unique())
     stats['changed_exhibits'] = set(stats['changed_exhibits'])
-    stats['isEmpty'] = False if len(modified)+len(added)+len(deleted) > 0 else True
+    stats['isEmpty'] = False if len(
+        modified)+len(added)+len(deleted) > 0 else True
 
     return {'modified': modified,
             'added': added,
@@ -611,7 +618,8 @@ def generate_html_diff(changes):
     updates = deepcopy(changes)
     updates['modified']['Factor'] = updates['modified']['Factor_Old'].astype(str) +\
         ' -> ' + updates['modified']['Factor_New'].astype(str)
-    updates['modified'].drop(['Factor_Old', 'Factor_New'], axis=1, inplace=True)
+    updates['modified'].drop(
+        ['Factor_Old', 'Factor_New'], axis=1, inplace=True)
     updates['modified'] = updates['modified'][updates['modified'].columns.sort_values().to_list()]
     updates['added'] = updates['added'][updates['modified'].columns.sort_values().to_list()]
     updates['deleted'] = updates['deleted'][updates['modified'].columns.sort_values().to_list()]
@@ -626,7 +634,7 @@ def generate_html_diff(changes):
     diff_df = diff_df.hide(axis='index')
     rbChangesTableHTML = diff_df.to_html(
         table_uuid='changes'
-        )
+    )
     return rbChangesTableHTML
 
 
@@ -670,10 +678,12 @@ def extractUpdateRBDetails(xl_url, withExhibitStatusHeader=False):
             table.append(list(row._asdict().values()))
         elif len(table) > 0 and all([not x for x in row._asdict().values()]):
             print('Found Table Ending')
-            SheetTableList.append(deepcopy(pd.DataFrame(table).dropna(axis=1, how='all')))
+            SheetTableList.append(
+                deepcopy(pd.DataFrame(table).dropna(axis=1, how='all')))
             table.clear()
     if len(table) != 0:
-        SheetTableList.append(deepcopy(pd.DataFrame(table).dropna(axis=1, how='all')))
+        SheetTableList.append(
+            deepcopy(pd.DataFrame(table).dropna(axis=1, how='all')))
 
     toDelete = SheetTableList[1]
     return {'rbDetails'
@@ -719,7 +729,7 @@ def inverseTransform(df):
             index=index,
             columns=columns,
             values=values
-            )
+        )
 
         idf = idf.reset_index(allow_duplicates=False)
 
@@ -741,8 +751,10 @@ def inverseTransform(df):
     if not any([re.findall(r"\ARatingVar", x) for x in list(df.columns)]):
         return df[['Coverage', 'Factor']]
 
-    varCount = sum([1 if re.match(r'\ARatingVar', x) else 0 for x in list(df.columns)])/2
-    varNames = [x for x in list(df.columns) if re.match(r'\ARatingVarValue', x)]
+    varCount = sum([1 if re.match(r'\ARatingVar', x)
+                   else 0 for x in list(df.columns)])/2
+    varNames = [x for x in list(
+        df.columns) if re.match(r'\ARatingVarValue', x)]
 
     # one Rating variable and many covs
     if varCount == 1:
@@ -914,7 +926,8 @@ def clone_object(obj, attrs={}):
                 attrs = {
                     field.remote_field.name: clone
                 }
-                children = field.related_model.objects.filter(**{field.remote_field.name: obj})
+                children = field.related_model.objects.filter(
+                    **{field.remote_field.name: obj})
                 for child in children:
                     clone_object(child, attrs)
     return clone
