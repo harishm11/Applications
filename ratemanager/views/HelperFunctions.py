@@ -144,107 +144,106 @@ def handle_manually(tabStruct, sheetname, df_in):
     Returns:
     pandas.DataFrame: The modified dataframe after performing various operations based on the sheetname.
     """
-    match sheetname:
-        case 'DeductiblesbySymbol':
-            df_in = df_in.melt(id_vars=tabStruct['ratevars'])
-            df_in.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+    if sheetname == 'DeductiblesbySymbol':
+        df_in = df_in.melt(id_vars=tabStruct['ratevars'])
+        df_in.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
 
-            df_in['Symbol1'] = pd.NA
-            df_in['Symbol2'] = pd.NA
-            for index, val in df_in['Coverage'].items():
-                cov = r = None
-                has_separator, separator = find_separator(val)
-                if has_separator:
-                    cov, r = val.split()
-                if separator == '-':
-                    df_in.loc[index, 'Coverage'] = cov
-                    df_in.loc[index, 'Symbol1'], \
-                        df_in.loc[index, 'Symbol2'] = r.split(separator)
+        df_in['Symbol1'] = pd.NA
+        df_in['Symbol2'] = pd.NA
+        for index, val in df_in['Coverage'].items():
+            cov = r = None
+            has_separator, separator = find_separator(val)
+            if has_separator:
+                cov, r = val.split()
+            if separator == '-':
+                df_in.loc[index, 'Coverage'] = cov
+                df_in.loc[index, 'Symbol1'], \
+                    df_in.loc[index, 'Symbol2'] = r.split(separator)
+            if separator == '&':
+                df_in.loc[index, 'Coverage'] = cov
+                a, b = r.split(separator)
+                df_in.loc[index, 'Symbol1'] = a
+                df_in.loc[int(df_in.index[-1])+1] = df_in.loc[index]
+                df_in.loc[int(df_in.index[-1]), 'Symbol1'] = b
+        tabStruct['ratevars'].extend(['Symbol1', 'Symbol2'])
+        df_in = create_rate_vars_cols(df_in, tabStruct['ratevars'])
+        df_in['Exhibit'] = sheetname
+        return df_in
+    if sheetname == 'DriverTrainingDiscount':
+        newdf = df_in.melt(id_vars=tabStruct['ratevars'])
+        newdf.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+        for index, val in newdf['Description'].items():
+            if any([x.isnumeric() for x in val.split()]):
+                cleanedVal = [x for x in val.split() if x.isnumeric()]
+                if len(cleanedVal) >= 2:
+                    newdf.loc[index, 'Description'] = cleanedVal[0]
+                    for i in range(int(cleanedVal[0])+1, int(cleanedVal[1])+1):
+                        newdf.loc[int(newdf.index[-1])+1] = newdf.loc[index]
+                        newdf.loc[int(newdf.index[-1]), 'Description'] = str(i)
+                else:
+                    newdf.loc[index, 'Description'] = cleanedVal[0]
+        newdf.sort_values(by=['Description', 'Coverage'], inplace=True)
+        newdf = create_rate_vars_cols(newdf, tabStruct['ratevars'])
+        newdf['Exhibit'] = sheetname
+        newdf.loc[newdf['RatingVarValue1'] == 'Senior Defensive', 'Exhibit'] = 'SeniorDefensive'
+        return newdf
+
+    if sheetname == 'UMPDC2BaseRatesbyDeductible':
+        newdf = df_in.melt(id_vars='Deductible')
+        newdf.rename(columns={'variable': 'AffinityGroup', 'value': 'Factor'}, inplace=True)
+        newdf = create_rate_vars_cols(newdf, ['Deductible', 'AffinityGroup'])
+        newdf['Exhibit'] = sheetname
+        newdf['Coverage'] = 'UMPD'
+        return newdf
+
+    if sheetname in ['CollisionRatesTrailers', 'CCDRatesTrailers', 'CollisionRatesCampers', 'CCDRatesCampers']:
+        df_in = df_in.melt(id_vars=df_in.columns[0:2])
+        df_in.rename(columns={'variable': 'Deductible', 'value': 'Factor'}, inplace=True)
+
+        def clean(string):
+            if isinstance(string, str):
+                return ''.join([x for x in string if x not in [' ', '$', '\n', u'\24']])
+        df_in.apply(clean)
+        df_in['Amount1'] = pd.NA
+        df_in['Amount2'] = pd.NA
+        for index, val in df_in[df_in.columns[0]].items():
+            val = ''.join([x for x in val if x not in [' ', '$']])
+            r = None
+            has_separator, separator = find_separator(val)
+            if has_separator:
+                r1, r2 = val.split(separator)
+                if separator == '-' or separator == u'\u2013':
+                    df_in.loc[index, 'Amount1'], \
+                        df_in.loc[index, 'Amount2'] = r1, r2
                 if separator == '&':
-                    df_in.loc[index, 'Coverage'] = cov
-                    a, b = r.split(separator)
-                    df_in.loc[index, 'Symbol1'] = a
-                    df_in.loc[int(df_in.index[-1])+1] = df_in.loc[index]
-                    df_in.loc[int(df_in.index[-1]), 'Symbol1'] = b
-            tabStruct['ratevars'].extend(['Symbol1', 'Symbol2'])
-            df_in = create_rate_vars_cols(df_in, tabStruct['ratevars'])
-            df_in['Exhibit'] = sheetname
-            return df_in
-        case 'DriverTrainingDiscount':
-            newdf = df_in.melt(id_vars=tabStruct['ratevars'])
-            newdf.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
-            for index, val in newdf['Description'].items():
-                if any([x.isnumeric() for x in val.split()]):
-                    cleanedVal = [x for x in val.split() if x.isnumeric()]
-                    if len(cleanedVal) >= 2:
-                        newdf.loc[index, 'Description'] = cleanedVal[0]
-                        for i in range(int(cleanedVal[0])+1, int(cleanedVal[1])+1):
-                            newdf.loc[int(newdf.index[-1])+1] = newdf.loc[index]
-                            newdf.loc[int(newdf.index[-1]), 'Description'] = str(i)
-                    else:
-                        newdf.loc[index, 'Description'] = cleanedVal[0]
-            newdf.sort_values(by=['Description', 'Coverage'], inplace=True)
-            newdf = create_rate_vars_cols(newdf, tabStruct['ratevars'])
-            newdf['Exhibit'] = sheetname
-            newdf.loc[newdf['RatingVarValue1'] == 'Senior Defensive', 'Exhibit'] = 'SeniorDefensive'
-            return newdf
+                    df_in.loc[index, 'Amount1'] = r1
+        ratevars = ['Amount1', 'Amount2', 'Deductible']
+        ratevars.append(df_in.columns[1])
+        df_in.drop(df_in.columns[0], axis=1, inplace=True)
+        df_in = create_rate_vars_cols(df_in, ratevars)
+        df_in['Exhibit'] = sheetname
+        df_in['Coverage'] = 'COLL'
+        return df_in
 
-        case 'UMPDC2BaseRatesbyDeductible':
-            newdf = df_in.melt(id_vars='Deductible')
-            newdf.rename(columns={'variable': 'AffinityGroup', 'value': 'Factor'}, inplace=True)
-            newdf = create_rate_vars_cols(newdf, ['Deductible', 'AffinityGroup'])
-            newdf['Exhibit'] = sheetname
-            newdf['Coverage'] = 'UMPD'
-            return newdf
+    if sheetname.startswith('FrequencyandSeverity'):
+        keySubstrings = ['FREQ BAND', 'SEV BAND']
 
-        case 'CollisionRatesTrailers' | 'CCDRatesTrailers' | 'CollisionRatesCampers' | 'CCDRatesCampers':
-            df_in = df_in.melt(id_vars=df_in.columns[0:2])
-            df_in.rename(columns={'variable': 'Deductible', 'value': 'Factor'}, inplace=True)
+        def filterAndTransform(keySubstring, df):
+            filtered_cols = ['ZIP CODE'] + [col for col in df.columns if keySubstring in col]
+            filtered = df[filtered_cols]
+            new_cols = [col.replace(keySubstring, '').strip() for col in filtered.columns]
+            filtered.columns = new_cols
+            filtered = filtered.melt(id_vars=['ZIP CODE'], value_vars=filtered.columns[1:])
+            filtered.rename(columns={'variable': 'Coverage', 'value': keySubstring}, inplace=True)
+            return filtered
 
-            def clean(string):
-                if isinstance(string, str):
-                    return ''.join([x for x in string if x not in [' ', '$', '\n', u'\24']])
-            df_in.apply(clean)
-            df_in['Amount1'] = pd.NA
-            df_in['Amount2'] = pd.NA
-            for index, val in df_in[df_in.columns[0]].items():
-                val = ''.join([x for x in val if x not in [' ', '$']])
-                r = None
-                has_separator, separator = find_separator(val)
-                if has_separator:
-                    r1, r2 = val.split(separator)
-                    if separator == '-' or separator == u'\u2013':
-                        df_in.loc[index, 'Amount1'], \
-                            df_in.loc[index, 'Amount2'] = r1, r2
-                    if separator == '&':
-                        df_in.loc[index, 'Amount1'] = r1
-            ratevars = ['Amount1', 'Amount2', 'Deductible']
-            ratevars.append(df_in.columns[1])
-            df_in.drop(df_in.columns[0], axis=1, inplace=True)
-            df_in = create_rate_vars_cols(df_in, ratevars)
-            df_in['Exhibit'] = sheetname
-            df_in['Coverage'] = 'COLL'
-            return df_in
+        to_joins = [filterAndTransform(i, df=df_in) for i in keySubstrings]
+        merged = pd.merge(to_joins[0], to_joins[1], on=['ZIP CODE', 'Coverage'])
+        merged['Exhibit'] = sheetname
+        return create_rate_vars_cols(merged, ['ZIP CODE', 'FREQ BAND', 'SEV BAND'])
 
-        case x if x.startswith('FrequencyandSeverity'):
-            keySubstrings = ['FREQ BAND', 'SEV BAND']
-
-            def filterAndTransform(keySubstring, df):
-                filtered_cols = ['ZIP CODE'] + [col for col in df.columns if keySubstring in col]
-                filtered = df[filtered_cols]
-                new_cols = [col.replace(keySubstring, '').strip() for col in filtered.columns]
-                filtered.columns = new_cols
-                filtered = filtered.melt(id_vars=['ZIP CODE'], value_vars=filtered.columns[1:])
-                filtered.rename(columns={'variable': 'Coverage', 'value': keySubstring}, inplace=True)
-                return filtered
-
-            to_joins = [filterAndTransform(i, df=df_in) for i in keySubstrings]
-            merged = pd.merge(to_joins[0], to_joins[1], on=['ZIP CODE', 'Coverage'])
-            merged['Exhibit'] = sheetname
-            return create_rate_vars_cols(merged, ['ZIP CODE', 'FREQ BAND', 'SEV BAND'])
-
-        case _:
-            return df_in
+    else:
+        return df_in
 
 
 def get_table_category(sheet_name):

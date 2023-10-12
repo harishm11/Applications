@@ -1,0 +1,69 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} View Ratebook {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %} 
+
+<h5>Please select the exhibits to clone</h4>
+<p>
+  Showing exhibits from the selected Ratebook: <br>
+  State: {{ rbState }} &emsp;
+  RatebookID: {{ rbID }} &emsp;
+</p>
+
+<form class="form-control"
+      method="post"
+      id="rbMetadataForm"
+      action="/ratemanager/cloneRB/">
+      {% csrf_token %}
+      <input type="hidden" name="rbID" value="{{ rbID }}">
+      <input type="hidden" name="rbVer" value="{{ rbVer }}">
+      <input type="hidden" name="rbState" value="{{ rbState }}">
+      <input type="hidden" name="rbCode" value="{{ rbCode }}">
+      {{ form.toAddExhibits.label }}
+        <div style="border:2px solid #ccc; width:550px; height: 250px; overflow-y: scroll;">
+          {{ form.toAddExhibits }}
+        </div>
+      <br>
+<div class="row justify-content-around">
+  <button
+  type="button"
+  name="back"
+  class="btn btn-secondary col-md-2"
+  onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+  >Back</button>
+
+  <button
+  type="button"
+  class="col-md-2"
+  onclick="select_all();"
+  >Select All Exhibits</button>
+
+  <button
+  type="button"
+  class="col-md-2"
+  onclick="deselect_all();"
+  >Clear All Selections</button>
+
+    <input
+    type="submit"
+    name="submit"
+    class="btn btn-primary col-md-2"
+    value="Submit"
+    >
+
+  </div>
+</form>
+
+<script>
+  function select_all()  {
+    $('input[type=checkbox]').prop('checked', true);
+  }
+
+  function deselect_all()  {
+     $('input[type=checkbox]').prop('checked', false);
+  }
+</script>
+{% endblock %}

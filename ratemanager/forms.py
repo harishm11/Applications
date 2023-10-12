@@ -282,3 +282,12 @@ class addExhibitForm(forms.ModelForm):
         # labels = dict()
         # for i in fields:
         #     labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+
+
+class selectExhibitListsForm(forms.Form):
+    ADD_CHOICES = [(None, None)]
+    toAddExhibits = forms.MultipleChoiceField(
+        choices=ADD_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        label='Select Exhibits to Add to the Template'
+        )

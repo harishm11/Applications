@@ -9,6 +9,7 @@
 <h2> Template Exhibits List </h2>
 <p>Showing for {{ rbname }}; ID: {{ rbid }}; Version: {{ rbver }};</p> 
 <hr>
+<div class="container">
 <div class="row justify-content-around align-items-start">
   <button
   type="button"
@@ -59,17 +60,40 @@
   <h2>No Exhibits Added to this Ratebook yet, Click on add more to Add an exhibit</h2>
 
 {% else %}
-
+<div class="container table-responsive">
   <table class="table table-sm table-condensed cell-border">
     {% for exhibit in ExhibitObjs %}
     <tr>
       <td>{{ exhibit.RatebookExhibit }}</td>
-      <td><a href="{% url 'ratemanager:editExhibitTemplate' exhibit.id %}">Edit</a></td>
+      <td><a href="{% url 'ratemanager:editExhibitTemplate' exhibit.id %}">Modify Coverages</a></td>
+      <!-- 
       <td><a href="{% url 'ratemanager:deleteExhibitTemplate' exhibit.id %}">Delete from Template</a></td>
+      -->
+      <td>
+      <button 
+        hx-get="/ratemanager/previewExhibit/{{ exhibit.id }}/" 
+        hx-target="#preview-popup" 
+        hx-trigger="click"
+        data-bs-toggle="modal"
+        data-bs-target="#preview-popup"> Preview </button>
+        </td>
     </tr>
   {% endfor %}
   </table>
-
+</div>
 {% endif %}
+
+<!-- Popup Preview -->
+<div id="preview-popup"
+    class="modal modal-blur fade"
+    style="display: none"
+    aria-hidden="false"
+    tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
+</div>
+
 
 {% endblock %}

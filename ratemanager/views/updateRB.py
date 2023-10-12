@@ -4,7 +4,7 @@ from django.shortcuts import render
 import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.forms import UpdateForm
 from ratemanager.models import RatebookMetadata, RatingFactors
-from datetime import datetime
+from django.utils import timezone
 from pandas.errors import EmptyDataError
 
 
@@ -41,7 +41,7 @@ def loadUpdatedRB(request):
     rate_details["RatebookRevisionType"] = "Rate Revision"
     rate_details["RatebookStatusType"] = "In Production"
     rate_details["RatebookChangeType"] = "Rate Revision"
-    rate_details["CreationDateTime"] = datetime.now().strftime("%m-%d-%Y")
+    rate_details["CreationDateTime"] = timezone.now().strftime("%m-%d-%Y")
 
     rate_details = helperfuncs.fetchForeignFields(rate_details)
     rate_details = helperfuncs.applyDateConversion(rate_details)

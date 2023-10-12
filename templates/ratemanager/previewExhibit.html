@@ -1,0 +1,45 @@
+<div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">{{ ExhibitObj.RatebookExhibit.Exhibit }} Preview</h5>
+    </div>
+    <div class="container table-responsive modal-body">
+      <table class="table table-condensed table-bordered">
+        <thead>
+          <tr>
+
+        {%for i in ExhibitObj.ExhibitVariables.all %}
+        <td>
+          {{ i.RatingVarName }}
+        </td>
+        {% endfor %}
+
+        {% for i in ExhibitObj.ExhibitCoverages.all %}
+        <td>
+          {{ i.CoverageCode }} 
+        </td>
+        {% endfor %}
+
+      </tr>
+      </thead>
+      <tbody>
+      {%for i in ExhibitObj.ExhibitVariables.all %}
+      <td>
+        ___ 
+      </td>
+      {% endfor %}
+
+      {% for i in ExhibitObj.ExhibitCoverages.all %}
+      <td>
+         ___ 
+      </td>
+      {% endfor %}
+      </tbody>
+
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+</div>
