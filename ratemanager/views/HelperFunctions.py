@@ -288,36 +288,35 @@ def transform(sheet_name, df):
     if sheet_name in exhibits_to_handle_manually or 'FrequencyandSeverity' in sheet_name:
         newdf = handle_manually(tabStruct, sheet_name, df)
     else:
-        match tabStruct['category']:
-            case 'covs as cols':
-                df = df.melt(id_vars=tabStruct['ratevars'])
-                df.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
-                handle_ranges(df)
-                newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
-                newdf['Exhibit'] = sheet_name
-            case 'covs as rows':
-                df.rename(columns={'Factor Amt.': 'Factor'}, inplace=True)
-                handle_ranges(df)
-                newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
-                newdf['Exhibit'] = sheet_name
-            case 'no covs but factor in cols':
-                df.rename(columns={'Factor Amt.': 'Factor'}, inplace=True)
-                handle_ranges(df)
-                ratevars = []
-                for i in df.columns:
-                    if 'factor' not in i.lower():
-                        ratevars.append(i)
-                newdf = create_rate_vars_cols(df, ratevars)
-                newdf['Coverage'] = find_cov_name(sheet_name)
-                newdf['Exhibit'] = sheet_name
-            case 'neither covs nor factor in cols':
-                newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
-                newdf['Exhibit'] = sheet_name
-                newdf['Coverage'] = find_cov_name(sheet_name)
-                return newdf
+        if tabStruct['category'] == 'covs as cols':
+            df = df.melt(id_vars=tabStruct['ratevars'])
+            df.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+            handle_ranges(df)
+            newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
+            newdf['Exhibit'] = sheet_name
+        elif tabStruct['category'] == 'covs as rows':
+            df.rename(columns={'Factor Amt.': 'Factor'}, inplace=True)
+            handle_ranges(df)
+            newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
+            newdf['Exhibit'] = sheet_name
+        elif tabStruct['category'] == 'no covs but factor in cols':
+            df.rename(columns={'Factor Amt.': 'Factor'}, inplace=True)
+            handle_ranges(df)
+            ratevars = []
+            for i in df.columns:
+                if 'factor' not in i.lower():
+                    ratevars.append(i)
+            newdf = create_rate_vars_cols(df, ratevars)
+            newdf['Coverage'] = find_cov_name(sheet_name)
+            newdf['Exhibit'] = sheet_name
+        elif tabStruct['category'] == 'neither covs nor factor in cols':
+            newdf = create_rate_vars_cols(df, tabStruct['ratevars'])
+            newdf['Exhibit'] = sheet_name
+            newdf['Coverage'] = find_cov_name(sheet_name)
+            return newdf
 
-            case _:
-                return df
+        else:
+            return df
 
     return newdf
 
