@@ -7,7 +7,7 @@
 {% block maincontent %}
 
 <div>
-    <h3 class="col-md-8">Found some similar ratebooks, select any one to clone.</h3>
+    <h3>Found some similar ratebooks, select any one to clone.</h3>
     <form method="POST" action="/ratemanager/cloneOptions/{{ prodCode }}/">
       {% csrf_token %}
     <div class="row justify-content-around">
@@ -27,11 +27,11 @@
     {% endfor %}
   </ul>
   {% endif %}
-<form action="/ratemanager/cloneRB/"
+<form action="/ratemanager/selectExhibitOptions/"
       method="post">
       {% csrf_token %}
 <div class="container table-responsive">          
-    <table id="example" class="table table-sm table-condensed cell-border table-hover">
+    <table id="example" class="table table-sm table-condensed cell-border">
       <thead>
         <tr>
           <th class="no-sort" onclick="event.stopPropagation();">Select</th>
@@ -54,6 +54,28 @@
           <th>Policy Type</th>
           <th>Policy SubType</th>
           <th>Product Code</th>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
         </tr>
       </thead>
       <tbody>
@@ -101,18 +123,55 @@
 {% endblock %}
 {% block js%}
   <script type="text/javascript">
-    $(document).ready(function () {
-      $('#example').DataTable({
-        paging: false,
-        searching: false,
-        info: false,
-        order: [[9, 'desc']],
-        'columnDefs': [ {
-                  'targets': [0],
-                  'orderable': false,
-            }]
-      });
-    });
+
+$(document).ready( function () {
+  // Create the DataTable
+  var table = $('#example').DataTable( {
+
+    fixedHeader: true,
+    orderCellsTop: true,
+    searching: false,
+    paging:false,
+    info:false
+  } );
+  
+  // Add filtering
+  table.columns([]).every( function () {
+
+      var that = this;
+
+      // Create the `select` element
+      var select = $('<select><option value=""></option></select>')
+        .appendTo(
+          $('thead tr:eq(1) td').eq( this.index() )
+        )
+        .on( 'change', function() {
+          that
+            .search($(this).val())
+            .draw();
+        } );
+
+      // Add data
+      this
+        .data()
+        .sort()
+        .unique()
+        .each( function(d) {
+          select.append($('<option>' + d + '</option>'));
+        } );
+      
+      // Restore state saved values
+      var state = this.state.loaded();
+      if ( state ) {
+        var val = state.columns[ this.index() ];
+        select.val( val.search.search );
+      }
+
+  } );
+} );
+
+
+
     $('input[type=checkbox]').on('change', function (e) {
       if ($('input[type=checkbox]:checked').length > 1)
       {

@@ -40,6 +40,8 @@ urlpatterns = [
     path('viewTemplateOptions/', viewRB.viewTemplateOptions, name="viewTemplateOptions"),
     path('viewTemplate/<str:rbID>/', viewRB.viewTemplate, name="viewTemplate"),
     # clone
-    path('cloneOptions/<int:prodCode>/', cloneRB.cloneOptions, name="cloneOptions"),
+    path('cloneOptions/<str:prodCode>/', cloneRB.cloneOptions, name="cloneOptions"),
     path('cloneRB/', cloneRB.cloneRB, name="cloneRB"),
+    path('selectExhibitOptions/', createTemplate.selectExhibitList, name="selectExhibitOptions"),
+    path('previewExhibit/<int:Exhibit_id>/', createTemplate.previewExhibit, name="previewExhibit"),
 ]

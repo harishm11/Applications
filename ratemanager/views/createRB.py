@@ -4,7 +4,7 @@ from django.shortcuts import render
 from ratemanager.models import RatebookMetadata
 from django.utils.html import format_html
 import ratemanager.views.HelperFunctions as helperfuncs
-from datetime import datetime
+from django.utils import timezone
 
 
 def createRB(request):
@@ -62,7 +62,7 @@ def loadNewRBtoDB(request):
         rate_details['RatebookRevisionType'] = 'Initial'
         rate_details['RatebookStatusType'] = 'In Production'
         rate_details['RatebookChangeType'] = 'Initial'
-        rate_details['CreationDateTime'] = datetime.now().strftime('%m-%d-%Y')
+        rate_details['CreationDateTime'] = timezone.now().strftime('%m-%d-%Y')
         rate_details = helperfuncs.fetchForeignFields(rate_details)
         rate_details = helperfuncs.applyDateConversion(rate_details)
 

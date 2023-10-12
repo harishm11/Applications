@@ -1,9 +1,11 @@
-from ratemanager.forms import createTempleteForm, editExhibitForm, addExhibitForm
+from ratemanager.forms import createTempleteForm, editExhibitForm, addExhibitForm, selectExhibitListsForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
 from datetime import datetime
+from django.utils import timezone
 from ratemanager.models import RatebookMetadata, RatebookTemplate
 from django.contrib import messages
+import pandas as pd
 
 
 def createTemplate(request):
@@ -35,9 +37,9 @@ def createTemplate(request):
             'NewBusinessEffectiveDate': datetime.today(),
             'RenewalEffectiveDate': datetime.today(),
             'ActivationDate': datetime.today(),
-            'ActivationTime': datetime.now(),
+            'ActivationTime': timezone.now(),
             'MigrationDate': datetime.today(),
-            'MigrationTime': datetime.now()
+            'MigrationTime': timezone.now()
         }
 
         form = createTempleteForm(initial=initial)
@@ -132,6 +134,33 @@ def addExhibit2Template(request):
                             })
 
 
+def selectExhibitList(request):
+    options = helperfuncs.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
+
+    rbid = request.POST.get('toCloneRB')
+    rb = RatebookMetadata.objects.get(pk=rbid)
+    # if no ratebook is selected redirect to clone options view with error message
+    if not rbid:
+        list(messages.get_messages(request))
+        messages.add_message(request, messages.ERROR, "Please select a ratebook to clone")
+        return redirect('ratemanager:cloneOptions', prodCode=request.session.get('ProductCode'))
+
+    rbID = rbid.split('_')[0]
+
+    form = selectExhibitListsForm()
+    choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
+    form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
+    return render(request, 'ratemanager/selectExhibitsCloneOptions.html',
+                  {
+                        'form': form,
+                        'options': options,
+                        'appLabel': appLabel,
+                        'rbID': rbID,
+                        'rbState': rb.RatebookName,
+                    })
+
+
 def listExhibits(request, pk):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
@@ -152,6 +181,16 @@ def listExhibits(request, pk):
 
 
 def deleteExhibitTemplate(request, pk):
+    # delete the exhibit-rbid relationship from ratebooktemplate table
     RatebookTemplate.objects.get(pk=pk).delete()
     messages.add_message(request, messages.SUCCESS, "Exhibit Deleted Successfully")
     return redirect('ratemanager:listExhibits', request.session['currentlyEditingRatebook'])
+
+
+def previewExhibit(request, Exhibit_id):
+    ExhibitObj = RatebookTemplate.objects.get(pk=Exhibit_id)
+
+    return render(request, 'ratemanager/previewExhibit.html',
+                  {
+                    'ExhibitObj': ExhibitObj,
+                    })
