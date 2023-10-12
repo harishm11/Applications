@@ -1,0 +1,75 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} Create Ratebook {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %} 
+
+<h2> Template Exhibits List </h2>
+<p>Showing for {{ rbname }}; ID: {{ rbid }}; Version: {{ rbver }};</p> 
+<hr>
+<div class="row justify-content-around align-items-start">
+  <button
+  type="button"
+  name="back"
+  class="btn btn-secondary col-md-2"
+  onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+  >Back</button>
+
+  <button 
+  type="button" 
+  class="btn btn-primary col-md-2" 
+  onclick="window.location.href='/ratemanager/addExhibit2Template/';">
+  Add an Exhibit
+  </button>
+
+  <form class="col-md-2" method="post" action="/ratemanager/exportTemplate/{{ rbid }}/">
+    {% csrf_token %}
+  <input
+      type="submit"
+      name="submit"
+      value="Download the Template"
+      class="btn btn-primary"
+      method="post"
+      action="/ratemanager/exportTemplate/{{ rbid }}/"
+    /></form>
+
+    <button
+    type="button"
+    name="next"
+    class="btn btn-success col-md-2"
+    onclick="window.location.href='/ratemanager/createRB/';"
+    >Next</button>
+
+  </div>
+
+<hr>
+
+{% if messages %}
+  <b> Messages </b>
+  <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% if not ExhibitObjs %}
+  <h2>No Exhibits Added to this Ratebook yet, Click on add more to Add an exhibit</h2>
+
+{% else %}
+
+  <table class="table table-sm table-condensed cell-border">
+    {% for exhibit in ExhibitObjs %}
+    <tr>
+      <td>{{ exhibit.RatebookExhibit }}</td>
+      <td><a href="{% url 'ratemanager:editExhibitTemplate' exhibit.id %}">Edit</a></td>
+      <td><a href="{% url 'ratemanager:deleteExhibitTemplate' exhibit.id %}">Delete from Template</a></td>
+    </tr>
+  {% endfor %}
+  </table>
+
+{% endif %}
+
+{% endblock %}

@@ -61,8 +61,8 @@
       </tr>
     </thead>
     <tbody>
-    {% if filteredRatebookMetadata %}  
-    {% for obj in filteredRatebookMetadata %}
+    {% if page_obj %}  
+    {% for obj in page_obj %}
       <tr style='cursor: pointer; cursor: hand;' onclick="window.location='/ratemanager/viewRBbyDateExhibits/{{ obj.RatebookID }}';">
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>

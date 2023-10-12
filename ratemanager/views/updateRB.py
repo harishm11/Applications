@@ -125,6 +125,7 @@ def loadUpdatedRB(request):
                     addMetadataToFactorsRecord(Record=Record, rate_details=rate_details)
                     searchedObj = searchRatingFactorsRow(Record)
                     expireRatingFactorsRow(searchedObj, newRecord=Record)
+                    Record['TableCategory'] = searchedObj.TableCategory
                     RatingFactors.objects.create(**Record)
                 # Expire the Deleted Rows
                 for row in changes['deleted'].itertuples(index=False):
@@ -136,6 +137,7 @@ def loadUpdatedRB(request):
                 for row in changes['added'].itertuples(index=False):
                     Record = dict(row._asdict())
                     addMetadataToFactorsRecord(Record=Record, rate_details=rate_details)
+                    Record['TableCategory'] = df[df['Exhibit'] == Record['Exhibit']]['TableCategory'].values[0]
                     RatingFactors.objects.create(**Record)
                 # Expire deleted/renamed Exhibits
                 RatingFactors.objects.filter(

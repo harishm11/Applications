@@ -2,7 +2,7 @@ import io
 import pandas as pd
 from django.http import FileResponse
 import ratemanager.views.HelperFunctions as hf
-from ratemanager.models import RatebookMetadata, RatingExhibits, RatingVariables
+from ratemanager.models import RatebookMetadata, RatebookTemplate
 from django.apps import apps
 from django.shortcuts import render
 from ratemanager.forms import exportRBForm
@@ -67,8 +67,8 @@ def exportRB(request):
 
 
 def exportTemplate(request, pk):
-    rbMeta = RatebookMetadata.objects.filter(pk=pk)
-    exbList = RatingExhibits.objects.filter(Ratebook=rbMeta[0])
+    rbMeta = RatebookMetadata.objects.filter(RatebookID=pk).order_by('-RatebookVersion')
+    exbList = RatebookTemplate.objects.filter(RatebookID=pk)
     rbMeta = rbMeta.values()[0]
     export_details = configs.export_details
 
@@ -91,12 +91,12 @@ def exportTemplate(request, pk):
 
     # write only the selected exhibits to the excel file
     for i in exbList:
-        rvs = RatingVariables.objects.filter(Exhibit=i).values()
-        cols = [rv['RatingVarName'] for rv in rvs]
-        cols.extend(i.Coverages.all())
+        rvs = i.ExhibitVariables.all()
+        cols = [rv.DisplayName for rv in rvs]
+        cols.extend(i.ExhibitCoverages.all())
         pd.DataFrame(
             data=[], columns=cols
-        ).to_excel(writer, sheet_name=i.Exhibit, index=False)
+        ).to_excel(writer, sheet_name=i.RatebookExhibit.Exhibit, index=False)
 
     writer.close()
     xl.seek(0)
