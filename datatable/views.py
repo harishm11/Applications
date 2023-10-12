@@ -10,6 +10,8 @@ from productconfigurator.forms import *
 from datetime import datetime
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from authenticate.decorators import permission_required
+
 
 def getModelNames(appLabel):
     options = []
@@ -64,6 +66,7 @@ def datatable(request, appLabel, modelName):
         return render(request, 'error.html', {'message': err})
 
 
+@permission_required('add')
 def addObject(request, appLabel, modelName):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -101,6 +104,7 @@ def addObject(request, appLabel, modelName):
         return render(request, 'error.html', {'message': err})
 
 
+@permission_required('change')
 def editObject(request, appLabel, modelName, object_id):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -134,6 +138,7 @@ def editObject(request, appLabel, modelName, object_id):
         return render(request, 'error.html', {'message': err})
 
 
+@permission_required('delete')
 def deleteObject(request, appLabel, modelName, object_id):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -155,6 +160,7 @@ def deleteObject(request, appLabel, modelName, object_id):
         return render(request, 'error.html', {'message': err})
 
 
+@permission_required('add')
 def cloneObject(request, appLabel, modelName, object_id):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -193,6 +199,7 @@ def cloneObject(request, appLabel, modelName, object_id):
         return render(request, 'error.html', {'message': err})
 
 
+@permission_required('add')
 def exportCsv(request, appLabel, modelName):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -214,6 +221,7 @@ def exportCsv(request, appLabel, modelName):
         return render(request, 'error.html', {'message': err})
 
 
+@permission_required('add')
 def importCsv(request, appLabel, modelName):
     try:
         Model = apps.get_model(appLabel, modelName)
