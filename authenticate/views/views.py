@@ -12,11 +12,6 @@ from django.shortcuts import render, redirect
 class homeview(generic.ListView):
     from django.contrib.auth.models import User
 
-    user = User.objects.get(username='harish.murali')
-    print("User's permissions:")
-    print(user.get_all_permissions())
-    print("User's groups:")
-    print(user.groups.all())
     template_name = 'base.html'
     data = Homepagemodel.objects.all()
 
