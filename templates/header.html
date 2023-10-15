@@ -23,7 +23,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
+ {% if perms.systemtables %}
             <li class="nav-item dropdown  {% if 'productconfigurator' in request.path%}active {% endif%} mx-3">
               <a
                 class="nav-link"
@@ -33,9 +33,10 @@
                 Product Configurator
               </a>
             </li>
-
+   {% endif %} 
             
-
+            
+    {% if perms.ratemanager %}
 
             <li class="nav-item dropdown  {% if 'ratemanager' in request.path%}active {% endif%} mx-3">
               <a
@@ -45,7 +46,9 @@
                 Rate Manager
               </a>
             </li>   
+    {% endif %} 
 
+    {% if perms.rulesmanager %}
             <li class="nav-item dropdown  {% if 'rulesmanager' in request.path%}active {% endif%} mx-3">
               <a
                 class="nav-link"
@@ -54,8 +57,9 @@
                 Rules Manager
               </a>
             </li>   
+{% endif %} 
 
-
+  {% if perms.systemtables %}
           <li class="nav-item dropdown  {% if 'systemtables' in request.path%}active {% endif%} mx-3">
               <a
                 class="nav-link"
@@ -65,7 +69,7 @@
                 System Tables
               </a>
             </li>
-
+{% endif %}
           </ul>
         <form class="d-flex" role="search">
           {% if request.user.is_authenticated %} 
