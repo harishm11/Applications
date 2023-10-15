@@ -25,7 +25,8 @@
 #     return decorator
 
 
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseServerError
+from django.shortcuts import render, redirect
 
 
 def permission_required(action):
@@ -38,6 +39,7 @@ def permission_required(action):
             if request.user.has_perm(permission_name):
                 return view_func(request, *args, **kwargs)
             else:
-                return HttpResponseForbidden("Permission denied")
+                return render(request, 'error.html', {'message': "Not Authorized"})
+                # return HttpResponseServerError(f"Not Authorized")
         return _wrapped_view
     return decorator
