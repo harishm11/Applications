@@ -11,7 +11,10 @@
 <div class="">
   <div class="row">
     <div class="col mx-2">
+   {% with permission_name=appLabel|add:"."|add:"can_add_"|add:modelName|lower %}
+    {% if perms.permission_name %}
       <a class="" href="{% url 'addObject' appLabel modelName %}"><b>Add</b></a>
+  
     </div>
     <div class="col mx-2">
       <a class="" href="{% url 'exportCsv' appLabel modelName %}"
@@ -23,7 +26,8 @@
         ><b>Import from CSV</b></a
       >
     </div>
-    
+      {% endif %}
+   {% endwith %}
     <form
       method="get"
       action="{% url 'datatable' appLabel modelName %}"
@@ -40,11 +44,15 @@
     <table class="table table-responsive table-bordered" >
       <thead class="table-something"> 
         <tr>
+        {% with permission_name=appLabel|add:"."|add:"can_change_"|add:modelName|lower %}
+    {% if perms.permission_name %}
           <th>
             Clone  
           </th>
           <th>Edit</th>
           <th>Delete</th>
+              {% endif %}
+   {% endwith %}
           {% for field in model_fields %} {% if field != 'id' %}
           <th>{{ field }}
           {% endif %} {% endfor %}
@@ -53,6 +61,8 @@
       <tbody>
         {% for object in objects %}
         <tr>
+          {% with permission_name=appLabel|add:"."|add:"can_change_"|add:modelName|lower %}
+    {% if perms.permission_name %}
           <td>
             <a href="{% url 'cloneObject' appLabel modelName object.pk %}"
               ><i class="fa fa-clone"></i
@@ -68,6 +78,8 @@
               ><i class="fa fa-trash"></i
             ></a>
           </td>
+              {% endif %}
+   {% endwith %}
           {% for field in model_fields %} {% if field != 'id' %}
           <td>{{ object|get_attribute:field }}</td>
           {% endif %} {% endfor %}
