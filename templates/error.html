@@ -5,14 +5,14 @@
 {% endblock %}
 {% load crispy_forms_tags %}
 
-{% block content %}
-<div class="card p-5 w-50 ml-0 mr-0 mx-auto text-center border">
+{% block messagecontent %}
+
     {% if  request.user.is_authenticated %}
         <div>
           <h4>{{message}}</h4><br>
         </div>
     {% endif %}
-</div>
+
 {% endblock %}
 
 {% block js%}
