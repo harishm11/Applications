@@ -5,9 +5,9 @@ from django.apps import apps
 Coverage = apps.get_model('systemtables', 'coverage')
 
 
-class CoverageOption(models.Model):
-    Coverage = models.ForeignKey(
-        Coverage, on_delete=models.CASCADE)
+class CoverageOptions(models.Model):
+    CoverageName = models.ForeignKey(
+        Coverage, on_delete=models.CASCADE, null=True, blank=True)
     CoverageTerm = models.CharField(max_length=50)
     OptionValue = models.CharField(max_length=50)
     OptionDesc = models.CharField(max_length=200)
@@ -18,4 +18,3 @@ class CoverageOption(models.Model):
 
     def __str__(self):
         return f"{self.Coverage.CoverageName} - {self.OptionValue}"
-

@@ -15,11 +15,12 @@ from .models.discount import Discount
 from .models.surcharge import Surcharge
 from .models.ratingvariables import RatingVariable
 from .models.ratingexhibits import RatingExhibit
-
+from .models.coverageoptions import CoverageOptions
 
 admin.site.register(State)
 admin.site.register(Carrier)
 admin.site.register(Coverage)
+admin.site.register(CoverageOptions)
 admin.site.register(Uwcompany)
 admin.site.register(LineOfBusiness)
 admin.site.register(PolicyType)
