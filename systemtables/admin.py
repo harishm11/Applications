@@ -13,8 +13,6 @@ from .models.productcode import ProductCode
 from .models.offering import Offering
 from .models.discount import Discount
 from .models.surcharge import Surcharge
-from .models.ratingvariables import RatingVariable
-from .models.ratingexhibits import RatingExhibit
 from .models.coverageoptions import CoverageOptions
 
 admin.site.register(State)
@@ -30,5 +28,3 @@ admin.site.register(ProductCode)
 admin.site.register(Offering)
 admin.site.register(Discount)
 admin.site.register(Surcharge)
-admin.site.register(RatingVariable)
-admin.site.register(RatingExhibit)
