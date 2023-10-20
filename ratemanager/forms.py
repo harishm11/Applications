@@ -254,7 +254,7 @@ class projectIdAndDateInputForm(forms.ModelForm):
         model = RatebookMetadata
 
         fields = ([
-                    'ProjectID',
+                    'ProjectID', 'ProjectDescription',
                     'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
                     'MigrationDate', 'MigrationTime',
                     'ActivationDate', 'ActivationTime',
@@ -272,7 +272,8 @@ class projectIdAndDateInputForm(forms.ModelForm):
             'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
             'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
             'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'})
+            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
+            'ProjectDescription': forms.Textarea(attrs={"rows": "3"})
         }
 
 

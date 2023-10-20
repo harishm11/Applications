@@ -60,6 +60,12 @@ class RatebookMetadata(models.Model):
         null=False,
         default=None
         )
+    ProjectDescription = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        default=None
+        )
     RatebookVersion = models.FloatField(
         null=False,
         default=None
