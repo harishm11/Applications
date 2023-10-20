@@ -1,0 +1,55 @@
+Search Results:
+<div class="container table-responsive">          
+    <table id="example" class="table table-sm table-condensed table-bordered">
+      <thead>
+        <tr>
+          <th>Ratebook Name</th>
+          <th>Ratebook ID</th>
+          <th>Ratebook Version</th>
+          <th>New Business Effective Date</th>
+          <th>Renewal Effective Date</th>
+          <th>Migration Date</th>
+          <th>Migration Time</th>
+          <th>Activation Date</th>
+          <th>Activation Time</th>
+          <th>Ratebook Revision Type</th>
+          <th>Ratebook Status Type</th>
+          <th>Ratebook Change Type</th>
+          <th>Carrier</th>
+          <th>State</th>
+          <th>Line of Business</th>
+          <th>UW Company</th>
+          <th>Policy Type</th>
+          <th>Policy SubType</th>
+          <th>Product Code</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% if searchResults %}
+      {% for obj in searchResults %}
+        <tr>
+          <td>{{obj.RatebookName}}</td>
+          <td>{{obj.RatebookID}}</td>
+          <td>{{obj.RatebookVersion|floatformat:1}}</td>
+          <td>{{obj.NewBusinessEffectiveDate}}</td>
+          <td>{{obj.RenewalEffectiveDate}}</td>
+          <td>{{obj.MigrationDate}}</td>
+          <td>{{obj.MigrationTime}}</td>
+          <td>{{obj.ActivationDate}}</td>
+          <td>{{obj.ActivationTime}}</td>
+          <td>{{obj.RatebookRevisionType}}</td>
+          <td>{{obj.RatebookStatusType}}</td>
+          <td>{{obj.RatebookChangeType}}</td>
+          <td>{{obj.Carrier}}</td>
+          <td>{{obj.State}}</td>
+          <td>{{obj.LineofBusiness}}</td>
+          <td>{{obj.UWCompany}}</td>
+          <td>{{obj.PolicyType}}</td>
+          <td>{{obj.PolicySubType}}</td>
+          <td>{{obj.ProductCode}}</td>
+        </tr>
+      {% endfor %}
+      {% endif %}
+      </tbody>
+    </table>
+  </div>

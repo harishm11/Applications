@@ -15,9 +15,8 @@ from myproj.settings import DATABASES
 from difflib import get_close_matches
 import ratemanager.views.configs as configs
 
-SIDEBAR_OPTIONS = ["createRB", "viewRB", "updateRB",
+SIDEBAR_OPTIONS = ["template", "createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
-                   "createTemplate",
                    "viewTemplateOptions", 'EditCoverages']
 pd.options.mode.copy_on_write = True
 
@@ -881,8 +880,10 @@ def updateRatingExhibits(tdf, rbid, uploadURL):
 
 
 def extractIdentityDetails(dictionary: dict) -> dict:
-    ''' extract identity details (like Carrier, State, . . . e.t.c given in identity keys)
-      from dictionary input and return a dictionary of identity details excluding all other keys '''
+    ''' extract identity details ('Carrier', 'State', 'LineofBusiness',
+    'UWCompany', 'PolicyType', 'PolicyType', 'PolicySubType', 'ProductCode')
+    from dictionary input and return a dictionary of identity details excluding all other keys '''
+
     identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
                     'PolicyType', 'PolicySubType', 'ProductCode')
     identityRateDetails = {key: dictionary.get(key) for key in identityKeys}

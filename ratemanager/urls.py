@@ -2,7 +2,7 @@
 from django.urls import path
 from ratemanager.views import exportRB, viewRB, \
     views, createRB, updateRB, compareRB, \
-    createTemplate, cloneRB
+    createTemplate, cloneRB, template
 
 app_name = 'ratemanager'
 
@@ -44,4 +44,8 @@ urlpatterns = [
     path('cloneRB/', cloneRB.cloneRB, name="cloneRB"),
     path('selectExhibitOptions/', createTemplate.selectExhibitList, name="selectExhibitOptions"),
     path('previewExhibit/<int:Exhibit_id>/', createTemplate.previewExhibit, name="previewExhibit"),
+
+    # Template (checkpoint started building flows)
+    path('template/', template.template, name="template"),
+    path('projectIdAndDateInput/', template.projectIdAndDateInput, name="projectIdAndDateInput"),
 ]

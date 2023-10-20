@@ -202,29 +202,63 @@ class ViewRBFormWithDate(ViewRBForm):
     )
 
 
-class createTempleteForm(forms.ModelForm):
-
-    CHOICES = [('new', 'New'),
-               ('raterevision', 'Rate Revision'),
-               ('refresh', 'Refresh/Update(Add/Remove Exhibits)'),
-               ('factorcorrection', 'Factor Correction')]
-    CreateIntent = forms.ChoiceField(
-        label='Create Intent',
-        choices=CHOICES,
-        required=True,
-        widget=forms.Select(),
+class mainActionForm(forms.Form):
+    CHOICES = (
+        ('view', 'View'),
+        ('new', 'New'),
+        ('modify', 'Modify'),
+        ('delete', 'Delete'),
+        ('download', 'Download')
         )
 
+    MainAction = forms.TypedChoiceField(
+        label='Create Intent: ',
+        choices=CHOICES,
+        required=True,
+        widget=forms.RadioSelect(),
+        )
+
+
+class createTempleteForm(forms.ModelForm):
     class Meta:
         model = RatebookMetadata
 
-        fields = (['Carrier', 'State', 'LineofBusiness',
-                   'UWCompany', 'PolicyType', 'PolicySubType',
-                   'ProductCode', 'ProjectID',
-                   'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
-                   'MigrationDate', 'MigrationTime',
-                   'ActivationDate', 'ActivationTime',
-                   ])
+        fields = ([
+            'State', 'Carrier', 'LineofBusiness',
+            'UWCompany', 'PolicyType', 'PolicySubType',
+            'ProductCode',
+            #    'ProjectID',
+            #    'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
+            #    'MigrationDate', 'MigrationTime',
+            #    'ActivationDate', 'ActivationTime',
+            ])
+
+        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
+
+        labels = dict()
+        for i in fields:
+            labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+
+        widgets = {
+            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
+            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'})
+        }
+
+
+class projectIdAndDateInputForm(forms.ModelForm):
+    class Meta:
+        model = RatebookMetadata
+
+        fields = ([
+                    'ProjectID',
+                    'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
+                    'MigrationDate', 'MigrationTime',
+                    'ActivationDate', 'ActivationTime',
+                    ])
 
         # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
 

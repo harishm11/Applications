@@ -1,36 +1,28 @@
 {% extends 'body.html' %} {% load static %}
-{% block title %} Create Template {% endblock %}
+{% block title %} {{ title }} {% endblock %}
 {% block sidebarcontent %} 
   {% include 'ratemanager/sidebar.html' %} 
 {% endblock  %}
+{% block messagecontent %}
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
 {% load crispy_forms_tags %}
 {% block maincontent %}
 
-<div>
-    <h3>Found some similar ratebooks, select any one to clone.</h3>
-    <form method="POST" action="/ratemanager/cloneOptions/{{ prodCode }}/">
-      {% csrf_token %}
-    <div class="row justify-content-around">
-    <button
-    type="submit"
-    name="skip"
-    class="btn btn-warning col-md-3"
-    value="skip"
-    >Skip to Create Exhibits from Scratch</button>
-  </div>
-  </form>
-  </div>
-  {% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-<form action="/ratemanager/selectExhibitOptions/"
+<div class="container">
+  <h5>Select any one template to clone</h5>
+
+
+<form action="/ratemanager/selectExhibitOptions/?showAllExhibits=False"
       method="post">
       {% csrf_token %}
-<div class="container table-responsive">          
+<div class="container table-responsive">
     <table id="example" class="table table-sm table-condensed cell-border">
       <thead>
         <tr>
@@ -110,36 +102,40 @@
       </tbody>
     </table>
   </div>
+  <br>
   <div class="row justify-content-around">
-      <button
-      type="button"
-      name="back"
-      class="btn btn-secondary col-md-3"
-      onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
-      >Back</button>
-      <input class="btn btn-success col-md-3" type="submit" id="submit" value="Clone and Next">
+    <button
+    type="button"
+    name="back"
+    class="btn btn-sm btn-secondary col-md-3"
+    onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+    >Back</button>
+    <input class="btn btn-sm btn-primary col-md-3" type="submit" id="submit" value="Clone and Next">
   </div>
 </form>
-{% endblock %}
-{% block js%}
-  <script type="text/javascript">
+</div>
+{% endblock maincontent %}
+
+{% block js %}
+<!-- JS to make searchable headers -->
+<script type="text/javascript">
 
 $(document).ready( function () {
   // Create the DataTable
   var table = $('#example').DataTable( {
-
+    "initComplete": function(settings, json) {
+      //$('.dataTables_paginate').css('float', 'left');
+    },
+    dom:'prt',
     fixedHeader: true,
+    pageLength: 5,
     orderCellsTop: true,
-    searching: false,
-    paging:true,
+    bLengthChange: false,
     info:false,
-    "bLengthChange": false,
-    "pageLength": 10
   } );
   
   // Add filtering
   table.columns([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]).every( function () {
-
       var that = this;
 
       // Create the `select` element
@@ -167,27 +163,21 @@ $(document).ready( function () {
       if ( state ) {
         var val = state.columns[ this.index() ];
         select.val( val.search.search );
-      }
-
+    }
   } );
 } );
 
+// Allow only one selection alert on more than one selection
 
-
-    $('input[type=checkbox]').on('change', function (e) {
-      if ($('input[type=checkbox]:checked').length > 1)
-      {
-        $(this).prop('checked', false);
-        alert("Max allowed selections is 1");
-      }
-      else if ($('input[type=checkbox]:checked').length == 1){
-          $("#submit").prop("disabled", false);
-      }
-      else
-      {
-        $("#compare_button").prop("disabled", true);
-        $("#export_template_button").prop("disabled", true);
-      }
-    });
-  </script>
+$('input[type=checkbox]').on('change', function (e) {
+  if ($('input[type=checkbox]:checked').length > 1)
+  {
+    $(this).prop('checked', false);
+    alert("Max allowed selections is 1");
+  }
+  else if ($('input[type=checkbox]:checked').length == 1){
+      $("#submit").prop("disabled", false);
+  }
+});
+</script>
 {% endblock js%}

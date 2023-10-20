@@ -1,11 +1,10 @@
-from ratemanager.forms import createTempleteForm, editExhibitForm, addExhibitForm, selectExhibitListsForm
+from ratemanager.forms import createTempleteForm, editExhibitForm, addExhibitForm, selectExhibitListsForm, mainActionForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
 from datetime import datetime
 from django.utils import timezone
-from ratemanager.models import RatebookMetadata, RatebookTemplate
+from ratemanager.models import RatebookMetadata, RatebookTemplate, RatingExhibits
 from django.contrib import messages
-import pandas as pd
 
 
 def createTemplate(request):
@@ -15,15 +14,19 @@ def createTemplate(request):
     if request.method == 'POST':
         rate_details = request.POST.copy()
         form = createTempleteForm(rate_details)
-        if rate_details['CreateIntent'] == 'new':
+        if rate_details['MainAction'] == 'new':
             if form.is_valid():
 
                 # save the Form data to session
                 request.session['createTemplateFormData'] = rate_details
 
+                # check for matching drafts if found show the draft.
+
+                # check for existing template/Ratebook in production and if found show that it already exists.
+
                 # redirect to clone options view
                 return redirect('ratemanager:cloneOptions', prodCode=rate_details['ProductCode'])
-        if rate_details['CreateIntent'] == 'raterevision':
+        elif rate_details['MainAction'] == 'raterevision':
             ids = helperfuncs.extractIdentityDetails(rate_details)
             foundRB = RatebookMetadata.objects.all().filter(**ids).order_by('-RatebookVersion').first()
             if not foundRB:
@@ -31,6 +34,9 @@ def createTemplate(request):
                 return redirect('ratemanager:createTemplate')
             else:
                 return redirect('/ratemanager/exportRB/?selectedRBs=' + '_'.join([foundRB.RatebookID, str(foundRB.RatebookVersion), foundRB.RatebookName]))
+        else:
+            messages.add_message(request, messages.ERROR, "Invalid Create Intent Selection, Try Again")
+            return redirect('ratemanager:createTemplate')
 
     if request.method == 'GET':
         initial = {
@@ -41,14 +47,21 @@ def createTemplate(request):
             'MigrationDate': datetime.today(),
             'MigrationTime': timezone.now()
         }
-
-        form = createTempleteForm(initial=initial)
-
+        if request.session['createTemplateFormData']:
+            createTempleteFormPrefilled = createTempleteForm(
+                initial=request.session['createTemplateFormData']
+                )
+        else:
+            createTempleteFormPrefilled = createTempleteForm(initial=initial)
+        similarRBs = RatebookMetadata.objects.filter().exclude(RatebookStatusType__in=["Template", "Cloned Template"]).order_by('RatebookID').distinct('RatebookID')
         return render(request, 'ratemanager/createTemplate.html',
                       {
-                        'form': form,
+                        'createTempleteForm': createTempleteFormPrefilled,
                         'options': options,
-                        'appLabel': appLabel
+                        'appLabel': appLabel,
+                        'mainActionForm': mainActionForm(initial={'MainAction': 'view'}),
+                        'title': 'Create Template',
+                        'similarRBs': similarRBs
                         })
 
 
@@ -137,27 +150,33 @@ def addExhibit2Template(request):
 def selectExhibitList(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
-
-    rbid = request.POST.get('toCloneRB')
-    rb = RatebookMetadata.objects.get(pk=rbid)
-    # if no ratebook is selected redirect to clone options view with error message
-    if not rbid:
-        list(messages.get_messages(request))
-        messages.add_message(request, messages.ERROR, "Please select a ratebook to clone")
-        return redirect('ratemanager:cloneOptions', prodCode=request.session.get('ProductCode'))
-
-    rbID = rbid.split('_')[0]
-
+    rbid = rbID = None
+    showAllExhibits = request.GET.get('showAllExhibits')
     form = selectExhibitListsForm()
-    choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
-    form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
+
+    if not showAllExhibits:
+        rbid = request.POST.get('toCloneRB')
+        rbID = rbid.split('_')[0]
+
+        # if no ratebook is selected redirect to clone options view with error message
+        if rbid is None:
+            list(messages.get_messages(request))
+            messages.add_message(request, messages.ERROR, "Please select a ratebook to clone")
+            return redirect(
+                'ratemanager:cloneOptions',
+                prodCode=request.session.get('ProductCode')
+                )
+        choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
+        form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
+    else:
+        choices = RatingExhibits.objects.all()
+        form.fields['toAddExhibits'].choices = [(choice.id, choice.Exhibit) for choice in choices]
+
     return render(request, 'ratemanager/selectExhibitsCloneOptions.html',
                   {
                         'form': form,
                         'options': options,
                         'appLabel': appLabel,
-                        'rbID': rbID,
-                        'rbState': rb.RatebookName,
                     })
 
 

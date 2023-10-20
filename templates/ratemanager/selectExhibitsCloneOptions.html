@@ -7,11 +7,6 @@
 {% block maincontent %} 
 
 <h5>Please select the exhibits to clone</h4>
-<p>
-  Showing exhibits from the selected Ratebook: <br>
-  State: {{ rbState }} &emsp;
-  RatebookID: {{ rbID }} &emsp;
-</p>
 
 <form class="form-control"
       method="post"
@@ -23,7 +18,7 @@
       <input type="hidden" name="rbState" value="{{ rbState }}">
       <input type="hidden" name="rbCode" value="{{ rbCode }}">
       {{ form.toAddExhibits.label }}
-        <div style="border:2px solid #ccc; width:550px; height: 250px; overflow-y: scroll;">
+        <div style="border:2px solid #ccc; width:550px; height: 225px; overflow-y: scroll;">
           {{ form.toAddExhibits }}
         </div>
       <br>

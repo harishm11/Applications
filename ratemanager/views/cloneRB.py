@@ -3,7 +3,7 @@ from ratemanager.models import RatebookMetadata, RatebookTemplate
 from ratemanager.views import HelperFunctions as helperfuncs
 from django.utils import timezone
 from ratemanager.forms import createTempleteForm
-# from django.contrib import messages
+from django.contrib import messages
 
 
 def cloneOptions(request, prodCode):
@@ -21,7 +21,8 @@ def cloneOptions(request, prodCode):
                             'options': options,
                             'appLabel': appLabel,
                             'similarRBs': similarRBs,
-                            'prodCode': prodCode
+                            'prodCode': prodCode,
+                            'title': 'Clone Template'
                         })
     # for POST request and no similar ratebooks found
     # fetch the form data from session
@@ -74,5 +75,5 @@ def cloneRB(request):
             for row in getattr(i, field.name).all():
                 getattr(clonedExhibit, field.name).add(row)
         # set the id to None so that it is saved as a new record and set the newly generated ratebook ID and save
-
+    messages.add_message(request, messages.INFO, "Cloned Successful with New ID" + rb.RatebookID)
     return redirect('ratemanager:listExhibits', pk=rb.id)
