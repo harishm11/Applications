@@ -172,11 +172,12 @@ def selectExhibitList(request):
         choices = RatingExhibits.objects.all()
         form.fields['toAddExhibits'].choices = [(choice.id, choice.Exhibit) for choice in choices]
 
-    return render(request, 'ratemanager/selectExhibitsCloneOptions.html',
+    return render(request, 'ratemanager/selectExhibitsOptions.html',
                   {
                         'form': form,
                         'options': options,
                         'appLabel': appLabel,
+                        'title': 'Add Exhibits'
                     })
 
 

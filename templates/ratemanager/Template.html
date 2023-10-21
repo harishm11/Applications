@@ -5,11 +5,11 @@
 {% endblock  %}
 {% block messagecontent %}
 {% if messages %}
-<ul class="messages" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
+<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
     {% for message in messages %}
     <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
     {% endfor %}
-</ul>
+</div>
 {% endif %}
 {% endblock %}
 {% load crispy_forms_tags %}
@@ -63,19 +63,26 @@
   {%endfor%}
 </table>
 
-<div class="row justify-content-center">
+<div class="row justify-content-around">
+  <input
+  type="submit"
+  name="submit"
+  value="Search"
+  class="btn btn-sm btn-primary col-md-1"
+  action="/ratemanager/template/"
+  />
   <input
       type="submit"
       name="submit"
       value="Next"
-      class="btn btn-sm btn-primary col-md-3"
+      class="btn btn-sm btn-primary col-md-1"
       action="/ratemanager/template/"
     />
   </div>
 </form>
 
 {% if searchResults %}
-{% include 'ratemanager/TemplateSearchResults.html' %}
+    {% include 'ratemanager/TemplateSearchResults.html' %}
 {% endif %}
 </div>
 {% endblock %}

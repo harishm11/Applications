@@ -23,12 +23,15 @@ def template(request):
                 # check for existing template/Ratebook in production and if found show that it already exists.
                 identityDetails = helperfuncs.extractIdentityDetails(form_data)
                 searchResults = RatebookMetadata.objects.filter(**identityDetails)
-                if searchResults.count() > 0:
+                if searchResults.count() > 0 or request.POST['submit'] == 'Search':
+
                     # check for matching drafts if found show the draft.
                     if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
                         messages.add_message(request, messages.INFO, 'Found an existing draft for the given ratebook details.')
-                    else:
+                    elif searchResults.count() > 0:
                         messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
+                    else:
+                        messages.add_message(request, messages.INFO, 'No Ratebook with enterd details found.')
 
                     searchResults.order_by(
                         'RatebookID', 'RatebookStatusType', '-RatebookVersion'
@@ -70,6 +73,8 @@ def template(request):
 
 
 def projectIdAndDateInput(request):
+    options = helperfuncs.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
 
     if request.method == 'GET':
         initial = {
@@ -83,7 +88,10 @@ def projectIdAndDateInput(request):
         form = projectIdAndDateInputForm(initial=initial)
         return render(request, 'ratemanager/ProjectIdAndDateInput.html',
                       {
+                        'options': options,
+                        'appLabel': appLabel,
                         'form': form,
+                        'title': 'Project ID & Dates'
                         })
 
     if request.method == 'POST':
@@ -92,11 +100,23 @@ def projectIdAndDateInput(request):
             # check for valid Project ID
             form_data = form.cleaned_data
             form_data['ProjectID'] = form_data['ProjectID'].strip()
+            if not form_data['ProjectID']:
+                messages.add_message(request, messages.ERROR, 'Please assign a valid Project ID.')
+                return render(request, 'ratemanager/ProjectIdAndDateInput.html',
+                              {
+                                'options': options,
+                                'appLabel': appLabel,
+                                'form': form,
+                                'title': 'Project ID & Dates'
+                                })
             if RatebookMetadata.objects.filter(ProjectID=form_data['ProjectID']).count() > 0:
                 messages.add_message(request, messages.ERROR, 'ProjectID already exists, use different one.')
                 return render(request, 'ratemanager/ProjectIdAndDateInput.html',
                               {
+                                'options': options,
+                                'appLabel': appLabel,
                                 'form': form,
+                                'title': 'Project ID & Dates'
                                 })
             # save the forms data to RB metadatatable
             searchOptions = createTempleteForm(data=request.session['TemplateFormData'])
@@ -122,5 +142,8 @@ def projectIdAndDateInput(request):
             messages.add_message(request, messages.ERROR, 'Invalid form, Try again.')
             return render(request, 'ratemanager/ProjectIdAndDateInput.html',
                           {
+                            'options': options,
+                            'appLabel': appLabel,
                             'form': form,
+                            'title': 'Project ID & Dates'
                             })

@@ -273,7 +273,7 @@ class projectIdAndDateInputForm(forms.ModelForm):
             'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
             'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
             'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
-            'ProjectDescription': forms.Textarea(attrs={"rows": "3"})
+            'ProjectDescription': forms.Textarea(attrs={"rows": "2"})
         }
 
 
