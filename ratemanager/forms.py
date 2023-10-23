@@ -4,6 +4,7 @@ from datetime import datetime
 from ratemanager.models import RatebookMetadata, RatingFactors, \
     RatingExhibits, RatebookTemplate
 import ratemanager.views.HelperFunctions as helperfuncs
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 
 try:
@@ -219,7 +220,7 @@ class mainActionForm(forms.Form):
         )
 
 
-class createTempleteForm(forms.ModelForm):
+class createTemplateForm(forms.ModelForm):
     class Meta:
         model = RatebookMetadata
 
@@ -319,10 +320,22 @@ class addExhibitForm(forms.ModelForm):
         #     labels[i] = ' '.join(helperfuncs.camel_case_split(i))
 
 
-class selectExhibitListsForm(forms.Form):
-    ADD_CHOICES = [(None, None)]
-    toAddExhibits = forms.MultipleChoiceField(
-        choices=ADD_CHOICES,
-        widget=forms.CheckboxSelectMultiple,
-        label='Select Exhibits to Add to the Template'
+class selectExhibitListsForm(forms.ModelForm):
+    toAddExhibits = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=FilteredSelectMultiple("Exhibits", False),
+        label='Select Exhibits to Add to the Template',
+        required=True
         )
+
+    class Media:
+        css = {
+            'all': ['admin/css/widgets.css',
+                    'css/FilteredSelectMultiple.css'],
+        }
+        # Adding this javascript is crucial
+        js = ['/admin/jsi18n/']
+
+    class Meta:
+        model = RatebookTemplate
+        fields = ()

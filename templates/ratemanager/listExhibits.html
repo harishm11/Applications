@@ -6,7 +6,7 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
-<h2> Template Exhibits List </h2>
+<h6> Template Exhibits List </h6>
 <p>Showing for {{ rbname }}; ID: {{ rbid }}; Version: {{ rbver }};</p> 
 <hr>
 <div class="container">
@@ -14,13 +14,13 @@
   <button
   type="button"
   name="back"
-  class="btn btn-secondary col-md-2"
+  class="btn btn-sm btn-secondary col-md-2"
   onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
   >Back</button>
 
   <button 
   type="button" 
-  class="btn btn-primary col-md-2" 
+  class="btn btn-sm btn-primary col-md-2" 
   onclick="window.location.href='/ratemanager/addExhibit2Template/';">
   Add an Exhibit
   </button>
@@ -31,7 +31,7 @@
       type="submit"
       name="submit"
       value="Download the Template"
-      class="btn btn-primary"
+      class="btn btn-sm btn-primary"
       method="post"
       action="/ratemanager/exportTemplate/{{ rbid }}/"
     /></form>
@@ -39,7 +39,7 @@
     <button
     type="button"
     name="next"
-    class="btn btn-success col-md-2"
+    class="btn btn-sm btn-primary col-md-2"
     onclick="window.location.href='/ratemanager/createRB/';"
     >Next</button>
 
@@ -70,12 +70,13 @@
       <td><a href="{% url 'ratemanager:deleteExhibitTemplate' exhibit.id %}">Delete from Template</a></td>
       -->
       <td>
-      <button 
+      <a 
+        href=""
         hx-get="/ratemanager/previewExhibit/{{ exhibit.id }}/" 
         hx-target="#preview-popup" 
         hx-trigger="click"
         data-bs-toggle="modal"
-        data-bs-target="#preview-popup"> Preview </button>
+        data-bs-target="#preview-popup"> Preview </a>
         </td>
     </tr>
   {% endfor %}

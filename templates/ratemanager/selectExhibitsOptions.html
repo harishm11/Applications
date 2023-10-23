@@ -6,57 +6,32 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 <div class="container">
-<form method="post"
-      id="rbMetadataForm"
-      action="/ratemanager/cloneRB/">
+<h6> Select from All Exhibits List </h6>
+<form method="post">
       {% csrf_token %}
-      <input type="hidden" name="rbID" value="{{ rbID }}">
-      <input type="hidden" name="rbVer" value="{{ rbVer }}">
-      <input type="hidden" name="rbState" value="{{ rbState }}">
-      <input type="hidden" name="rbCode" value="{{ rbCode }}">
-      <b>{{ form.toAddExhibits.label }}:</b>
-      <hr>
-        <div style="width:550px; height: 300px; overflow-y: scroll;">
-          {{ form.toAddExhibits }}
-        </div>
-      <br>
-<div class="row justify-content-around">
-  <button
-  type="button"
-  name="back"
-  class="btn btn-sm btn-secondary col-md-2"
-  onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
-  >Back</button>
-
-  <button
-  type="button"
-  class="btn btn-sm btn-primary col-md-2"
-  onclick="select_all();"
-  >Select All Exhibits</button>
-
-  <button
-  type="button"
-  class="btn btn-sm btn-primary col-md-2"
-  onclick="deselect_all();"
-  >Clear All Selections</button>
-
-    <input
-    type="submit"
-    name="submit"
-    class="btn btn-sm btn-primary col-md-2"
-    value="Submit"
-    >
-
+  <div class="w-75 mx-auto">
+    <fieldset>
+        {{ form.media }}
+        {{ form | crispy }}
+        <script type="text/javascript" src="{% url 'ratemanager:jsi18n' %}"></script>
+    </fieldset>
+    <div class="row justify-content-around">
+      <button
+      type="button"
+      name="back"
+      class="btn btn-sm btn-secondary col-md-2"
+      onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+      >Back</button>
+    
+      <input
+      type="submit"
+      name="submit"
+      class="btn btn-sm btn-primary col-md-2"
+      value="Submit"
+      >
+      </div>
   </div>
 </form>
-</div>
-<script>
-  function select_all()  {
-    $('input[type=checkbox]').prop('checked', true);
-  }
 
-  function deselect_all()  {
-     $('input[type=checkbox]').prop('checked', false);
-  }
-</script>
+</div>
 {% endblock %}

@@ -1,8 +1,9 @@
 Search Results:
 <div class="container table-responsive">          
-  <table id="example" class="table table-sm table-condensed table-bordered">
+  <table id="example" class="table table-sm table-condensed table-bordered text-center">
     <thead>
       <tr>
+        <th>Resume Editing</th>
         <th>Ratebook Name</th>
         <th>Ratebook ID</th>
         <th>Ratebook Version</th>
@@ -27,6 +28,13 @@ Search Results:
     <tbody>
     {% for obj in searchResults %}
       <tr>
+        <td>
+          
+          <a href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
+          ><i class="fa fa-edit"></i
+        ></a>
+      
+        </td>
         <td>{{obj.RatebookName}}</td>
         <td>{{obj.RatebookID}}</td>
         <td>{{obj.RatebookVersion|floatformat:1}}</td>

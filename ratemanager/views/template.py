@@ -1,4 +1,4 @@
-from ratemanager.forms import createTempleteForm, mainActionForm, projectIdAndDateInputForm
+from ratemanager.forms import createTemplateForm, mainActionForm, projectIdAndDateInputForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.models import RatebookMetadata
@@ -14,7 +14,7 @@ def template(request):
         ratebook_details = request.POST.copy()
         # save the Form data to session before validation and main action
         request.session['TemplateFormData'] = ratebook_details
-        form = createTempleteForm(ratebook_details)
+        form = createTemplateForm(ratebook_details)
         if ratebook_details['MainAction'] == 'new':
             if form.is_valid():
                 # save the cleaned Form data to session
@@ -31,7 +31,7 @@ def template(request):
                     elif searchResults.count() > 0:
                         messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
                     else:
-                        messages.add_message(request, messages.INFO, 'No Ratebook with enterd details found.')
+                        messages.add_message(request, messages.INFO, 'No Ratebook with entered details found.')
 
                     searchResults.order_by(
                         'RatebookID', 'RatebookStatusType', '-RatebookVersion'
@@ -39,7 +39,7 @@ def template(request):
 
                     return render(request, 'ratemanager/Template.html',
                                   {
-                                    'createTempleteForm': form,
+                                    'createTemplateForm': form,
                                     'options': options,
                                     'appLabel': appLabel,
                                     'mainActionForm': mainActionForm(initial={'MainAction': ratebook_details['MainAction']}),
@@ -56,15 +56,15 @@ def template(request):
     if request.method == 'GET':
         initial = {}
         if request.session.get('TemplateFormData'):
-            createTempleteFormPrefilled = createTempleteForm(
+            createTemplateFormPrefilled = createTemplateForm(
                 initial=request.session['TemplateFormData']
                 )
         else:
-            createTempleteFormPrefilled = createTempleteForm(initial=initial)
+            createTemplateFormPrefilled = createTemplateForm(initial=initial)
 
         return render(request, 'ratemanager/Template.html',
                       {
-                        'createTempleteForm': createTempleteFormPrefilled,
+                        'createTemplateForm': createTemplateFormPrefilled,
                         'options': options,
                         'appLabel': appLabel,
                         'mainActionForm': mainActionForm(initial={'MainAction': 'view'}),
@@ -118,8 +118,8 @@ def projectIdAndDateInput(request):
                                 'form': form,
                                 'title': 'Project ID & Dates'
                                 })
-            # save the forms data to RB metadatatable
-            searchOptions = createTempleteForm(data=request.session['TemplateFormData'])
+            # save the forms data to RB meta data table
+            searchOptions = createTemplateForm(data=request.session['TemplateFormData'])
             searchOptions.is_valid()
             form_data.update(
                 searchOptions.cleaned_data
@@ -131,7 +131,7 @@ def projectIdAndDateInput(request):
             form_data['RatebookID'] = helperfuncs.generateRatebookID()
             form_data['RatebookVersion'] = 0.0
             obj = RatebookMetadata.objects.create(**form_data)
-
+            request.session['NewRBid'] = obj.id
             if request.POST['CreateFrom'] == 'clone':
                 return redirect('ratemanager:cloneOptions', prodCode=request.session['TemplateFormData']['ProductCode'])
             elif request.POST['CreateFrom'] == 'fromScratch':
