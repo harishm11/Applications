@@ -1,0 +1,34 @@
+.active.active.selector-add, 
+.active.selector-remove , 
+.active.selector-chooseall,
+.active.selector-clearall
+{
+  border: none;
+  
+}
+
+.selector h2{
+  font-size: medium;
+  font-weight: bold;
+  background-color: lightgrey !important;
+  border-style: solid !important;
+  border-width: 1px !important;
+  border-color: #ccc;
+  margin-top: 3px;
+  margin-bottom: 0px !important;
+}
+
+.help.help-tooltip.help-icon{
+  display: none;
+}
+
+.selector-filter{
+  border: 1px solid #ccc !important;
+  background-color: lightgrey;
+  padding: 3px !important;
+  font-size: 12px !important;
+}
+
+.help-tooltip.search-label-icon{
+  display: none;
+}

@@ -1,3 +1,7 @@
+'''
+This file stores the app configs for ratemanager, stuff like No of Ratevars, and some temporary stuff that are needed for the ETL process.
+'''
+
 cov_mapping = {
         'UMPD': 'UninsuredMotoristPD',
         'BI': 'BodilyInjury',

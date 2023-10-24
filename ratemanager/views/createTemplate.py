@@ -1,55 +1,8 @@
-from ratemanager.forms import createTempleteForm, editExhibitForm, addExhibitForm, selectExhibitListsForm
+from ratemanager.forms import editExhibitForm, addExhibitForm, selectExhibitListsForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
-from datetime import datetime
-from django.utils import timezone
-from ratemanager.models import RatebookMetadata, RatebookTemplate
+from ratemanager.models import RatebookMetadata, RatebookTemplate, RatingExhibits
 from django.contrib import messages
-import pandas as pd
-
-
-def createTemplate(request):
-    options = helperfuncs.SIDEBAR_OPTIONS
-    appLabel = 'ratemanager'
-
-    if request.method == 'POST':
-        rate_details = request.POST.copy()
-        form = createTempleteForm(rate_details)
-        if rate_details['CreateIntent'] == 'new':
-            if form.is_valid():
-
-                # save the Form data to session
-                request.session['createTemplateFormData'] = rate_details
-
-                # redirect to clone options view
-                return redirect('ratemanager:cloneOptions', prodCode=rate_details['ProductCode'])
-        if rate_details['CreateIntent'] == 'raterevision':
-            ids = helperfuncs.extractIdentityDetails(rate_details)
-            foundRB = RatebookMetadata.objects.all().filter(**ids).order_by('-RatebookVersion').first()
-            if not foundRB:
-                messages.add_message(request, messages.ERROR, "No Ratebook found with the given details")
-                return redirect('ratemanager:createTemplate')
-            else:
-                return redirect('/ratemanager/exportRB/?selectedRBs=' + '_'.join([foundRB.RatebookID, str(foundRB.RatebookVersion), foundRB.RatebookName]))
-
-    if request.method == 'GET':
-        initial = {
-            'NewBusinessEffectiveDate': datetime.today(),
-            'RenewalEffectiveDate': datetime.today(),
-            'ActivationDate': datetime.today(),
-            'ActivationTime': timezone.now(),
-            'MigrationDate': datetime.today(),
-            'MigrationTime': timezone.now()
-        }
-
-        form = createTempleteForm(initial=initial)
-
-        return render(request, 'ratemanager/createTemplate.html',
-                      {
-                        'form': form,
-                        'options': options,
-                        'appLabel': appLabel
-                        })
 
 
 def editExhibitTemplate(request, pk):
@@ -134,30 +87,54 @@ def addExhibit2Template(request):
                             })
 
 
-def selectExhibitList(request):
+def selectFromAllExhibitsList(request, id):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
-    rbid = request.POST.get('toCloneRB')
-    rb = RatebookMetadata.objects.get(pk=rbid)
-    # if no ratebook is selected redirect to clone options view with error message
-    if not rbid:
-        list(messages.get_messages(request))
-        messages.add_message(request, messages.ERROR, "Please select a ratebook to clone")
-        return redirect('ratemanager:cloneOptions', prodCode=request.session.get('ProductCode'))
+    if request.method == 'GET':
+        form = selectExhibitListsForm()
+        choices = RatingExhibits.objects.all()
+        form.fields['toAddExhibits'].queryset = choices
+        initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
+        print(initial)
+        form.fields['toAddExhibits'].initial = initial
 
-    rbID = rbid.split('_')[0]
+        return render(request, 'ratemanager/selectExhibitsOptions.html',
+                      {
+                            'form': form,
+                            'options': options,
+                            'appLabel': appLabel,
+                            'title': 'Add Exhibits',
+                            'id': id
+                        })
+
+    if request.method == 'POST':
+        form = selectExhibitListsForm(request.POST)
+        choices = RatingExhibits.objects.all()
+        form.fields['toAddExhibits'].queryset = choices
+        if form.is_valid():
+            form_data = form.cleaned_data
+            for i in form_data['toAddExhibits']:
+                RatebookTemplate.objects.get_or_create(RatebookID=id.split('_')[0], RatebookExhibit=i)
+        return redirect('ratemanager:listExhibits', id)
+
+
+def selectFromExistingRbExhibitsList(request, id):
+    options = helperfuncs.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
 
     form = selectExhibitListsForm()
+    cloneFromRBid = request.POST.get('toCloneRB')
+    rbID = cloneFromRBid.split('_')[0]
+
     choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
     form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
-    return render(request, 'ratemanager/selectExhibitsCloneOptions.html',
+    return render(request, 'ratemanager/selectExhibitsOptions.html',
                   {
                         'form': form,
                         'options': options,
                         'appLabel': appLabel,
-                        'rbID': rbID,
-                        'rbState': rb.RatebookName,
+                        'title': 'Add Exhibits'
                     })
 
 
@@ -168,16 +145,16 @@ def listExhibits(request, pk):
     rbid, rbver = pk.split('_')
     ExhibitObjs = RatebookTemplate.objects.filter(RatebookID=rbid)
     request.session['currentlyEditingRatebook'] = pk
-    if request.method == 'GET':
-        return render(request, 'ratemanager/listExhibits.html',
-                      {
-                        'options': options,
-                        'appLabel': appLabel,
-                        'ExhibitObjs': ExhibitObjs,
-                        'rbid': rbid,
-                        'rbver': rbver,
-                        'rbname': RatebookMetadata.objects.get(RatebookID=rbid, RatebookVersion=rbver).RatebookName,
-                        })
+
+    return render(request, 'ratemanager/listExhibits.html',
+                  {
+                    'options': options,
+                    'appLabel': appLabel,
+                    'ExhibitObjs': ExhibitObjs,
+                    'rbid': rbid,
+                    'rbver': rbver,
+                    'rbname': RatebookMetadata.objects.get(RatebookID=rbid, RatebookVersion=rbver).RatebookName,
+                    })
 
 
 def deleteExhibitTemplate(request, pk):
@@ -194,3 +171,7 @@ def previewExhibit(request, Exhibit_id):
                   {
                     'ExhibitObj': ExhibitObj,
                     })
+
+
+def resumeTemplateDraftCreation(request, id):
+    return redirect('ratemanager:selectFromAllExhibitsList', id=id)

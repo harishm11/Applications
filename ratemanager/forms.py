@@ -4,6 +4,7 @@ from datetime import datetime
 from ratemanager.models import RatebookMetadata, RatingFactors, \
     RatingExhibits, RatebookTemplate
 import ratemanager.views.HelperFunctions as helperfuncs
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 
 try:
@@ -202,29 +203,36 @@ class ViewRBFormWithDate(ViewRBForm):
     )
 
 
-class createTempleteForm(forms.ModelForm):
-
-    CHOICES = [('new', 'New'),
-               ('raterevision', 'Rate Revision'),
-               ('refresh', 'Refresh/Update(Add/Remove Exhibits)'),
-               ('factorcorrection', 'Factor Correction')]
-    CreateIntent = forms.ChoiceField(
-        label='Create Intent',
-        choices=CHOICES,
-        required=True,
-        widget=forms.Select(),
+class mainActionForm(forms.Form):
+    CHOICES = (
+        ('view', 'View'),
+        ('new', 'New'),
+        ('modify', 'Modify'),
+        ('delete', 'Delete'),
+        ('download', 'Download')
         )
 
+    MainAction = forms.TypedChoiceField(
+        label='Create Intent: ',
+        choices=CHOICES,
+        required=True,
+        widget=forms.RadioSelect(),
+        )
+
+
+class createTemplateForm(forms.ModelForm):
     class Meta:
         model = RatebookMetadata
 
-        fields = (['Carrier', 'State', 'LineofBusiness',
-                   'UWCompany', 'PolicyType', 'PolicySubType',
-                   'ProductCode', 'ProjectID',
-                   'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
-                   'MigrationDate', 'MigrationTime',
-                   'ActivationDate', 'ActivationTime',
-                   ])
+        fields = ([
+            'State', 'Carrier', 'LineofBusiness',
+            'UWCompany', 'PolicyType', 'PolicySubType',
+            'ProductCode',
+            #    'ProjectID',
+            #    'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
+            #    'MigrationDate', 'MigrationTime',
+            #    'ActivationDate', 'ActivationTime',
+            ])
 
         # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
 
@@ -239,6 +247,34 @@ class createTempleteForm(forms.ModelForm):
             'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
             'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
             'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'})
+        }
+
+
+class projectIdAndDateInputForm(forms.ModelForm):
+    class Meta:
+        model = RatebookMetadata
+
+        fields = ([
+                    'ProjectID', 'ProjectDescription',
+                    'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
+                    'MigrationDate', 'MigrationTime',
+                    'ActivationDate', 'ActivationTime',
+                    ])
+
+        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
+
+        labels = dict()
+        for i in fields:
+            labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+
+        widgets = {
+            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
+            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
+            'ProjectDescription': forms.Textarea(attrs={"rows": "2"})
         }
 
 
@@ -284,10 +320,22 @@ class addExhibitForm(forms.ModelForm):
         #     labels[i] = ' '.join(helperfuncs.camel_case_split(i))
 
 
-class selectExhibitListsForm(forms.Form):
-    ADD_CHOICES = [(None, None)]
-    toAddExhibits = forms.MultipleChoiceField(
-        choices=ADD_CHOICES,
-        widget=forms.CheckboxSelectMultiple,
-        label='Select Exhibits to Add to the Template'
+class selectExhibitListsForm(forms.ModelForm):
+    toAddExhibits = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=FilteredSelectMultiple("Exhibits", False),
+        label='Select Exhibits to Add to the Template',
+        required=True
         )
+
+    class Media:
+        css = {
+            'all': ['admin/css/widgets.css',
+                    'css/FilteredSelectMultiple.css'],
+        }
+        # Adding this javascript is crucial
+        js = ['/admin/jsi18n/']
+
+    class Meta:
+        model = RatebookTemplate
+        fields = ()

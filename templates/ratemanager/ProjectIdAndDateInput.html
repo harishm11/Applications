@@ -1,0 +1,74 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} {{ title }} {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% block messagecontent %}
+{% if messages %}
+<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
+  {% for message in messages %}
+  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+{% load crispy_forms_tags %}
+{% block maincontent %}
+<div class="container">
+    <h5>Project ID and other details</h5>
+<form class="form"
+      method="post">
+    {% csrf_token %}
+    <table class="table table-sm table-responsive w-50 mx-auto table-borderless">
+    {{ form.as_table }}
+    </table>
+
+    <!-- Ask if clone from existing or create from scratch -->
+
+    <div id="createFromOptionsForm">
+      <div class="row justify-content-center">
+        Choose your starting point:
+        <div class="radio text-center col-md-6">
+          <input 
+          class="form-check-input"
+          onchange="//this.form.submit();"
+          type="radio" 
+          name="CreateFrom"
+          value="fromScratch"
+          required="required"
+          id="fromScratch"
+          >
+          <label for="fromScratch">Create template from scratch</label>
+          &emsp;
+          <input 
+          class="form-check-input"
+          onchange="//this.form.submit();"
+          type="radio" 
+          value="clone"
+          name="CreateFrom"
+          id="clone"
+          >
+          <label for="clone">Create a clone from an existing ratebook</label>
+        </div>
+      </div>
+    </div>
+    <br>
+
+    <div class="row justify-content-around">
+        <button
+        type="button"
+        name="back"
+        class="btn btn-sm btn-secondary col-md-1"
+        onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+        >Back</button>
+
+        <input
+            type="submit"
+            name="submit"
+            value="Next"
+            class="btn btn-sm btn-primary col-md-1"
+          />
+        </div>
+</form>
+</div>
+{% endblock %}

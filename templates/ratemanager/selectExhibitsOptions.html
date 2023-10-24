@@ -1,0 +1,37 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} {{ title }} {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% load crispy_forms_tags %}
+{% block maincontent %} 
+<div class="container">
+<h6> Select from All Exhibits List </h6>
+<form method="post">
+      {% csrf_token %}
+  <div class="w-75 mx-auto">
+    <fieldset>
+        {{ form.media }}
+        {{ form | crispy }}
+        <script type="text/javascript" src="{% url 'ratemanager:jsi18n' %}"></script>
+    </fieldset>
+    <div class="row justify-content-around">
+      <button
+      type="button"
+      name="back"
+      class="btn btn-sm btn-secondary col-md-2"
+      onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+      >Back</button>
+    
+      <input
+      type="submit"
+      name="submit"
+      class="btn btn-sm btn-primary col-md-2"
+      value="Submit"
+      >
+      </div>
+  </div>
+</form>
+
+</div>
+{% endblock %}

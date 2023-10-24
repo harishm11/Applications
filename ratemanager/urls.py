@@ -1,8 +1,9 @@
 # from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from ratemanager.views import exportRB, viewRB, \
     views, createRB, updateRB, compareRB, \
-    createTemplate, cloneRB
+    createTemplate, cloneRB, template
+from django import views as django_views
 
 app_name = 'ratemanager'
 
@@ -30,7 +31,7 @@ urlpatterns = [
     path('exportRB/', exportRB.exportRB, name="exportRB"),
     path('exportTemplate/<str:pk>/', exportRB.exportTemplate, name="exportTemplate"),
     # create rb template
-    path('createTemplate/', createTemplate.createTemplate, name="createTemplate"),
+    # path('createTemplate/', createTemplate.createTemplate, name="createTemplate"),
     path('listExhibits/<str:pk>/', createTemplate.listExhibits, name="listExhibits"),
     path('addExhibit2Template/', createTemplate.addExhibit2Template, name="addExhibit2Template"),
     path('editExhibitTemplate/<str:pk>/', createTemplate.editExhibitTemplate, name="editExhibitTemplate"),
@@ -42,6 +43,14 @@ urlpatterns = [
     # clone
     path('cloneOptions/<str:prodCode>/', cloneRB.cloneOptions, name="cloneOptions"),
     path('cloneRB/', cloneRB.cloneRB, name="cloneRB"),
-    path('selectExhibitOptions/', createTemplate.selectExhibitList, name="selectExhibitOptions"),
+    path('selectFromAllExhibitsList/<str:id>', createTemplate.selectFromAllExhibitsList, name="selectFromAllExhibitsList"),
+    path('selectFromExistingRbExhibitsList/<str:id>', createTemplate.selectFromExistingRbExhibitsList, name="selectFromExistingRbExhibitsList"),
     path('previewExhibit/<int:Exhibit_id>/', createTemplate.previewExhibit, name="previewExhibit"),
+
+    # For the FilteredSelectMultiple widget from admin
+    re_path(r'^jsi18n/$', django_views.i18n.JavaScriptCatalog.as_view(), name='jsi18n'),
+
+    # Template (checkpoint started building flows)
+    path('template/', template.template, name="template"),
+    path('projectIdAndDateInput/', template.projectIdAndDateInput, name="projectIdAndDateInput"),
 ]
