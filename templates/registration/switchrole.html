@@ -1,0 +1,14 @@
+{% extends 'base.html'%}
+{% load static %}
+
+{% load crispy_forms_tags %}
+{% block title %} Switch Role{% endblock %}
+{% block content %}
+<div  class="center-div">
+    <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Switch Group</button>
+</form>
+</div>
+{% endblock %}
