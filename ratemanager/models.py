@@ -126,6 +126,13 @@ class RatebookMetadata(models.Model):
         null=False,
         default=None
         )
+    Environment = models.CharField(
+        max_length=50,
+        default='Rate Development',
+        null=True
+    )
+    is_deleted = models.BooleanField(null=True, default=False)
+    on_hold = models.BooleanField(null=True, default=False)
 
     def save(self, *args, **kwargs):
         self.RatebookName = str(self.State) + '_' + str(self.ProductCode)
