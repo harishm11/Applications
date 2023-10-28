@@ -6,7 +6,12 @@ register = template.Library()
 @register.filter
 def has_permission(perms, app_and_permission):
     app, permission = app_and_permission.split('.')
-    group = Group.objects.get(name=perms.user.groups.all()[0])
+
+    if perms.user.groups.exists():
+        group = Group.objects.get(name=perms.user.groups.first())
+    else:
+        # Handle the case where the user is not authenticated or not part of any group
+        group = None
     group_permissions = group.permissions.all()
     for group_permission in group_permissions:
         if group_permission.codename == permission:
