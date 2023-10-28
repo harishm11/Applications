@@ -9,5 +9,9 @@ class ProductCode(models.Model):
         LineOfBusiness, on_delete=models.CASCADE, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('ProductCd', 'ProductName', 'Lob',
+                          )
+
     def __str__(self):
         return self.ProductCd

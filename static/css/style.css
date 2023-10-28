@@ -104,3 +104,10 @@ a {
   margin-right: 10px;
 }
 
+
+.mesage_text{
+  color: red;
+          
+          display: inline-block;
+          text-align: center;
+}

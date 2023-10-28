@@ -6,6 +6,7 @@
 
 
 {% block maincontent %} 
+ {% if request.user.is_authenticated %}
 <ul>
   {% for table in tables %}
   <li class="nav-link">
@@ -13,5 +14,5 @@
   </li>
   {% endfor %}
 </ul>
-    
+  {% endif %}     
 {% endblock %}

@@ -3,9 +3,10 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.views import *
-
+from myproj.utils import handleformerror
 
 def login_view(request):
+    context = {}
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -13,10 +14,11 @@ def login_view(request):
             login(request, user)
             # request.session['selected_group_id'] = 1
             return redirect('/')
+        else:
+            context['message'] = handleformerror(form)
     else:
         form = AuthenticationForm(request)
-    context = {
-        "form": form}
+    context['form'] = form
     return render(request, "registration/login.html", context)
 
 
@@ -46,9 +48,14 @@ class PasswordResetByUser(PasswordChangeView):
 
 
 def register_view(request):
+    context = {}
     form = UserCreationForm(request.POST or None)
     if form.is_valid():
         form.save()
         return redirect('/login')
-    context = {"form": form}
+    else:
+        context['message'] = handleformerror(form)
+    context['form'] = form
     return render(request, "registration/register.html", context)
+
+

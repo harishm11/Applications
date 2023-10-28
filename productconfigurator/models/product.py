@@ -39,5 +39,9 @@ class Product(models.Model):
     discounts = models.ManyToManyField(Discount)
     surcharges = models.ManyToManyField(Surcharge)
 
+    class Meta:
+        unique_together = ('StateCode', 'Carrier', 'UwCompany',
+                           'LineOfBusiness', 'PolicyType', 'PolicySubType', 'Policyterm')
+
     def __str__(self):
         return f"{self.StateCode} {self.Carrier} {self.UwCompany} {self.LineOfBusiness} {self.PolicyType} {self.PolicySubType}"
