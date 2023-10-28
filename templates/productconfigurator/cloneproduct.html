@@ -17,7 +17,7 @@
 
     <form method="POST" >
       {% csrf_token %}
-      
+
       <table class="table table-responsive table-borderd">
         {% for field in product_form %}
           <tr>
@@ -28,8 +28,7 @@
       </table>
       <button class="btn btn-secondary" type="submit">Clone Product</button>
     </form>
-    {%else%}
-Please Login to access this 
+
   {% endif %}
 {% endblock %}
 

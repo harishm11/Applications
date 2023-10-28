@@ -6,23 +6,19 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.apps import apps
 from django.db.models import Q
 from django.shortcuts import render,  redirect
-from django.forms import modelform_factory
+from django.forms import ValidationError
 from ..models.product import Product
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from myproj.utils import handleformerror
 
 from productconfigurator.forms import *
+
 
 coverage = apps.get_model('systemtables', 'coverage')
 discount = apps.get_model('systemtables', 'discount')
 surcharge = apps.get_model('systemtables', 'surcharge')
 options = ['createproduct', 'filterproduct']
 appLabel = 'productconfigurator'
-# def productconfigurator(request):
-#     options = []
-#     for model in apps.get_app_config('productconfigurator').get_models():
-#         options.append(model.__name__)
-#     context = {'options': options, 'appLabel': 'productconfigurator'}
-#     return render(request, 'productconfigurator/home.html', context)
 
 
 def productconfigurator(request):
@@ -41,7 +37,8 @@ def getModelNames(appLabel):
 
 def createProduct(request):
     try:
-
+        context = {}
+        error_msg = ''
         product_created = False
         created_product = None
 
@@ -55,6 +52,8 @@ def createProduct(request):
                 created_product = product
 
                 return redirect('filterproduct')
+            else:
+                error_msg = handleformerror(product_form)
 
         else:
             product_form = ProductForm()
@@ -62,7 +61,9 @@ def createProduct(request):
                    'product_form': product_form,
                    'product_created': product_created,
                    'created_product': created_product,
-                   'title': 'Create Product'}
+                   'title': 'Create Product',
+                   'message': error_msg
+                   }
 
         return render(request, 'productconfigurator/createproduct.html', context)
     except Exception as err:
@@ -71,7 +72,8 @@ def createProduct(request):
 
 def updateProduct(request, product_id):
     try:
-
+        context = {}
+        error_msg = ''
         product_updated = False
         updated_product = None
         selected_coverages = []
@@ -90,8 +92,8 @@ def updateProduct(request, product_id):
 
                 return redirect('filterproduct')
             else:
-                redirect(
-                    request, 'error.html', {'message': 'Form Error'})
+                updated_product = product
+                error_msg = handleformerror(product_form)
 
         else:
             product_form = ProductForm(
@@ -102,7 +104,9 @@ def updateProduct(request, product_id):
                    'product_form': product_form,
                    'product_updated': product_updated,
                    'updated_product': updated_product,
-                   'title': 'Update Product'}
+                   'title': 'Update Product',
+                   'message': error_msg
+                   }
 
         return render(request, 'productconfigurator/updateproduct.html', context
                       )
@@ -111,12 +115,14 @@ def updateProduct(request, product_id):
 
 
 def filterProduct(request):
-
+    context = {}
+    error_msg = ''
     Model = Product
     model_fields = [field.name for field in Model._meta.get_fields(
         include_hidden=False) if field.name not in ['coverages', 'discounts', 'surcharges', 'id', 'CreateTime', 'UpdateTime',
                                                     'OpenBookInd', 'OpenBookStartDate', 'CloseBookEndDate']]
     form = ProductFilterForm(request.GET or None)
+
     objectsall = []
     objectsall = Model.objects.none()
     if form.is_valid():
@@ -124,7 +130,8 @@ def filterProduct(request):
                          v in form.cleaned_data.items() if v is not None and v != ''}
 
         objectsall = Product.objects.filter(**filter_params)
-
+    else:
+        error_msg = handleformerror(form)
     paginator = Paginator(objectsall, 5)
 
     page = request.GET.get('page')
@@ -145,6 +152,7 @@ def filterProduct(request):
         'coverages': 'CoverageName',
         'discounts': 'DiscountName',
         'surcharges': 'SurchargeName',
+        'message': error_msg
 
     }
     return render(request, 'productconfigurator/filterproduct.html', context)
@@ -152,8 +160,9 @@ def filterProduct(request):
 
 def viewProduct(request, product_id):
     try:
-
+        context = {}
         Model = Product
+
         model_fields = [
             field.name for field in Model._meta.get_fields(include_hidden=False)]
         object = get_object_or_404(Product, pk=product_id)
@@ -166,6 +175,7 @@ def viewProduct(request, product_id):
             'coverages': 'CoverageName',
             'discounts': 'DiscountName',
             'surcharges': 'SurchargeName',
+
         }
         return render(request, 'productconfigurator/viewproduct.html', context)
     except Exception as err:
@@ -184,7 +194,8 @@ def deleteProduct(request, product_id):
         return render(request, 'productconfigurator/deleteproduct.html', {
             'options': options,
             'product': product,
-            'title': 'Delete Product'
+            'title': 'Delete Product',
+
         })
     except Exception as err:
         return render(request, 'error.html', {'message': err})
@@ -192,15 +203,19 @@ def deleteProduct(request, product_id):
 
 def cloneProduct(request, product_id):
     try:
-
+        context = {}
+        error_msg = ''
         product = get_object_or_404(Product, pk=product_id)
 
         if request.method == 'POST':
             product.pk = None  # Create a new object with a new primary key
             product_form = ProductForm(request.POST, instance=product)
+
             if product_form.is_valid():
                 cloned_product = product_form.save()
                 return redirect('filterproduct')
+            else:
+                error_msg = handleformerror(product_form)
 
         product_form = ProductForm(instance=product)
         context = {
@@ -208,7 +223,9 @@ def cloneProduct(request, product_id):
             'appLabel': appLabel,
             'product_form': product_form,
             'product': product,
-            'title': 'Clone Product'
+            'title': 'Clone Product',
+            'message': error_msg
+
         }
         return render(request, 'productconfigurator/cloneproduct.html', context
 

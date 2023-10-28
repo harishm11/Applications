@@ -16,5 +16,9 @@ class CoverageOptions(models.Model):
     Amount3 = models.CharField(max_length=50, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('CoverageName', 'CoverageTerm', 'OptionValue',
+                           'OptionDesc', 'Amount1', 'Amount2', 'Amount3')
+
     def __str__(self):
         return f"{self.Coverage.CoverageName} - {self.OptionValue}"

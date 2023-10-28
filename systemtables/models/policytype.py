@@ -8,5 +8,8 @@ class PolicyType(models.Model):
         LineOfBusiness, on_delete=models.CASCADE, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('PolicyTypeName', 'Lob',)
+
     def __str__(self):
         return self.PolicyTypeName

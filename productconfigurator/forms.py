@@ -2,7 +2,8 @@
 from django import forms
 from django.apps import apps
 from django.core.management import call_command
-
+from django.shortcuts import render,  redirect
+from django.core.exceptions import ValidationError
 
 try:
     uwcompany = apps.get_model('systemtables', 'uwcompany')
@@ -41,19 +42,37 @@ class ProductForm(forms.ModelForm):
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
+    OpenBookStartDate = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    CloseBookEndDate = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    EffectiveDate = forms.DateField(widget=forms.DateInput(
+        attrs={'type': 'date'}), required=True)
+    ExpiryDate = forms.DateField(widget=forms.DateInput(
+        attrs={'type': 'date'}), required=False)
+
     class Meta:
         model = product
-        # exclude = ['coverages', 'discounts', 'surcharges']
-        fields = '__all__'
-        widgets = {
-            'coverages': forms.CheckboxSelectMultiple,
-            'discounts': forms.CheckboxSelectMultiple,
-            'surcharges': forms.CheckboxSelectMultiple,
-            'OpenBookStartDate': forms.DateInput(attrs={'type': 'date'}),
-            'CloseBookEndDate': forms.DateInput(attrs={'type': 'date'}),
-            'EffectiveDate': forms.DateInput(attrs={'type': 'date'}),
-            'ExpiryDate': forms.DateInput(attrs={'type': 'date'}),
-        }
+
+        exclude = ('coverages', 'discounts', 'surcharges',)
+
+    # def combination_exists(self):
+    #     cleaned_data = super().clean()
+    #     state_code = cleaned_data.get('StateCode')
+    #     carrier = cleaned_data.get('Carrier')
+    #     uw_company = cleaned_data.get('UwCompany')
+    #     line_of_business = cleaned_data.get('LineOfBusiness')
+    #     policy_type = cleaned_data.get('PolicyType')
+    #     policy_sub_type = cleaned_data.get('PolicySubType')
+    #     policy_term = cleaned_data.get('Policyterm')
+    #     product_code = cleaned_data.get('ProductCode')
+    #     # Check if the combination already exists
+    #     if product.objects.filter(StateCode=state_code, Carrier=carrier, UwCompany=uw_company,
+    #                               LineOfBusiness=line_of_business, PolicyType=policy_type,
+    #                               PolicySubType=policy_sub_type, Policyterm=policy_term, ProductCode=product_code).exists():
+    #         return 'Product already exists. Please enter a unique Product.'
+
+    #     return ""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -160,5 +179,3 @@ class ProductFilterForm(forms.Form):
             Lob_id=lob_id) if lob_id else productcode.objects.none()
         self.fields['PolicyType'].queryset = policytype.objects.filter(
             Lob_id=lob_id) if lob_id else policytype.objects.none()
-
-

@@ -8,5 +8,9 @@ class Uwcompany(models.Model):
         Carrier, on_delete=models.CASCADE, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('CompanyName', 'Carrier',
+                           )
+
     def __str__(self):
         return self.CompanyName

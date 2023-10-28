@@ -136,7 +136,7 @@ def projectIdAndDateInput(request):
                 return redirect('ratemanager:cloneOptions', prodCode=request.session['TemplateFormData']['ProductCode'])
             elif request.POST['CreateFrom'] == 'fromScratch':
                 request.session['CreatedTemplateMetadata'] = obj.id
-                return redirect('/ratemanager/selectExhibitOptions/?showAllExhibits=True')
+                return redirect('ratemanager:selectFromAllExhibitsList', id=obj.id)
 
         else:
             messages.add_message(request, messages.ERROR, 'Invalid form, Try again.')

@@ -9,5 +9,9 @@ class State(models.Model):
     ZipMax = models.CharField(max_length=5)
     EnableInd = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('StateID', 'StateName', 'StateCode',
+                           )
+
     def __str__(self):
         return f"{self.StateCode}"

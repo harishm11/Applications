@@ -4,7 +4,7 @@ from django.utils.decorators import method_decorator
 from ..forms import *
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
+from myproj.utils import handleformerror
 # from ..decorators import has_permission
 
 
@@ -49,6 +49,9 @@ def switch_group(request):
             request.session['selected_group_id'] = selected_group.id
             # Redirect to the home page or any other page
             return redirect('home')
+        else:
+            context['message'] = handleformerror(form)
+
     else:
         form = SwitchGroupForm(request.user)
 
@@ -58,14 +61,20 @@ def switch_group(request):
 
 
 def feedbackview(request):
+    context = {}
     if request.method == "POST":
+
         form = feedbackpageform(request.POST)
         if form.is_valid():
             form.instance.Username = request.user
             form.save()
             return redirect('/')
+        else:
+            context['message'] = handleformerror(form)
     else:
         form = feedbackpageform()
-    context = {
-        "form": form}
+    context['form'] = form
     return render(request, "feedback.html", context)
+
+
+
