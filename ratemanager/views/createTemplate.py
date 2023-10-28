@@ -96,7 +96,6 @@ def selectFromAllExhibitsList(request, id):
         choices = RatingExhibits.objects.all()
         form.fields['toAddExhibits'].queryset = choices
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
-        print(initial)
         form.fields['toAddExhibits'].initial = initial
 
         return render(request, 'ratemanager/selectExhibitsOptions.html',
