@@ -20,4 +20,4 @@ class Coverage(models.Model):
                            'CoverageCode', 'CoverageType', 'CoverageSequence', 'CoverageLevel')
 
     def __str__(self):
-        return self.CoverageName
+        return f"{self.CoverageName}"

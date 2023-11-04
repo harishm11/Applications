@@ -14,4 +14,4 @@ class State(models.Model):
                            )
 
     def __str__(self):
-        return f"{self.StateCode}"
+        return self.StateCode
