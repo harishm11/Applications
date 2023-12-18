@@ -114,7 +114,12 @@ def selectFromAllExhibitsList(request, id):
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:
-                RatebookTemplate.objects.get_or_create(RatebookID=id.split('_')[0], RatebookExhibit=i)
+                newObj, _ = RatebookTemplate.objects.get_or_create(RatebookID=id.split('_')[0], RatebookExhibit=i)
+                sourceExhibit = RatebookTemplate.objects.all().filter(RatebookExhibit=i).first()
+                for i in sourceExhibit.ExhibitVariables.all():
+                    newObj.ExhibitVariables.add(i)
+                for i in sourceExhibit.ExhibitCoverages.all():
+                    newObj.ExhibitCoverages.add(i)
         return redirect('ratemanager:listExhibits', id)
 
 
