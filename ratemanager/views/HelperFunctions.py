@@ -3,7 +3,7 @@ import re
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
-from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatingCoverages, RatebookTemplate
+from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatebookTemplate
 from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
@@ -14,6 +14,9 @@ import sqlalchemy as sa
 from myproj.settings import DATABASES
 from difflib import get_close_matches
 import ratemanager.views.configs as configs
+from django.apps import apps
+
+coverage = apps.get_model('systemtables', 'coverage')
 
 SIDEBAR_OPTIONS = ["template", "createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
@@ -145,7 +148,8 @@ def handle_manually(tabStruct, sheetname, df_in):
     """
     if sheetname == 'DeductiblesbySymbol':
         df_in = df_in.melt(id_vars=tabStruct['ratevars'])
-        df_in.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+        df_in.rename(columns={'variable': 'Coverage',
+                     'value': 'Factor'}, inplace=True)
 
         df_in['Symbol1'] = pd.NA
         df_in['Symbol2'] = pd.NA
@@ -170,7 +174,8 @@ def handle_manually(tabStruct, sheetname, df_in):
         return df_in
     if sheetname == 'DriverTrainingDiscount':
         newdf = df_in.melt(id_vars=tabStruct['ratevars'])
-        newdf.rename(columns={'variable': 'Coverage', 'value': 'Factor'}, inplace=True)
+        newdf.rename(columns={'variable': 'Coverage',
+                     'value': 'Factor'}, inplace=True)
         for index, val in newdf['Description'].items():
             if any([x.isnumeric() for x in val.split()]):
                 cleanedVal = [x for x in val.split() if x.isnumeric()]
@@ -184,12 +189,14 @@ def handle_manually(tabStruct, sheetname, df_in):
         newdf.sort_values(by=['Description', 'Coverage'], inplace=True)
         newdf = create_rate_vars_cols(newdf, tabStruct['ratevars'])
         newdf['Exhibit'] = sheetname
-        newdf.loc[newdf['RatingVarValue1'] == 'Senior Defensive', 'Exhibit'] = 'SeniorDefensive'
+        newdf.loc[newdf['RatingVarValue1'] ==
+                  'Senior Defensive', 'Exhibit'] = 'SeniorDefensive'
         return newdf
 
     if sheetname == 'UMPDC2BaseRatesbyDeductible':
         newdf = df_in.melt(id_vars='Deductible')
-        newdf.rename(columns={'variable': 'AffinityGroup', 'value': 'Factor'}, inplace=True)
+        newdf.rename(columns={'variable': 'AffinityGroup',
+                     'value': 'Factor'}, inplace=True)
         newdf = create_rate_vars_cols(newdf, ['Deductible', 'AffinityGroup'])
         newdf['Exhibit'] = sheetname
         newdf['Coverage'] = 'UMPD'
@@ -197,7 +204,8 @@ def handle_manually(tabStruct, sheetname, df_in):
 
     if sheetname in ['CollisionRatesTrailers', 'CCDRatesTrailers', 'CollisionRatesCampers', 'CCDRatesCampers']:
         df_in = df_in.melt(id_vars=df_in.columns[0:2])
-        df_in.rename(columns={'variable': 'Deductible', 'value': 'Factor'}, inplace=True)
+        df_in.rename(columns={'variable': 'Deductible',
+                     'value': 'Factor'}, inplace=True)
 
         def clean(string):
             if isinstance(string, str):
@@ -228,16 +236,21 @@ def handle_manually(tabStruct, sheetname, df_in):
         keySubstrings = ['FREQ BAND', 'SEV BAND']
 
         def filterAndTransform(keySubstring, df):
-            filtered_cols = ['ZIP CODE'] + [col for col in df.columns if keySubstring in col]
+            filtered_cols = ['ZIP CODE'] + \
+                [col for col in df.columns if keySubstring in col]
             filtered = df[filtered_cols]
-            new_cols = [col.replace(keySubstring, '').strip() for col in filtered.columns]
+            new_cols = [col.replace(keySubstring, '').strip()
+                        for col in filtered.columns]
             filtered.columns = new_cols
-            filtered = filtered.melt(id_vars=['ZIP CODE'], value_vars=filtered.columns[1:])
-            filtered.rename(columns={'variable': 'Coverage', 'value': keySubstring}, inplace=True)
+            filtered = filtered.melt(
+                id_vars=['ZIP CODE'], value_vars=filtered.columns[1:])
+            filtered.rename(
+                columns={'variable': 'Coverage', 'value': keySubstring}, inplace=True)
             return filtered
 
         to_joins = [filterAndTransform(i, df=df_in) for i in keySubstrings]
-        merged = pd.merge(to_joins[0], to_joins[1], on=['ZIP CODE', 'Coverage'])
+        merged = pd.merge(to_joins[0], to_joins[1],
+                          on=['ZIP CODE', 'Coverage'])
         merged['Exhibit'] = sheetname
         return create_rate_vars_cols(merged, ['ZIP CODE', 'FREQ BAND', 'SEV BAND'])
 
@@ -449,14 +462,17 @@ def uploadFile(request):
         returns the file path url. '''
     # save and get uploaded file path
     upfile = request.FILES.get("file")
+    # print(BASE_DIR)
     root = os.path.join(BASE_DIR, "uploads")
     path = os.path.abspath(os.path.join(
         root, str(upfile.name.replace(" ", ""))))
+    # print(path)
     fileexists = False
     if not fileexists:
         filstg = FileSystemStorage(base_url=str(BASE_DIR))
         upldfl = filstg.save(path, upfile)
-        upldfl_url = filstg.url(upldfl)
+        # upldfl_url = filstg.url(upldfl)
+        upldfl_url = os.path.join(filstg.location, upldfl)
     return upldfl_url
 
 
@@ -841,7 +857,8 @@ def updateRatingVars(uploadURL, TemplateID):
         # iterate over the columns and create RatingVar objects if not already exists
         for _, col in enumerate(df.columns):
             if tabStruct['ratevars'] is not None and col in tabStruct['ratevars']:
-                RatingVarObj, _ = RatingVariables.objects.get_or_create(RatingVarName=col)
+                RatingVarObj, _ = RatingVariables.objects.get_or_create(
+                    RatingVarName=col)
                 RatingVarObj.DisplayName = col
                 RatingVarObj.RatingVarType = guessed_dtypes_df.dtypes[col]
                 RatingVarObj.save()
@@ -872,7 +889,7 @@ def updateRatingExhibits(tdf, rbid, uploadURL):
         df = tdf[tdf["Exhibit"] == i]
         TempRec.save()
         for i in df['Coverage'].unique().tolist():
-            cov, _ = RatingCoverages.objects.get_or_create(CoverageCode=i)
+            cov, _ = coverage.objects.get_or_create(CoverageCode=i)
             # add the Coverage to the current Template
             TempRec.ExhibitCoverages.add(cov)
 

@@ -1,0 +1,52 @@
+{% extends 'body.html' %} {% load static %} {% load product_tags %} {% load options_tag %} {% load related_objects %}
+{% block title %} {{ title}}{% endblock %} 
+{% load crispy_forms_tags%} 
+{% block sidebarcontent %} 
+{% include 'productconfigurator/sidebar.html' %} 
+{%endblock %} 
+{% block maincontent%} 
+{% if request.user.is_authenticated %}
+   
+
+<div class="border p-4">
+{% if object %}
+
+   <table class="table table-responsive table-borderd">
+      <tbody>
+         {% for field in model_fields %}
+            {% if field != 'id' and field != 'CreateTime' and field != 'UpdateTime' %}
+               <tr>
+                  <td><b>{{ field | capfirst }}</b></td>
+
+                     <td>
+                        {% if field == 'coverages' or field == 'discounts' or field == 'surcharges' %}
+                           {% with related_objects=object|get_attribute:field %}
+                              {% for related_object in related_objects.all %}
+                                 {{ related_object }}<br>
+                              {% empty %}
+                                 No {{ field }} selected
+                              {% endfor %}
+                           {% endwith %}
+                        {% else %}
+                           {{ object|get_attribute:field }}
+                        {% endif %}
+                     </td>
+
+               </tr>
+            {% endif %}
+         {% endfor %}
+      </tbody>
+   </table>
+  
+{% else %}
+   <p>No data available.</p>
+{% endif %}
+</div>
+
+
+
+
+
+</div>
+
+{% endif %} {% endblock %} {% block js%} {% endblock js%}

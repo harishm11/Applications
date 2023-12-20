@@ -1,7 +1,11 @@
 from django.db import models
 from systemtables.models import \
     state, carrier, lineofbusiness, \
-    uwcompany, productcode, policytype, policysubtype
+    uwcompany, productcode, policytype, policysubtype, coverage
+
+# from django.apps import apps
+
+# coverage = apps.get_model('systemtables', 'coverage')
 
 
 class RatebookMetadata(models.Model):
@@ -12,120 +16,120 @@ class RatebookMetadata(models.Model):
         null=False,
         primary_key=True,
         editable=False
-        )
+    )
     RatebookID = models.CharField(
         max_length=50,
         blank=True,
         null=False,
         default=None
-        )
+    )
     Carrier = models.ForeignKey(
         carrier.Carrier,
         on_delete=models.CASCADE,
         default=None
-        )
+    )
     State = models.ForeignKey(
         state.State,
         on_delete=models.CASCADE,
         default=None
-        )
+    )
     LineofBusiness = models.ForeignKey(
         lineofbusiness.LineOfBusiness,
         on_delete=models.CASCADE,
         default=None
-        )
+    )
     UWCompany = models.ForeignKey(
         uwcompany.Uwcompany,
         on_delete=models.CASCADE,
         default=None
-        )
+    )
     PolicyType = models.ForeignKey(
         policytype.PolicyType,
         on_delete=models.CASCADE,
         default=None
-        )
+    )
     PolicySubType = models.ForeignKey(
         policysubtype.PolicySubType,
         on_delete=models.CASCADE,
         default=None
-        )
+    )
     ProductCode = models.ForeignKey(
         productcode.ProductCode,
         on_delete=models.CASCADE,
         default=None
-        )
+    )
     ProjectID = models.CharField(
         max_length=50,
         blank=True,
         null=False,
         default=None
-        )
+    )
     ProjectDescription = models.CharField(
         max_length=500,
         blank=True,
         null=True,
         default=None
-        )
+    )
     RatebookVersion = models.FloatField(
         null=False,
         default=None
-        )
+    )
     RatebookName = models.CharField(
         max_length=100,
         null=False,
         default=None
-        )
+    )
     RatebookRevisionType = models.CharField(
         max_length=50,
         null=False,
         default=None
-        )
+    )
     RatebookStatusType = models.CharField(
         max_length=50,
         null=False,
         default=None
-        )
+    )
     RatebookChangeType = models.CharField(
         max_length=50,
         null=False,
         default=None
-        )
+    )
     NewBusinessEffectiveDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     NewBusinessExpiryDate = models.DateField(
         null=True,
         default=None
-        )
+    )
     RenewalEffectiveDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     RenewalExpiryDate = models.DateField(
         null=True,
         default=None
-        )
+    )
     ActivationDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     ActivationTime = models.TimeField(
         null=False,
         default=None
-        )
+    )
     MigrationDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     MigrationTime = models.TimeField(
         null=False,
         default=None
-        )
+    )
     CreationDateTime = models.DateTimeField(
         null=False,
         default=None
-        )
+    )
     Environment = models.CharField(
         max_length=50,
         default='Rate Development',
@@ -144,17 +148,17 @@ class RatingFactors (models.Model):
     Ratebook = models.ForeignKey(
         RatebookMetadata,
         on_delete=models.CASCADE
-        )
+    )
     RatebookID = models.CharField(
         max_length=50,
         blank=True,
         null=False,
         default=None
-        )
+    )
     RatebookVersion = models.FloatField(
         null=False,
         default=None
-        )
+    )
     TableCategory = models.CharField(max_length=100, null=False, default=None)
     Coverage = models.CharField(max_length=100, null=False, default=None)
     Exhibit = models.CharField(max_length=100, null=False, default=None)
@@ -179,53 +183,53 @@ class RatingFactors (models.Model):
     NewBusinessEffectiveDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     NewBusinessExpiryDate = models.DateField(
         null=True,
         default=None
-        )
+    )
     RenewalEffectiveDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     RenewalExpiryDate = models.DateField(
         null=True,
         default=None
-        )
+    )
     ActivationDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     ActivationTime = models.TimeField(
         null=False,
         default=None
-        )
+    )
     MigrationDate = models.DateField(
         null=False,
         default=None
-        )
+    )
     MigrationTime = models.TimeField(
         null=False,
         default=None
-        )
+    )
     CreationDateTime = models.DateTimeField(
         null=False,
         default=None
-        )
+    )
     RecordStatus = models.CharField(
         max_length=50,
         blank=True,
         null=False,
         default=None
-        )
+    )
 
 
-class RatingCoverages(models.Model):
-    CoverageCode = models.CharField(max_length=200, null=True, blank=True, default=None)
-    DisplayName = models.CharField(max_length=200, null=True, default=None)
+# class RatingCoverages(models.Model):
+#     CoverageCode = models.CharField(max_length=200, null=True, blank=True, default=None)
+#     DisplayName = models.CharField(max_length=200, null=True, default=None)
 
-    def __str__(self) -> str:
-        return self.CoverageCode
+#     def __str__(self) -> str:
+#         return self.CoverageCode
 
 
 class RatingExhibits(models.Model):
@@ -257,8 +261,9 @@ class RatebookTemplate(models.Model):
         null=False,
         default=None,
         editable=False
-        )
+    )
 
-    RatebookExhibit = models.ForeignKey(RatingExhibits, on_delete=models.DO_NOTHING)
+    RatebookExhibit = models.ForeignKey(
+        RatingExhibits, on_delete=models.DO_NOTHING)
     ExhibitVariables = models.ManyToManyField(RatingVariables)
-    ExhibitCoverages = models.ManyToManyField(RatingCoverages)
+    ExhibitCoverages = models.ManyToManyField(coverage.Coverage)

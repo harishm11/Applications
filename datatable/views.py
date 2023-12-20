@@ -13,6 +13,7 @@ from django.forms.utils import ErrorList
 from authenticate.decorators import permission_required
 from myproj.utils import handleformerror
 
+
 def getModelNames(appLabel):
     options = []
     for model in apps.get_app_config(appLabel).get_models():
@@ -264,9 +265,15 @@ def importCsv(request, appLabel, modelName):
                         if row[i] == 'FFPA':
                             # Get the value from the CSV file
                             product_code_value = row[i]
-                            product_code_instance = productcode.objects.get(
+                            product_code_instance = coverage.objects.get(
                                 ProductCd=product_code_value)
                             setattr(obj, 'ProductCd', product_code_instance)
+                        if modelName == 'CoverageOptions' and field == 'CoverageName':
+                            # Get the value from the CSV file
+                            coverage_name_value = row[i]
+                            coverage_instance = coverage.objects.get(
+                                CoverageName=coverage_name_value)
+                            setattr(obj, 'CoverageName', coverage_instance)
                         else:
                             setattr(obj, field, row[i])
                 obj.save()
@@ -283,5 +290,3 @@ def importCsv(request, appLabel, modelName):
 
     except Exception as err:
         return render(request, 'error.html', {'message': err})
-
-

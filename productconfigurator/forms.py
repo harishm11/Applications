@@ -4,6 +4,8 @@ from django.apps import apps
 from django.core.management import call_command
 from django.shortcuts import render,  redirect
 from django.core.exceptions import ValidationError
+from django.forms import inlineformset_factory
+from .models.product import ProductCoverage, ProductCoverageOption
 
 try:
     uwcompany = apps.get_model('systemtables', 'uwcompany')
@@ -17,6 +19,8 @@ try:
     productcode = apps.get_model('systemtables', 'productcode')
     policyterm = apps.get_model('systemtables', 'policyterm')
     coverage = apps.get_model('systemtables', 'coverage')
+    coverageoptions = apps.get_model('systemtables', 'coverageoptions')
+
 
 except LookupError:
     None
@@ -42,10 +46,10 @@ class ProductForm(forms.ModelForm):
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
 
-    OpenBookStartDate = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}), required=True)
-    CloseBookEndDate = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    # OpenBookStartDate = forms.DateField(
+    #     widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    # CloseBookEndDate = forms.DateField(
+    #     widget=forms.DateInput(attrs={'type': 'date'}), required=True)
     EffectiveDate = forms.DateField(widget=forms.DateInput(
         attrs={'type': 'date'}), required=True)
     ExpiryDate = forms.DateField(widget=forms.DateInput(
@@ -55,24 +59,6 @@ class ProductForm(forms.ModelForm):
         model = product
 
         exclude = ('coverages', 'discounts', 'surcharges',)
-
-    # def combination_exists(self):
-    #     cleaned_data = super().clean()
-    #     state_code = cleaned_data.get('StateCode')
-    #     carrier = cleaned_data.get('Carrier')
-    #     uw_company = cleaned_data.get('UwCompany')
-    #     line_of_business = cleaned_data.get('LineOfBusiness')
-    #     policy_type = cleaned_data.get('PolicyType')
-    #     policy_sub_type = cleaned_data.get('PolicySubType')
-    #     policy_term = cleaned_data.get('Policyterm')
-    #     product_code = cleaned_data.get('ProductCode')
-    #     # Check if the combination already exists
-    #     if product.objects.filter(StateCode=state_code, Carrier=carrier, UwCompany=uw_company,
-    #                               LineOfBusiness=line_of_business, PolicyType=policy_type,
-    #                               PolicySubType=policy_sub_type, Policyterm=policy_term, ProductCode=product_code).exists():
-    #         return 'Product already exists. Please enter a unique Product.'
-
-    #     return ""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -102,14 +88,6 @@ class ProductForm(forms.ModelForm):
             Lob_id=lob_id) if lob_id else policytype.objects.none()
 
 
-class PolicySubTypeForm(forms.ModelForm):
-    PolicyType = forms.ModelChoiceField(queryset=policytype.objects.all())
-
-    class Meta:
-        model = policysubtype
-        fields = '__all__'
-
-
 class ProductFilterForm(forms.Form):
     Carrier = forms.ModelChoiceField(
         queryset=carrier.objects.all(),
@@ -123,12 +101,6 @@ class ProductFilterForm(forms.Form):
         label='StateCode',
         widget=forms.Select(attrs={'onchange': 'this.form.submit();'})
     )
-
-    # UwCompany = forms.ModelChoiceField(
-    #     queryset=uwcompany.objects.all(),
-    #     required=False,
-    #     label='CompanyName'
-    # )
 
     LineOfBusiness = forms.ModelChoiceField(
         queryset=lineofbusiness.objects.all(),
@@ -179,3 +151,60 @@ class ProductFilterForm(forms.Form):
             Lob_id=lob_id) if lob_id else productcode.objects.none()
         self.fields['PolicyType'].queryset = policytype.objects.filter(
             Lob_id=lob_id) if lob_id else policytype.objects.none()
+
+
+class PolicySubTypeForm(forms.ModelForm):
+    PolicyType = forms.ModelChoiceField(queryset=policytype.objects.all())
+
+    class Meta:
+        model = policysubtype
+        fields = '__all__'
+
+
+class ProductCoverageForm(forms.ModelForm):
+
+    coverages = forms.ModelMultipleChoiceField(
+        queryset=coverage.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+
+    )
+
+    class Meta:
+        model = ProductCoverage
+        exclude = ['product', 'CoverageName', 'EffectiveDate', 'ExpiryDate']
+        widgets = {
+            'product': forms.HiddenInput(),
+            'CoverageName': forms.HiddenInput(),
+            'EffectiveDate': forms.HiddenInput(),
+            'ExpiryDate': forms.HiddenInput(),
+
+        }
+
+
+class ProductCoverageOptionForm(forms.Form):
+    def __init__(self, *args, options=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if options:
+            self.fields['selected_options'] = forms.MultipleChoiceField(
+                choices=options,
+                widget=forms.CheckboxSelectMultiple,
+            )
+
+    # class Meta:
+    #     model = ProductCoverageOption
+    #     exclude = ['ProductCoverage', 'OptionValue',
+    #                'EffectiveDate', 'ExpiryDate']
+    #     widgets = {
+    #         'ProductCoverage': forms.HiddenInput(),
+    #         'OptionValue': forms.HiddenInput(),
+    #         'EffectiveDate': forms.HiddenInput(),
+    #         'ExpiryDate': forms.HiddenInput(),
+
+    #     }
+
+    # def __init__(self, *args, coverage_options=None, **kwargs):
+    #     super().__init__(*args, **kwargs)
+
+    #     if coverage_options:
+    #         self.fields['coverage_options'].queryset = coverage_options

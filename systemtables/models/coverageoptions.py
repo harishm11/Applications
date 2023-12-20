@@ -21,4 +21,4 @@ class CoverageOptions(models.Model):
                            'OptionDesc', 'Amount1', 'Amount2', 'Amount3')
 
     def __str__(self):
-        return f"{self.Coverage.CoverageName} - {self.OptionValue}"
+        return f"{self.CoverageName} {self.OptionValue}"
