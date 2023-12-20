@@ -92,7 +92,9 @@ def updateProduct(request, product_id):
                 product_updated = True
                 updated_product = product
 
-                return redirect('filterproduct')
+                request.session['productid'] = updated_product.id
+                request.session['view'] = 'update'
+                return redirect('createproductcoverage')
             else:
                 updated_product = product
                 error_msg = handleformerror(product_form)
@@ -222,14 +224,19 @@ def cloneProduct(request, product_id):
         context = {}
         error_msg = ''
         product = get_object_or_404(Product, pk=product_id)
-
+        # coverages = ProductCoverage.objects.filter(product=product)
         if request.method == 'POST':
-            product.pk = None  # Create a new object with a new primary key
+            product.pk = None
+
+            # Create a new object with a new primary key
             product_form = ProductForm(request.POST, instance=product)
 
             if product_form.is_valid():
                 cloned_product = product_form.save()
-                return redirect('filterproduct')
+                request.session['productid'] = cloned_product.id
+                request.session['view'] = 'clone'
+                return redirect('createproductcoverage')
+
             else:
                 error_msg = handleformerror(product_form)
 
@@ -251,6 +258,7 @@ def cloneProduct(request, product_id):
 
 
 def createProduct(request):
+    error_msg = ''
     if request.method == 'POST':
         product_form = ProductForm(request.POST)
 
@@ -259,13 +267,17 @@ def createProduct(request):
             created_product = product_form.save()
             request.session['productid'] = created_product.id
             return redirect('createproductcoverage')
+        else:
+            error_msg = handleformerror(product_form)
+
     else:
         product_form = ProductForm()
 
-    return render(request, 'productconfigurator/createProduct.html', {'product_form': product_form})
+    return render(request, 'productconfigurator/createProduct.html', {'product_form': product_form, 'message': error_msg, 'title': 'Create Product', })
 
 
 def createProductCoverage(request):
+    error_msg = ''
     if 'productid' not in request.session:
         return redirect('createproduct')
 
@@ -289,13 +301,35 @@ def createProductCoverage(request):
             request.session['selected_coverage_ids'] = selected_coverage_ids
 
             return redirect('createcoverageoptns')
+        else:
+            error_msg = handleformerror(coverage_form)
     else:
-        coverage_form = ProductCoverageForm()
+        if request.session['view'] == 'update' or request.session['view'] == 'clone':
+            product = Product.objects.get(id=request.session['productid'])
+            product_coverages = ProductCoverage.objects.filter(product=product)
 
-    return render(request, 'productconfigurator/createProductCoverage.html', {'coverage_form': coverage_form})
+            # Extract the coverages from the queryset
+            coverages = [pc.CoverageName for pc in product_coverages]
+
+            # Initial data for the form
+            initial_data = {
+                'coverages': coverages,
+                # You may need to adjust this based on your model
+                'EffectiveDate': product.EffectiveDate,
+                # You may need to adjust this based on your model
+                'ExpiryDate': product.ExpiryDate,
+            }
+
+            # Create the form and pass the initial data
+            coverage_form = ProductCoverageForm(initial=initial_data)
+        else:
+            coverage_form = ProductCoverageForm()
+
+    return render(request, 'productconfigurator/createProductCoverage.html', {'coverage_form': coverage_form, 'message': error_msg, 'title': 'Select Coverages'})
 
 
 def createCoverageOptns(request):
+    error_msg = ''
     if 'selected_coverage_ids' not in request.session:
         return redirect('createproductcoverage')
 
@@ -320,8 +354,6 @@ def createCoverageOptns(request):
                     cov = ProductCoverage.objects.get(
                         CoverageName_id=covid, product_id=product.id)
                     if coverage_name == cov.CoverageName.CoverageName:
-                        print(covid)
-                        print(option_value)
                         covoption = coverageoptions.objects.get(
                             CoverageName_id=covid, OptionValue=option_value)
 
@@ -336,11 +368,30 @@ def createCoverageOptns(request):
             del request.session['selected_coverage_ids']
 
             return redirect('filterproduct')
+        else:
+            error_msg = handleformerror(coverage_option_form)
     else:
 
-        # coverage_options_queryset = coverageoptions.objects.filter(
-        #     CoverageName__in=selected_coverage_ids)
-        coverage_option_form = ProductCoverageOptionForm(options=options_list
-                                                         )
+        if request.session['view'] == 'update' or request.session['view'] == 'clone':
+            product = Product.objects.get(id=request.session['productid'])
+            product_coverages = ProductCoverage.objects.filter(product=product)
+            sel_cov_options = ProductCoverageOption.objects.filter(
+                ProductCoverage__product=product
+            )
+
+            # Here you can access the OptionValue for each selected option
+            coverage_options = coverageoptions.objects.filter(
+                CoverageName__in=selected_coverage_ids)
+            options_list = [(f"{option.CoverageName} - {option.OptionValue}",
+                             f"{option.CoverageName} - {option.OptionValue}") for option in coverage_options]
+            coverage_option_form = ProductCoverageOptionForm(
+                options=options_list)
+            initial_selected_options = [option.OptionValue
+                                        for option in sel_cov_options]
+            # coverage_option_form.fields['selected_options'].choices = initial_selected_options
+
+        else:
+            coverage_option_form = ProductCoverageOptionForm(options=options_list
+                                                             )
     return render(request, 'productconfigurator/createCoverageOptns.html',
-                  {'coverage_option_form': coverage_option_form, 'selected_coverages': selected_coverages})
+                  {'coverage_option_form': coverage_option_form, 'selected_coverages': selected_coverages, 'message': error_msg, 'title': 'Select Coverage Options'})

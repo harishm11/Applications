@@ -16,13 +16,9 @@
             {% if field != 'id' and field != 'CreateTime' and field != 'UpdateTime' %}
                <tr>
                   <td><b>{{ field | capfirst }}</b></td>
-
                      <td>
-
                            {{ product|get_attribute:field }}
-
                      </td>
-
                </tr>
             {% endif %}
          {% endfor %}
@@ -34,15 +30,15 @@
 <h2>Coverages:</h2>
 
   {% for option in product_coverage_options %}
-   <table class="table table-responsive table-borderd">
+   <table class="center-div table table-responsive table-borderd ">
       <tbody>
          {% for field in product_coverage_option_fields %}
             {% if field == 'OptionValue' %}
                <tr>
-                  {% comment %} <td><b>{{ field | capfirst }}</b></td> {% endcomment %}
-                     <td>
+
+
                            {{ option|get_attribute:field }}
-                     </td>
+
                </tr>
             {% endif %}
          {% endfor %}
