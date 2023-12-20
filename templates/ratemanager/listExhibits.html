@@ -1,8 +1,17 @@
 {% extends 'body.html' %} {% load static %}
-{% block title %} Create Ratebook {% endblock %}
+{% block title %} {{ title }} {% endblock %}
 {% block sidebarcontent %} 
   {% include 'ratemanager/sidebar.html' %} 
 {% endblock  %}
+{% block messagecontent %}
+{% if messages %}
+<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
@@ -46,15 +55,6 @@
   </div>
 
 <hr>
-
-{% if messages %}
-  <b> Messages </b>
-  <ul class="messages">
-    {% for message in messages %}
-      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
 
 {% if not ExhibitObjs %}
   <h2>No Exhibits Added to this Ratebook yet, Click on add more to Add an exhibit</h2>
