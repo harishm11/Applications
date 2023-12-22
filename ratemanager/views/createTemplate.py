@@ -128,18 +128,35 @@ def selectFromExistingRbExhibitsList(request, id):
     appLabel = 'ratemanager'
 
     form = selectExhibitListsForm()
-    cloneFromRBid = request.POST.get('toCloneRB')
+    cloneFromRBid = request.POST.get('toCloneRB') or id
     rbID = cloneFromRBid.split('_')[0]
 
-    choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
-    form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
-    return render(request, 'ratemanager/selectExhibitsOptions.html',
-                  {
-                        'form': form,
-                        'options': options,
-                        'appLabel': appLabel,
-                        'title': 'Add Exhibits'
-                    })
+    if request.method == 'GET':
+        choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
+        form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
+        return render(request, 'ratemanager/selectExhibitsOptions.html',
+                      {
+                            'form': form,
+                            'options': options,
+                            'appLabel': appLabel,
+                            'title': 'Add Exhibits'
+                        })
+
+    if request.method == 'POST':
+        newRbID = request.session['NewRBid']
+        form = selectExhibitListsForm(request.POST)
+        choices = RatingExhibits.objects.all()
+        form.fields['toAddExhibits'].queryset = choices
+        if form.is_valid():
+            form_data = form.cleaned_data
+            for i in form_data['toAddExhibits']:
+                newObj, _ = RatebookTemplate.objects.get_or_create(RatebookID=newRbID.split('_')[0], RatebookExhibit=i)
+                sourceExhibit = RatebookTemplate.objects.all().filter(RatebookExhibit=i).first()
+                for i in sourceExhibit.ExhibitVariables.all():
+                    newObj.ExhibitVariables.add(i)
+                for i in sourceExhibit.ExhibitCoverages.all():
+                    newObj.ExhibitCoverages.add(i)
+        return redirect('ratemanager:selectFromAllExhibitsList', newRbID)
 
 
 def listExhibits(request, pk):
@@ -162,7 +179,7 @@ def listExhibits(request, pk):
 
 
 def deleteExhibitTemplate(request, pk):
-    # delete the exhibit-rbid relationship from ratebooktemplate table
+    # delete the exhibit-rbid relationship from RatebookTemplate table
     RatebookTemplate.objects.get(pk=pk).delete()
     messages.add_message(request, messages.SUCCESS, "Exhibit Deleted Successfully")
     return redirect('ratemanager:listExhibits', request.session['currentlyEditingRatebook'])
