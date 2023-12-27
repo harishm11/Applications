@@ -1,6 +1,7 @@
 from django import forms
 from django.apps import apps
 from datetime import datetime
+
 from ratemanager.models import RatebookMetadata, RatingFactors, \
     RatingExhibits, RatebookTemplate
 import ratemanager.views.HelperFunctions as helperfuncs
@@ -339,3 +340,11 @@ class selectExhibitListsForm(forms.ModelForm):
     class Meta:
         model = RatebookTemplate
         fields = ()
+
+
+class selectExhibitListsFormExistingRB(selectExhibitListsForm):
+    def __init__(self, *args, **kwargs):
+        rbID = kwargs.pop('rbID')
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
+        choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
+        self.fields['toAddExhibits'].queryset = RatingExhibits.objects.filter(ratebooktemplate__in=choices)

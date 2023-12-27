@@ -3,6 +3,15 @@
 {% block sidebarcontent %} 
   {% include 'ratemanager/sidebar.html' %} 
 {% endblock  %}
+{% block messagecontent %}
+{% if messages %}
+<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 <div class="container">

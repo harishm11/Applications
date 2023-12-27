@@ -1,4 +1,4 @@
-from ratemanager.forms import editExhibitForm, addExhibitForm, selectExhibitListsForm
+from ratemanager.forms import editExhibitForm, addExhibitForm, selectExhibitListsForm, selectExhibitListsFormExistingRB
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.models import RatebookMetadata, RatebookTemplate, RatingExhibits
@@ -111,6 +111,10 @@ def selectFromAllExhibitsList(request, id):
         form = selectExhibitListsForm(request.POST)
         choices = RatingExhibits.objects.all()
         form.fields['toAddExhibits'].queryset = choices
+        initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
+        form.fields['toAddExhibits'].initial = initial
+
+        print(form)
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:
@@ -127,13 +131,14 @@ def selectFromExistingRbExhibitsList(request, id):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
-    form = selectExhibitListsForm()
     cloneFromRBid = request.POST.get('toCloneRB') or id
     rbID = cloneFromRBid.split('_')[0]
 
     if request.method == 'GET':
-        choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
-        form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
+        form = selectExhibitListsFormExistingRB(rbID=rbID)
+        newRbID = request.session['NewRBid']
+        initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=newRbID))
+        form.fields['toAddExhibits'].initial = initial
         return render(request, 'ratemanager/selectExhibitsOptions.html',
                       {
                             'form': form,
@@ -144,9 +149,9 @@ def selectFromExistingRbExhibitsList(request, id):
 
     if request.method == 'POST':
         newRbID = request.session['NewRBid']
-        form = selectExhibitListsForm(request.POST)
-        choices = RatingExhibits.objects.all()
-        form.fields['toAddExhibits'].queryset = choices
+        form = selectExhibitListsFormExistingRB(data=request.POST, rbID=rbID)
+
+        print(form)
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:
@@ -156,7 +161,10 @@ def selectFromExistingRbExhibitsList(request, id):
                     newObj.ExhibitVariables.add(i)
                 for i in sourceExhibit.ExhibitCoverages.all():
                     newObj.ExhibitCoverages.add(i)
-        return redirect('ratemanager:selectFromAllExhibitsList', newRbID)
+            return redirect('ratemanager:selectFromAllExhibitsList', newRbID)
+        else:
+            messages.add_message(request, messages.SUCCESS, form.errors)
+            return redirect('ratemanager:selectFromExistingRbExhibitsList', cloneFromRBid)
 
 
 def listExhibits(request, pk):
