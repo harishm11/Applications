@@ -9,8 +9,9 @@ from django import forms
 from productconfigurator.forms import *
 from datetime import datetime
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from django.forms.utils import ErrorList
 from authenticate.decorators import permission_required
+from myproj.utils import handleformerror
 
 
 def getModelNames(appLabel):
@@ -66,9 +67,10 @@ def datatable(request, appLabel, modelName):
         return render(request, 'error.html', {'message': err})
 
 
-@permission_required('add')
+# @permission_required('add')
 def addObject(request, appLabel, modelName):
     try:
+        error_msg = ''
         Model = apps.get_model(appLabel, modelName)
         if modelName == 'Product':
             form_obj = ProductForm(request.POST)
@@ -88,6 +90,8 @@ def addObject(request, appLabel, modelName):
             if form.is_valid():
                 form.save()
                 return redirect('datatable', appLabel=appLabel, modelName=modelName)
+            else:
+                error_msg = handleformerror(form)
         else:
             form = form_obj
 
@@ -96,6 +100,7 @@ def addObject(request, appLabel, modelName):
             'appLabel': appLabel,
             'modelName': modelName,
             'verboseNamePlural_value': verboseNamePlural,
+            'message': error_msg
         }
         # context.update(getModelNames(appLabel))
 
@@ -104,9 +109,10 @@ def addObject(request, appLabel, modelName):
         return render(request, 'error.html', {'message': err})
 
 
-@permission_required('change')
+# @permission_required('change')
 def editObject(request, appLabel, modelName, object_id):
     try:
+        error_msg = ''
         Model = apps.get_model(appLabel, modelName)
         instance = get_object_or_404(Model, pk=object_id)
 
@@ -124,21 +130,22 @@ def editObject(request, appLabel, modelName, object_id):
             if form.is_valid():
                 form.save()
                 return redirect('datatable', appLabel=appLabel, modelName=modelName)
-
+            else:
+                error_msg = handleformerror(form)
         context = {
             'form': form(instance=instance),
             'appLabel': appLabel,
             'modelName': modelName,
             'object_id': object_id,
             'verboseNamePlural_value': verboseNamePlural,
-        }
+            'message': error_msg}
 
         return render(request, 'datatable/edit.html', context)
     except Exception as err:
         return render(request, 'error.html', {'message': err})
 
 
-@permission_required('delete')
+# @permission_required('delete')
 def deleteObject(request, appLabel, modelName, object_id):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -160,9 +167,10 @@ def deleteObject(request, appLabel, modelName, object_id):
         return render(request, 'error.html', {'message': err})
 
 
-@permission_required('add')
+# @permission_required('add')
 def cloneObject(request, appLabel, modelName, object_id):
     try:
+        error_msg = ''
         Model = apps.get_model(appLabel, modelName)
         instance = get_object_or_404(Model, pk=object_id)
 
@@ -176,12 +184,16 @@ def cloneObject(request, appLabel, modelName, object_id):
         if request.method == 'POST':
 
             form = form(request.POST)
+
             if form.is_valid():
                 cloned_instance = form.save(commit=False)
                 cloned_instance.id = None
                 cloned_instance.save()
 
                 return redirect('datatable', appLabel=appLabel, modelName=modelName)
+            else:
+                error_msg = handleformerror(form)
+
         else:
 
             form = form(instance=instance)
@@ -191,6 +203,7 @@ def cloneObject(request, appLabel, modelName, object_id):
             'appLabel': appLabel,
             'modelName': modelName,
             'verboseNamePlural_value': verboseNamePlural,
+            'message': error_msg,
         }
         # context.update(getModelNames(appLabel))
 
@@ -199,7 +212,7 @@ def cloneObject(request, appLabel, modelName, object_id):
         return render(request, 'error.html', {'message': err})
 
 
-@permission_required('add')
+# @permission_required('add')
 def exportCsv(request, appLabel, modelName):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -221,7 +234,7 @@ def exportCsv(request, appLabel, modelName):
         return render(request, 'error.html', {'message': err})
 
 
-@permission_required('add')
+# @permission_required('add')
 def importCsv(request, appLabel, modelName):
     try:
         Model = apps.get_model(appLabel, modelName)
@@ -252,9 +265,15 @@ def importCsv(request, appLabel, modelName):
                         if row[i] == 'FFPA':
                             # Get the value from the CSV file
                             product_code_value = row[i]
-                            product_code_instance = productcode.objects.get(
+                            product_code_instance = coverage.objects.get(
                                 ProductCd=product_code_value)
                             setattr(obj, 'ProductCd', product_code_instance)
+                        if modelName == 'CoverageOptions' and field == 'CoverageName':
+                            # Get the value from the CSV file
+                            coverage_name_value = row[i]
+                            coverage_instance = coverage.objects.get(
+                                CoverageName=coverage_name_value)
+                            setattr(obj, 'CoverageName', coverage_instance)
                         else:
                             setattr(obj, field, row[i])
                 obj.save()

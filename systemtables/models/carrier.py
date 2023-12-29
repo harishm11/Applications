@@ -8,5 +8,9 @@ class Carrier(models.Model):
     AmbestNumber = models.CharField(max_length=10)
     EnableInd = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('CarrierName', 'NAICCode', 'FullCompanyName',
+                           'AmbestNumber')
+
     def __str__(self):
         return self.CarrierName

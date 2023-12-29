@@ -11,4 +11,5 @@ urlpatterns = [
     path('register/', register_view),
     path('password_change/', PasswordResetByUser.as_view()),
     path('feedback/', feedbackview),
+    path('switchrole/', switch_group, name="switch_group"),
 ]

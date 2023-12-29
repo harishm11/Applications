@@ -5,9 +5,9 @@ from django.apps import apps
 Coverage = apps.get_model('systemtables', 'coverage')
 
 
-class CoverageOption(models.Model):
-    Coverage = models.ForeignKey(
-        Coverage, on_delete=models.CASCADE)
+class CoverageOptions(models.Model):
+    CoverageName = models.ForeignKey(
+        Coverage, on_delete=models.CASCADE, null=True, blank=True)
     CoverageTerm = models.CharField(max_length=50)
     OptionValue = models.CharField(max_length=50)
     OptionDesc = models.CharField(max_length=200)
@@ -16,6 +16,9 @@ class CoverageOption(models.Model):
     Amount3 = models.CharField(max_length=50, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
 
-    def __str__(self):
-        return f"{self.Coverage.CoverageName} - {self.OptionValue}"
+    class Meta:
+        unique_together = ('CoverageName', 'CoverageTerm', 'OptionValue',
+                           'OptionDesc', 'Amount1', 'Amount2', 'Amount3')
 
+    def __str__(self):
+        return f"{self.CoverageName} {self.OptionValue}"

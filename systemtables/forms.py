@@ -4,6 +4,40 @@ from django.apps import apps
 from django.db import models
 from django.core.management import call_command
 
+
+try:
+    uwcompany = apps.get_model('systemtables', 'uwcompany')
+    state = apps.get_model('systemtables', 'state')
+    carrier = apps.get_model('systemtables', 'carrier')
+    product = apps.get_model('productconfigurator', 'product')
+    lineofbusiness = apps.get_model('systemtables', 'lineofbusiness')
+    policytype = apps.get_model('systemtables', 'policytype')
+    policysubtype = apps.get_model('systemtables', 'policysubtype')
+    offering = apps.get_model('systemtables', 'offering')
+    productcode = apps.get_model('systemtables', 'productcode')
+    policyterm = apps.get_model('systemtables', 'policyterm')
+    coverage = apps.get_model('systemtables', 'coverage')
+
+except LookupError:
+    None
+
+
+# class UWcompanyForm(forms.ModelForm):
+#     class Meta:
+#         model = uwcompany
+#         fields = '__all__'
+
+#     def combination_exists(self):
+#         cleaned_data = super().clean()
+#         company_name = cleaned_data.get('CompanyName')
+#         carrier = cleaned_data.get('Carrier')
+
+#         if product.objects.filter(CompanyName=company_name, Carrier=carrier, ).exists():
+#             return 'UW company already exists. Please enter a unique Uw Company.'
+
+#         return ""
+
+
 FIELD_TYPE_CHOICES = (
     ('CharField', 'CharField'),
     ('IntegerField', 'IntegerField'),

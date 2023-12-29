@@ -1,21 +1,23 @@
 {% extends 'base.html' %}{% load static %} {% block content%}
 
-
 <div class="container-fluid">
   <div class="custom-grid">
-    <div class="sidebar">
-      {% block sidebarcontent %} {% endblock %}
-    </div>
+    <div class="sidebar">{% block sidebarcontent %} {% endblock %}</div>
     <div class="main">
-
-    <span style="color: blue; font-size: 10px; display: inline-block; text-align: center;">
-    {% block messagecontent %} {% endblock %}
-    </span>
+      <div>
+        {% block messagecontent %} {% if request.user.is_authenticated %}
+        <div class="center-div mesage_text">
+          <h4>{{message}}</h4>
+          <br />
+        </div>
+        {%else%}
+        <div class="mesage_text">Please Login to access this</div>
+        {% endif %} {% endblock %}
+      </div>
 
       {% block maincontent %} {% endblock %}
     </div>
   </div>
 </div>
-     
 
 {% endblock content %}

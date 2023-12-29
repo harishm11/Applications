@@ -3,13 +3,12 @@
 {% load crispy_forms_tags%} {% block sidebarcontent %} {% include 'productconfigurator/sidebar.html' %} {%endblock %} {% block maincontent%} 
 {% if  request.user.is_authenticated %}
 
-
-<p>Are you sure you want to delete the following product?</p>
-
-<form method="post">
-   {% csrf_token %}
-   <input type="submit" class="btn btn-danger" value="Delete">
-   <a href="#" onclick="history.back();" class="btn btn-secondary">Cancel</a>
+<form method="POST" action="{% url 'createcoverageoptns' %}">
+  {% csrf_token %} 
+  {{ coverage_option_form.selected_options}}
+    
+  <button class="btn btn-secondary"  type="submit">Select coverage options</button>
 </form>
+
 
  {% endif %} {% endblock %} {% block js%} {% endblock js%}

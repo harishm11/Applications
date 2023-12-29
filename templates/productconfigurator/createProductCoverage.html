@@ -3,12 +3,11 @@
 {% load crispy_forms_tags%} {% block sidebarcontent %} {% include 'productconfigurator/sidebar.html' %} {%endblock %} {% block maincontent%} 
 {% if  request.user.is_authenticated %}
 
-<form method="POST" action="{% url 'createproduct' %}">
+<form method="POST" action="{% url 'createproductcoverage' %}">
   {% csrf_token %} 
-  
 
       <table class="table table-responsive table-borderd">
-      {% for field in product_form %}
+      {% for field in coverage_form %}
       <tr>
         <td>{{ field.label_tag }}</td>
         <td>{{ field }}</td>
@@ -16,7 +15,7 @@
       {% endfor %}
     </table>
 
-  <button class="btn btn-secondary"  type="submit">Create Product</button>
+  <button class="btn btn-secondary"  type="submit">Select coverage options</button>
 </form>
 
  {% endif %} {% endblock %} {% block js%} {% endblock js%}

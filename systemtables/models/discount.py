@@ -11,5 +11,9 @@ class Discount(models.Model):
         ProductCode, on_delete=models.CASCADE, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('DiscountName', 'DiscountCode', 'DiscountDesc',
+                           'RatingItemCode', 'ProductCd')
+
     def __str__(self):
         return self.DiscountName

@@ -24,14 +24,16 @@ def uploadNewRB(request):
     file_uploaded = True
 
     # read from excel file and convert to pandas series and HTML Table
-    df = pd.read_excel(request.session.get('upload_url'), sheet_name=None, header=None)
+    df = pd.read_excel(request.session.get('upload_url'),
+                       sheet_name=None, header=None)
     sheet_name = helperfuncs.findRBDetails(df)
 
     if sheet_name is not None:
         msgs.append('Found Ratebook Details')
         df = df[sheet_name]
         df[0] = df[0].str.replace(' ', '')
-        df_view = pd.Series(index=list(df[0]), data=list(df[1]), name='Details')
+        df_view = pd.Series(index=list(
+            df[0]), data=list(df[1]), name='Details')
         rbDetailsTable = format_html(
             df_view.to_frame().to_html(
                 justify='left', classes=['table', 'table-bordered']
@@ -59,6 +61,7 @@ def loadNewRBtoDB(request):
     try:
         loaded_to_dbBooks = False
         rbObj = None
+        rate_details['ProjectID'] = 'Test'
         rate_details['RatebookRevisionType'] = 'Initial'
         rate_details['RatebookStatusType'] = 'In Production'
         rate_details['RatebookChangeType'] = 'Initial'
@@ -68,12 +71,14 @@ def loadNewRBtoDB(request):
 
         identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
                         'PolicyType', 'PolicySubType', 'ProductCode')
-        identityRateDetails = {key: rate_details.get(key) for key in identityKeys}
+        identityRateDetails = {
+            key: rate_details.get(key) for key in identityKeys}
 
         rate_details['RatebookVersion'] = 0.0
         rate_details['RatebookID'] = helperfuncs.generateRatebookID()
         if RatebookMetadata.objects.filter(**identityRateDetails).count() == 0:
-            rbObj, loaded_to_dbBooks = RatebookMetadata.objects.get_or_create(**rate_details)
+            rbObj, loaded_to_dbBooks = RatebookMetadata.objects.get_or_create(
+                **rate_details)
         else:
             msgs.append('Another Ratebook with similar details already exists\
                         You may want to use Update.')
@@ -82,13 +87,14 @@ def loadNewRBtoDB(request):
         if loaded_to_dbBooks:
             try:
                 # transform the data to usable form
-                df, errors = helperfuncs.transformRB(xl_url=request.session['upload_url'])
+                df, errors = helperfuncs.transformRB(
+                    xl_url=request.session['upload_url'])
                 msgs.extend(errors)
 
                 # update the rating exhibits and rating variables
-                helperfuncs. updateRatingExhibits(
+                helperfuncs.updateRatingExhibits(
                     df, rbid=rbObj.id, uploadURL=request.session["upload_url"]
-                    )
+                )
                 df['Ratebook_id'] = rbObj.id
                 df['RatebookVersion'] = rate_details['RatebookVersion']
                 df['RatebookID'] = rate_details['RatebookID']

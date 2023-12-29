@@ -7,7 +7,9 @@ import pandas as pd
 from myproj.settings import BASE_DIR
 import ratemanager.views.HelperFunctions as helperfuncs
 from django.forms import modelformset_factory
-from ratemanager.models import RatingCoverages
+from django.apps import apps
+
+coverage = apps.get_model('systemtables', 'coverage')
 
 
 def rateManager(request):
@@ -80,7 +82,7 @@ def EditCoverages(request):
     my_objects = RatingCoverages.objects.all()
 
     # Create a formset for RatingCoverages instances
-    RatingCoveragesFormSet = modelformset_factory(RatingCoverages, fields=('__all__'), can_delete=True, extra=0)
+    RatingCoveragesFormSet = modelformset_factory(coverage, fields=('__all__'), can_delete=True, extra=0)
     formset = RatingCoveragesFormSet(queryset=my_objects)
 
     if request.method == 'POST':
