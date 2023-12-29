@@ -1,8 +1,9 @@
 from django.db import models
 from systemtables.models import \
     state, carrier, lineofbusiness, \
-    uwcompany, productcode, policytype, policysubtype, coverage
-
+    uwcompany, productcode, policytype, \
+    policysubtype, coverage
+# import ratemanager.views.HelperFunctions as hf
 # from django.apps import apps
 
 # coverage = apps.get_model('systemtables', 'coverage')
@@ -240,7 +241,7 @@ class RatingExhibits(models.Model):
     SequenceNo = models.IntegerField(null=True, default=None)
 
     def __str__(self) -> str:
-        return self.Exhibit
+        return self.DisplayName
 
 
 class RatingVariables(models.Model):

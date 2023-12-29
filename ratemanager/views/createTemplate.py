@@ -114,7 +114,6 @@ def selectFromAllExhibitsList(request, id):
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
         form.fields['toAddExhibits'].initial = initial
 
-        print(form)
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:
@@ -151,7 +150,6 @@ def selectFromExistingRbExhibitsList(request, id):
         newRbID = request.session['NewRBid']
         form = selectExhibitListsFormExistingRB(data=request.POST, rbID=rbID)
 
-        print(form)
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:

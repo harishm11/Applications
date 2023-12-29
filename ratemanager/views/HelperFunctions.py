@@ -14,7 +14,6 @@ import sqlalchemy as sa
 from myproj.settings import DATABASES
 from difflib import get_close_matches
 import ratemanager.views.configs as configs
-from django.apps import apps
 
 coverage = apps.get_model('systemtables', 'coverage')
 
@@ -884,12 +883,12 @@ def updateRatingExhibits(tdf, rbid, uploadURL):
     for i in ExList:
         TempRec = RatebookTemplate()
         TempRec.RatebookID = rbid.split('_')[0]  # remove version from rbid
-        ExhibitObj, _ = RatingExhibits.objects.get_or_create(Exhibit=i)
+        ExhibitObj, _ = RatingExhibits.objects.get_or_create(Exhibit=i, DisplayName=' '.join(camel_case_split(i)))
         TempRec.RatebookExhibit = ExhibitObj
         df = tdf[tdf["Exhibit"] == i]
         TempRec.save()
         for i in df['Coverage'].unique().tolist():
-            cov, _ = coverage.objects.get_or_create(CoverageCode=i)
+            cov, _ = coverage.objects.get_or_create(CoverageCode=i, CoverageName=' '.join(camel_case_split(i)))
             # add the Coverage to the current Template
             TempRec.ExhibitCoverages.add(cov)
 
