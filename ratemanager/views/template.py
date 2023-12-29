@@ -1,7 +1,7 @@
 from ratemanager.forms import createTemplateForm, mainActionForm, projectIdAndDateInputForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
-from ratemanager.models import RatebookMetadata
+from ratemanager.models import RatebookMetadata, RatebookTemplate
 from django.contrib import messages
 from django.utils import timezone
 
@@ -93,7 +93,7 @@ def template(request):
                 # save the cleaned Form data to session
                 form_data = form.cleaned_data
 
-                # check for existing template/Ratebook in production and if found show that it already exists.
+                # check for existing template/Ratebook in production
                 identityDetails = helperfuncs.extractIdentityDetails(form_data)
                 searchResults = RatebookMetadata.objects.filter(**identityDetails)
                 if searchResults.count() > 0 or request.POST['submit'] == 'Search':
@@ -122,6 +122,41 @@ def template(request):
                                     'title': 'Template',
                                     'searchResults': searchResults
                                     })
+
+        # Delete an existing template
+        if ratebook_details['MainAction'] == 'delete':
+            if form.is_valid():
+                form_data = form.cleaned_data
+                identityDetails = helperfuncs.extractIdentityDetails(form_data)
+                searchResults = RatebookMetadata.objects.filter(**identityDetails)
+                if searchResults.count() > 0 or request.POST['submit'] == 'Search':
+                    # check for matching drafts if found show the draft.
+                    if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
+                        messages.add_message(request, messages.INFO, 'Found an existing draft for the given ratebook details.')
+
+                    # check database for all types of templates and rate books
+                    if searchResults.count() == 1:
+                        id = searchResults.first().id
+                        return redirect('ratemanager:deleteTemplate', id.split('_')[0])
+                    elif searchResults.count() > 0:
+                        messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
+                    else:
+                        messages.add_message(request, messages.INFO, 'No Ratebook with entered details found.')
+
+                    searchResults.order_by(
+                        'RatebookID', 'RatebookStatusType', '-RatebookVersion'
+                        ).distinct('RatebookID', 'RatebookStatusType')
+
+                    return render(request, 'ratemanager/Template.html',
+                                  {
+                                    'createTemplateForm': form,
+                                    'options': options,
+                                    'appLabel': appLabel,
+                                    'mainActionForm': mainActionForm(initial={'MainAction': ratebook_details['MainAction']}),
+                                    'title': 'Template',
+                                    'searchResults': searchResults
+                                    })
+
         else:
             messages.add_message(request, messages.ERROR, "Form invalid, Try Again")
             return redirect('ratemanager:template')
@@ -220,3 +255,27 @@ def projectIdAndDateInput(request):
                             'form': form,
                             'title': 'Project ID & Dates'
                             })
+
+
+def deleteTemplate(request, rbID):
+    options = helperfuncs.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
+
+    RatebookTemplate.objects.all().filter(RatebookID=rbID).delete()
+    messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
+    initial = {}
+    if request.session.get('TemplateFormData'):
+        createTemplateFormPrefilled = createTemplateForm(
+            initial=request.session['TemplateFormData']
+            )
+    else:
+        createTemplateFormPrefilled = createTemplateForm(initial=initial)
+
+    return render(request, 'ratemanager/Template.html',
+                  {
+                    'createTemplateForm': createTemplateFormPrefilled,
+                    'options': options,
+                    'appLabel': appLabel,
+                    'mainActionForm': mainActionForm(initial={'MainAction': 'delete'}),
+                    'title': 'Template',
+                    })

@@ -53,4 +53,7 @@ urlpatterns = [
     # Template (checkpoint started building flows)
     path('template/', template.template, name="template"),
     path('projectIdAndDateInput/', template.projectIdAndDateInput, name="projectIdAndDateInput"),
+
+    # Delete Template
+    path('deleteTemplate/<str:rbID>/', template.deleteTemplate, name="deleteTemplate"),
 ]
