@@ -3,7 +3,8 @@ import pandas as pd
 from django.shortcuts import render
 import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.forms import UpdateForm
-from ratemanager.models import RatebookMetadata, RatingFactors
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratingfactors import RatingFactors
 from django.utils import timezone
 from pandas.errors import EmptyDataError
 

@@ -2,7 +2,9 @@ import io
 import pandas as pd
 from django.http import FileResponse
 import ratemanager.views.HelperFunctions as hf
-from ratemanager.models import RatebookMetadata, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+
 from django.apps import apps
 from django.shortcuts import render
 from ratemanager.forms import exportRBForm

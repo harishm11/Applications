@@ -1,7 +1,9 @@
 from ratemanager.forms import createTemplateForm, mainActionForm, projectIdAndDateInputForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
-from ratemanager.models import RatebookMetadata, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+
 from django.contrib import messages
 from django.utils import timezone
 

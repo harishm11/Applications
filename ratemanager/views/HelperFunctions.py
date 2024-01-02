@@ -3,7 +3,11 @@ import re
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
-from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+from ratemanager.models.ratingfactors import RatingFactors
+from ratemanager.models.ratingexhibits import RatingExhibits
+from ratemanager.models.ratingvariables import RatingVariables
 from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q

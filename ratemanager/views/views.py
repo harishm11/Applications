@@ -79,7 +79,7 @@ def openexhibit(request):
 # view to edit the Coverage records
 def EditCoverages(request):
     # Get all instances of RatingCoverages
-    my_objects = RatingCoverages.objects.all()
+    my_objects = coverage.objects.all()
 
     # Create a formset for RatingCoverages instances
     RatingCoveragesFormSet = modelformset_factory(coverage, fields=('__all__'), can_delete=True, extra=0)

@@ -2,8 +2,11 @@ from django import forms
 from django.apps import apps
 from datetime import datetime
 
-from ratemanager.models import RatebookMetadata, RatingFactors, \
-    RatingExhibits, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+from ratemanager.models.ratingfactors import RatingFactors
+from ratemanager.models.ratingexhibits import RatingExhibits
+
 import ratemanager.views.HelperFunctions as helperfuncs
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
@@ -286,10 +289,6 @@ class exportRBForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         label='Select Exhibits to Export'
         )
-
-
-class inputPKForm(forms.Form):
-    pk = forms.IntegerField(label='Enter Ratebook Primary Key', required=True)
 
 
 class editExhibitForm(forms.ModelForm):

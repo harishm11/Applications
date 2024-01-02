@@ -1,6 +1,8 @@
 from django.db.models import Q
 from django.shortcuts import render
-from ratemanager.models import RatebookMetadata, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+
 from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import ratemanager.views.HelperFunctions as helperfuncs

@@ -1,7 +1,7 @@
 import traceback
 import pandas as pd
 from django.shortcuts import render
-from ratemanager.models import RatebookMetadata
+from ratemanager.models.ratebookmetadata import RatebookMetadata
 from django.utils.html import format_html
 import ratemanager.views.HelperFunctions as helperfuncs
 from django.utils import timezone

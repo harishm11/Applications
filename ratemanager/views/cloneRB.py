@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from ratemanager.models import RatebookMetadata, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
 from ratemanager.views import HelperFunctions as helperfuncs
 # from django.utils import timezone
 # from ratemanager.forms import createTemplateForm
