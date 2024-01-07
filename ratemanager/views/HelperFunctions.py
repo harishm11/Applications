@@ -367,7 +367,7 @@ def transformRB(xl_url=None, df_sheets=None):
     for i in set(df_sheets.keys()) - set(df_out["Exhibit"].unique()):
         if i not in excludeList:
             msgs.append("Unable to transform {} table.".format(i))
-    map_covs_and_vars(df_out)
+    # map_covs_and_vars(df_out)
     # df_out.to_excel('./uploads/check_transform.xlsx')
     return df_out, msgs
 
@@ -892,7 +892,7 @@ def updateRatingExhibits(tdf, rbid, uploadURL):
         df = tdf[tdf["Exhibit"] == i]
         TempRec.save()
         for i in df['Coverage'].unique().tolist():
-            cov, _ = coverage.objects.get_or_create(CoverageCode=i, CoverageName=' '.join(camel_case_split(i)))
+            cov, _ = coverage.objects.get_or_create(CoverageCode=configs.cov_mapping.get(i, i), CoverageName=i)
             # add the Coverage to the current Template
             TempRec.ExhibitCoverages.add(cov)
 

@@ -3,7 +3,7 @@ Search Results:
   <table id="example" class="table table-sm table-condensed table-bordered text-center">
     <thead>
       <tr>
-        <th>Resume Editing</th>
+        <th>Actions</th>
         <th>Ratebook Name</th>
         <th>Ratebook ID</th>
         <th>Ratebook Version</th>
@@ -30,9 +30,17 @@ Search Results:
       <tr>
         <td>
           
-          <a href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
+          <a title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
           ><i class="fa fa-edit"></i
-        ></a>
+          ></a>
+          &emsp;
+          <a title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
+          ><i class="fa fa-trash"></i
+          ></a> 
+          &emsp;
+          <a title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
+          ><i class="fa fa-download"></i
+          ></a>
       
         </td>
         <td>{{obj.RatebookName}}</td>

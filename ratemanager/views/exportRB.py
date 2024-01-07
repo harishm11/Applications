@@ -52,7 +52,10 @@ def exportRB(request):
                 data.append(toIn)
             else:
                 model = apps.get_model("systemtables", x.replace(' ', '').lower())
-                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
+                if model.__name__ == 'State':
+                    data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')).StateName)
+                else:
+                    data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
 
         pd.Series(index=export_details,
                   data=data
@@ -85,7 +88,10 @@ def exportTemplate(request, pk):
             data.append(toIn)
         else:
             model = apps.get_model("systemtables", x.replace(' ', '').lower())
-            data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
+            if model.__name__ == 'State':
+                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')).StateName)
+            else:
+                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
 
     pd.Series(index=export_details,
               data=data

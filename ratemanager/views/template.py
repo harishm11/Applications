@@ -1,4 +1,4 @@
-from ratemanager.forms import createTemplateForm, mainActionForm, projectIdAndDateInputForm
+from ratemanager.forms import createTemplateForm, projectIdAndDateInputForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.models.ratebookmetadata import RatebookMetadata
@@ -17,147 +17,40 @@ def template(request):
         # save the Form data to session before validation and main action
         request.session['TemplateFormData'] = ratebook_details
         form = createTemplateForm(ratebook_details)
+        if form.is_valid():
+            # save the cleaned Form data to session
+            form_data = form.cleaned_data
 
-        # Create a New template main action
-        if ratebook_details['MainAction'] == 'new':
-            if form.is_valid():
-                # save the cleaned Form data to session
-                form_data = form.cleaned_data
+            # check for existing template/Ratebook in production and if found show that it already exists.
+            identityDetails = helperfuncs.extractIdentityDetails(form_data)
+            searchResults = RatebookMetadata.objects.filter(**identityDetails)
+            if searchResults.count() > 0 or request.POST['submit'] == 'Search':
 
-                # check for existing template/Ratebook in production and if found show that it already exists.
-                identityDetails = helperfuncs.extractIdentityDetails(form_data)
-                searchResults = RatebookMetadata.objects.filter(**identityDetails)
-                if searchResults.count() > 0 or request.POST['submit'] == 'Search':
-
-                    # check for matching drafts if found show the draft.
-                    if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
-                        messages.add_message(request, messages.INFO, 'Found an existing draft for the given ratebook details.')
-                    elif searchResults.count() > 0:
-                        messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
-                    else:
-                        messages.add_message(request, messages.INFO, 'No Ratebook with entered details found.')
-
-                    searchResults.order_by(
-                        'RatebookID', 'RatebookStatusType', '-RatebookVersion'
-                        ).distinct('RatebookID', 'RatebookStatusType')
-
-                    return render(request, 'ratemanager/Template.html',
-                                  {
-                                    'createTemplateForm': form,
-                                    'options': options,
-                                    'appLabel': appLabel,
-                                    'mainActionForm': mainActionForm(initial={'MainAction': ratebook_details['MainAction']}),
-                                    'title': 'Template',
-                                    'searchResults': searchResults
-                                    })
+                # check for matching drafts if found show the draft.
+                if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
+                    messages.add_message(request, messages.INFO, 'Found an existing draft for the given ratebook details.')
+                elif searchResults.count() > 0:
+                    messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
                 else:
-                    return redirect('ratemanager:projectIdAndDateInput')
+                    messages.add_message(request, messages.INFO, 'No Ratebook with entered details found.')
 
-        # View an existing Template main action
-        if ratebook_details['MainAction'] == 'view':
-            if form.is_valid():
-                # save the cleaned Form data to session
-                form_data = form.cleaned_data
+                searchResults.order_by(
+                    'RatebookID', 'RatebookStatusType', '-RatebookVersion'
+                    ).distinct('RatebookID', 'RatebookStatusType')
 
-                # check for existing template/Ratebook in production and if found show that it already exists.
-                identityDetails = helperfuncs.extractIdentityDetails(form_data)
-                searchResults = RatebookMetadata.objects.filter(**identityDetails)
-                if searchResults.count() > 0 or request.POST['submit'] == 'Search':
-
-                    # check for matching drafts if found show the draft.
-                    if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
-                        messages.add_message(request, messages.INFO, 'Found an existing draft for the given ratebook details.')
-                    if searchResults.count() == 1:
-                        id = searchResults.first().id
-                        return redirect('ratemanager:listExhibits', id)
-                    elif searchResults.count() > 0:
-                        messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
-                    else:
-                        messages.add_message(request, messages.INFO, 'No Ratebook with entered details found.')
-
-                    searchResults.order_by(
-                        'RatebookID', 'RatebookStatusType', '-RatebookVersion'
-                        ).distinct('RatebookID', 'RatebookStatusType')
-
-                    return render(request, 'ratemanager/Template.html',
-                                  {
-                                    'createTemplateForm': form,
-                                    'options': options,
-                                    'appLabel': appLabel,
-                                    'mainActionForm': mainActionForm(initial={'MainAction': ratebook_details['MainAction']}),
-                                    'title': 'Template',
-                                    'searchResults': searchResults
-                                    })
-
-        # Download an existing template
-        if ratebook_details['MainAction'] == 'download':
-            if form.is_valid():
-                # save the cleaned Form data to session
-                form_data = form.cleaned_data
-
-                # check for existing template/Ratebook in production
-                identityDetails = helperfuncs.extractIdentityDetails(form_data)
-                searchResults = RatebookMetadata.objects.filter(**identityDetails)
-                if searchResults.count() > 0 or request.POST['submit'] == 'Search':
-
-                    # check for matching drafts if found show the draft.
-                    if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
-                        messages.add_message(request, messages.INFO, 'Found an existing draft for the given ratebook details.')
-                    if searchResults.count() == 1:
-                        id = searchResults.first().id
-                        return redirect('ratemanager:exportTemplate', id.split('_')[0])
-                    elif searchResults.count() > 0:
-                        messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
-                    else:
-                        messages.add_message(request, messages.INFO, 'No Ratebook with entered details found.')
-
-                    searchResults.order_by(
-                        'RatebookID', 'RatebookStatusType', '-RatebookVersion'
-                        ).distinct('RatebookID', 'RatebookStatusType')
-
-                    return render(request, 'ratemanager/Template.html',
-                                  {
-                                    'createTemplateForm': form,
-                                    'options': options,
-                                    'appLabel': appLabel,
-                                    'mainActionForm': mainActionForm(initial={'MainAction': ratebook_details['MainAction']}),
-                                    'title': 'Template',
-                                    'searchResults': searchResults
-                                    })
-
-        # Delete an existing template
-        if ratebook_details['MainAction'] == 'delete':
-            if form.is_valid():
-                form_data = form.cleaned_data
-                identityDetails = helperfuncs.extractIdentityDetails(form_data)
-                searchResults = RatebookMetadata.objects.filter(**identityDetails)
-                if searchResults.count() > 0 or request.POST['submit'] == 'Search':
-                    # check for matching drafts if found show the draft.
-                    if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
-                        messages.add_message(request, messages.INFO, 'Found an existing draft for the given ratebook details.')
-
-                    # check database for all types of templates and rate books
-                    if searchResults.count() == 1:
-                        id = searchResults.first().id
-                        return redirect('ratemanager:deleteTemplate', id.split('_')[0])
-                    elif searchResults.count() > 0:
-                        messages.add_message(request, messages.INFO, 'Another Ratebook with same details already exists.')
-                    else:
-                        messages.add_message(request, messages.INFO, 'No Ratebook with entered details found.')
-
-                    searchResults.order_by(
-                        'RatebookID', 'RatebookStatusType', '-RatebookVersion'
-                        ).distinct('RatebookID', 'RatebookStatusType')
-
-                    return render(request, 'ratemanager/Template.html',
-                                  {
-                                    'createTemplateForm': form,
-                                    'options': options,
-                                    'appLabel': appLabel,
-                                    'mainActionForm': mainActionForm(initial={'MainAction': ratebook_details['MainAction']}),
-                                    'title': 'Template',
-                                    'searchResults': searchResults
-                                    })
+                return render(request, 'ratemanager/Template.html',
+                              {
+                                'createTemplateForm': form,
+                                'options': options,
+                                'appLabel': appLabel,
+                                'title': 'Template',
+                                'searchResults': searchResults
+                                })
+            elif request.POST['submit'] == 'Create a new ratebook':
+                return redirect('ratemanager:projectIdAndDateInput')
+            else:
+                messages.add_message(request, messages.INFO, "No matching Templates found.")
+                return redirect('ratemanager:template')
 
         else:
             messages.add_message(request, messages.ERROR, "Form invalid, Try Again")
@@ -177,7 +70,6 @@ def template(request):
                         'createTemplateForm': createTemplateFormPrefilled,
                         'options': options,
                         'appLabel': appLabel,
-                        'mainActionForm': mainActionForm(initial={'MainAction': 'view'}),
                         'title': 'Template',
                         })
 
@@ -264,6 +156,10 @@ def deleteTemplate(request, rbID):
     appLabel = 'ratemanager'
 
     RatebookTemplate.objects.all().filter(RatebookID=rbID).delete()
+    RatebookMetadata.objects.filter(
+        RatebookID=rbID,
+        RatebookStatusType='Initial Draft'
+        ).delete()
     messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
     initial = {}
     if request.session.get('TemplateFormData'):
@@ -278,6 +174,5 @@ def deleteTemplate(request, rbID):
                     'createTemplateForm': createTemplateFormPrefilled,
                     'options': options,
                     'appLabel': appLabel,
-                    'mainActionForm': mainActionForm(initial={'MainAction': 'delete'}),
                     'title': 'Template',
                     })
