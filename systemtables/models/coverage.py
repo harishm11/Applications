@@ -5,14 +5,19 @@ from ..models.lineofbusiness import LineOfBusiness
 
 class Coverage(models.Model):
     ProductCd = models.ForeignKey(
-        ProductCode, on_delete=models.CASCADE, null=True, blank=True)
-    CoverageName = models.CharField(max_length=100)
+        ProductCode, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Product Code")
+    CoverageName = models.CharField(
+        max_length=100, verbose_name="Coverage Name")
     CoverageLob = models.ForeignKey(
-        LineOfBusiness, on_delete=models.CASCADE, null=True, blank=True)
-    CoverageCode = models.CharField(max_length=50)
-    CoverageType = models.CharField(max_length=50)
-    CoverageSequence = models.CharField(max_length=10)
-    CoverageLevel = models.CharField(max_length=50)
+        LineOfBusiness, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Coverage LOB")
+    CoverageCode = models.CharField(
+        max_length=50, verbose_name="Coverage Code")
+    CoverageType = models.CharField(
+        max_length=50, verbose_name="Coverage Type")
+    CoverageSequence = models.CharField(
+        max_length=10, verbose_name="Coverage Sequence")
+    CoverageLevel = models.CharField(
+        max_length=50, verbose_name="Coverage Level")
     EnableInd = models.BooleanField(default=True)
 
     class Meta:
