@@ -3,7 +3,8 @@ from ..models.productcode import ProductCode
 
 
 class Discount(models.Model):
-    DiscountName = models.CharField(max_length=50)
+    DiscountName = models.CharField(
+        max_length=50, verbose_name="Discount Name")
     DiscountCode = models.CharField(max_length=50)
     DiscountDesc = models.CharField(max_length=100)
     RatingItemCode = models.CharField(max_length=10)

@@ -87,6 +87,9 @@ class ProductForm(forms.ModelForm):
         self.fields['PolicyType'].queryset = policytype.objects.filter(
             Lob_id=lob_id) if lob_id else policytype.objects.none()
 
+        self.fields['LineOfBusiness'].label = lineofbusiness._meta.get_field(
+            'LobName').verbose_name
+
 
 class ProductFilterForm(forms.Form):
     Carrier = forms.ModelChoiceField(
@@ -151,6 +154,9 @@ class ProductFilterForm(forms.Form):
             Lob_id=lob_id) if lob_id else productcode.objects.none()
         self.fields['PolicyType'].queryset = policytype.objects.filter(
             Lob_id=lob_id) if lob_id else policytype.objects.none()
+
+        self.fields['LineOfBusiness'].label = lineofbusiness._meta.get_field(
+            'LobName').verbose_name
 
 
 class PolicySubTypeForm(forms.ModelForm):
