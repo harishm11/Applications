@@ -30,33 +30,29 @@ def template(request):
                 return redirect('ratemanager:projectIdAndDateInput')
             if searchResults.count() > 0 or request.POST['submit'] == 'Search':
 
-                    # check for matching drafts if found show the draft.
-                    if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
-                        messages.add_message(
-                            request, messages.INFO, RATE_MANAGER['MES_0001'])
-                    elif searchResults.count() > 0:
-                        messages.add_message(
-                            request, messages.INFO, RATE_MANAGER['MES_0002'])
-                    else:
-                        messages.add_message(
-                            request, messages.INFO, RATE_MANAGER['MES_0003'])
-
-                    searchResults.order_by(
-                        'RatebookID', 'RatebookStatusType', '-RatebookVersion'
-                    ).distinct('RatebookID', 'RatebookStatusType')
-
-                    return render(request, 'ratemanager/Template.html',
-                                  {
-                                      'createTemplateForm': form,
-                                      'options': options,
-                                      'appLabel': appLabel,
-                                      'mainActionForm': mainActionForm(initial={'MainAction': ratebook_details['MainAction']}),
-                                      'title': 'Template',
-                                      'searchResults': searchResults
-                                  })
+                # check for matching drafts if found show the draft.
+                if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
+                    messages.add_message(
+                        request, messages.INFO, RATE_MANAGER['MES_0001'])
+                elif searchResults.count() > 0:
+                    messages.add_message(
+                        request, messages.INFO, RATE_MANAGER['MES_0002'])
                 else:
-                    return redirect('ratemanager:projectIdAndDateInput')
+                    messages.add_message(
+                        request, messages.INFO, RATE_MANAGER['MES_0003'])
 
+                searchResults.order_by(
+                    'RatebookID', 'RatebookStatusType', '-RatebookVersion'
+                ).distinct('RatebookID', 'RatebookStatusType')
+
+                return render(request, 'ratemanager/Template.html',
+                              {
+                                'createTemplateForm': form,
+                                'options': options,
+                                'appLabel': appLabel,
+                                'title': 'Template',
+                                'searchResults': searchResults
+                                })
         else:
             messages.add_message(request, messages.ERROR,
                                  "Form invalid, Try Again")
@@ -76,7 +72,6 @@ def template(request):
                           'createTemplateForm': createTemplateFormPrefilled,
                           'options': options,
                           'appLabel': appLabel,
-                          'mainActionForm': mainActionForm(initial={'MainAction': 'view'}),
                           'title': 'Template',
                       })
 
@@ -160,3 +155,30 @@ def projectIdAndDateInput(request):
                               'form': form,
                               'title': 'Project ID & Dates'
                           })
+
+
+def deleteTemplate(request, rbID):
+    options = helperfuncs.SIDEBAR_OPTIONS
+    appLabel = 'ratemanager'
+
+    RatebookTemplate.objects.all().filter(RatebookID=rbID).delete()
+    RatebookMetadata.objects.filter(
+        RatebookID=rbID,
+        RatebookStatusType='Initial Draft'
+        ).delete()
+    messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
+    initial = {}
+    if request.session.get('TemplateFormData'):
+        createTemplateFormPrefilled = createTemplateForm(
+            initial=request.session['TemplateFormData']
+            )
+    else:
+        createTemplateFormPrefilled = createTemplateForm(initial=initial)
+
+    return render(request, 'ratemanager/Template.html',
+                  {
+                    'createTemplateForm': createTemplateFormPrefilled,
+                    'options': options,
+                    'appLabel': appLabel,
+                    'title': 'Template',
+                    })
