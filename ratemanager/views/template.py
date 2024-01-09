@@ -24,6 +24,8 @@ def template(request):
             # check for existing template/Ratebook in production and if found show that it already exists.
             identityDetails = helperfuncs.extractIdentityDetails(form_data)
             searchResults = RatebookMetadata.objects.filter(**identityDetails)
+            if request.POST['submit'] == 'Create a new ratebook':
+                return redirect('ratemanager:projectIdAndDateInput')
             if searchResults.count() > 0 or request.POST['submit'] == 'Search':
 
                 # check for matching drafts if found show the draft.
@@ -46,8 +48,7 @@ def template(request):
                                 'title': 'Template',
                                 'searchResults': searchResults
                                 })
-            elif request.POST['submit'] == 'Create a new ratebook':
-                return redirect('ratemanager:projectIdAndDateInput')
+
             else:
                 messages.add_message(request, messages.INFO, "No matching Templates found.")
                 return redirect('ratemanager:template')
