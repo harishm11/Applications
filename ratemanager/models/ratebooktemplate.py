@@ -14,6 +14,15 @@ class RatebookTemplate(models.Model):
     )
 
     RatebookExhibit = models.ForeignKey(
-        RatingExhibits, on_delete=models.DO_NOTHING)
-    ExhibitVariables = models.ManyToManyField(RatingVariables)
-    ExhibitCoverages = models.ManyToManyField(coverage.Coverage)
+        RatingExhibits,
+        on_delete=models.CASCADE,
+        verbose_name='Exhibits Belonging to this Ratebook'
+    )
+    ExhibitVariables = models.ManyToManyField(
+        RatingVariables,
+        verbose_name='Variables belonging to this Exhibit'
+    )
+    ExhibitCoverages = models.ManyToManyField(
+        coverage.Coverage,
+        verbose_name='Coverages belonging to this Exhibit'
+    )

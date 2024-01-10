@@ -158,6 +158,10 @@ def projectIdAndDateInput(request):
 
 
 def deleteTemplate(request, rbID):
+    '''
+    Deletes all the template entries and
+    also the Rb metadata entry if the status is in Initial draft
+    '''
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 

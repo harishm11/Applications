@@ -59,81 +59,106 @@ class RatebookMetadata(models.Model):
         max_length=50,
         blank=True,
         null=False,
-        default=None
+        default=None,
+        verbose_name='project ID'
     )
     ProjectDescription = models.CharField(
         max_length=500,
         blank=True,
         null=True,
-        default=None
+        default=None,
+        verbose_name='Project Description'
     )
     RatebookVersion = models.FloatField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='Ratebook Version'
     )
     RatebookName = models.CharField(
         max_length=100,
         null=False,
-        default=None
+        default=None,
+        verbose_name='Ratebook Name'
     )
     RatebookRevisionType = models.CharField(
         max_length=50,
         null=False,
-        default=None
+        default=None,
+        verbose_name='Ratebook Revision Type'
     )
     RatebookStatusType = models.CharField(
         max_length=50,
         null=False,
-        default=None
+        default=None,
+        verbose_name='Ratebook Status Type'
     )
     RatebookChangeType = models.CharField(
         max_length=50,
         null=False,
-        default=None
+        default=None,
+        verbose_name='Ratebook Change Type'
     )
     NewBusinessEffectiveDate = models.DateField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='New Business Effective Date'
     )
     NewBusinessExpiryDate = models.DateField(
         null=True,
-        default=None
+        default=None,
+        verbose_name='New Business Expiry Date'
     )
     RenewalEffectiveDate = models.DateField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='Renewal Effective Date'
     )
     RenewalExpiryDate = models.DateField(
         null=True,
-        default=None
+        default=None,
+        verbose_name='Renewal Expiry Date'
     )
     ActivationDate = models.DateField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='Activation Date'
     )
     ActivationTime = models.TimeField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='Activation Time'
     )
     MigrationDate = models.DateField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='Migration Date'
     )
     MigrationTime = models.TimeField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='Migration Time'
     )
     CreationDateTime = models.DateTimeField(
         null=False,
-        default=None
+        default=None,
+        verbose_name='Creation DateTime'
     )
     Environment = models.CharField(
         max_length=50,
         default='Rate Development',
-        null=True
+        null=True,
+        verbose_name='Environment'
     )
-    is_deleted = models.BooleanField(null=True, default=False)
-    on_hold = models.BooleanField(null=True, default=False)
+    is_deleted = models.BooleanField(
+        null=True,
+        default=False,
+        verbose_name='Delete Status'
+    )
+    on_hold = models.BooleanField(
+        null=True,
+        default=False,
+        verbose_name='Hold Status'
+    )
 
     def save(self, *args, **kwargs):
         self.RatebookName = str(self.State) + '_' + str(self.ProductCode)

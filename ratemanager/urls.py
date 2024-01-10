@@ -34,7 +34,9 @@ urlpatterns = [
     # path('createTemplate/', createTemplate.createTemplate, name="createTemplate"),
     path('listExhibits/<str:pk>/', createTemplate.listExhibits, name="listExhibits"),
     path('addExhibit2Template/', createTemplate.addExhibit2Template, name="addExhibit2Template"),
+
     path('editExhibitTemplate/<str:pk>/', createTemplate.editExhibitTemplate, name="editExhibitTemplate"),
+    # Delete an Exhibit from the given template.
     path('deleteExhibitTemplate/<str:pk>/', createTemplate.deleteExhibitTemplate, name="deleteExhibitTemplate"),
     path('EditCoverages/', views.EditCoverages, name="EditCoverages"),
     # view rb template

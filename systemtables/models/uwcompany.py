@@ -3,7 +3,7 @@ from ..models.carrier import Carrier
 
 
 class Uwcompany(models.Model):
-    CompanyName = models.CharField(max_length=255, null=True, blank=True)
+    CompanyName = models.CharField(max_length=255, null=True, blank=True, verbose_name='Company Name')
     Carrier = models.ForeignKey(
         Carrier, on_delete=models.CASCADE, null=True, blank=True)
     EnableInd = models.BooleanField(default=True)
