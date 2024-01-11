@@ -1,8 +1,12 @@
 from django import forms
 from django.apps import apps
 from datetime import datetime
-from ratemanager.models import RatebookMetadata, RatingFactors, \
-    RatingExhibits, RatebookTemplate
+
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+from ratemanager.models.ratingfactors import RatingFactors
+from ratemanager.models.ratingexhibits import RatingExhibits
+
 import ratemanager.views.HelperFunctions as helperfuncs
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
@@ -18,6 +22,23 @@ try:
     policySubType = apps.get_model('systemtables', 'policysubtype')
 except LookupError:
     pass
+
+
+def setVerboseNamesAsLabels(self):
+    self.fields['LineofBusiness'].label = lineOfBusiness._meta.get_field(
+        'LobName').verbose_name
+    self.fields['State'].label = state._meta.get_field(
+        'StateCode').verbose_name
+    self.fields['Carrier'].label = carrier._meta.get_field(
+        'CarrierName').verbose_name
+    self.fields['UWCompany'].label = uwCompany._meta.get_field(
+        'CompanyName').verbose_name
+    self.fields['ProductCode'].label = productCode._meta.get_field(
+        'ProductCd').verbose_name
+    self.fields['PolicyType'].label = policyType._meta.get_field(
+        'PolicyTypeName').verbose_name
+    self.fields['PolicySubType'].label = policySubType._meta.get_field(
+        'PolicySubTypeName').verbose_name
 
 
 class ViewRBForm(forms.ModelForm):
@@ -227,18 +248,15 @@ class createTemplateForm(forms.ModelForm):
         fields = ([
             'State', 'Carrier', 'LineofBusiness',
             'UWCompany', 'PolicyType', 'PolicySubType',
-            'ProductCode',
-            #    'ProjectID',
-            #    'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
-            #    'MigrationDate', 'MigrationTime',
-            #    'ActivationDate', 'ActivationTime',
-            ])
+            'ProductCode'
+        ])
 
-        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
+        # exclude = ([])
 
         labels = dict()
         for i in fields:
-            labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+            # appModel = apps.get_model('systemtables', i.lower().replace(' ', ''))
+            labels[i] = RatebookMetadata._meta.get_field(i).verbose_name
 
         widgets = {
             'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
@@ -248,6 +266,11 @@ class createTemplateForm(forms.ModelForm):
             'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
             'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        setVerboseNamesAsLabels(self)
 
 
 class projectIdAndDateInputForm(forms.ModelForm):
@@ -285,10 +308,6 @@ class exportRBForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         label='Select Exhibits to Export'
         )
-
-
-class inputPKForm(forms.Form):
-    pk = forms.IntegerField(label='Enter Ratebook Primary Key', required=True)
 
 
 class editExhibitForm(forms.ModelForm):
@@ -339,3 +358,11 @@ class selectExhibitListsForm(forms.ModelForm):
     class Meta:
         model = RatebookTemplate
         fields = ()
+
+
+class selectExhibitListsFormExistingRB(selectExhibitListsForm):
+    def __init__(self, *args, **kwargs):
+        rbID = kwargs.pop('rbID')
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
+        choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
+        self.fields['toAddExhibits'].queryset = RatingExhibits.objects.filter(ratebooktemplate__in=choices)

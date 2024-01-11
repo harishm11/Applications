@@ -2,7 +2,9 @@ import io
 import pandas as pd
 from django.http import FileResponse
 import ratemanager.views.HelperFunctions as hf
-from ratemanager.models import RatebookMetadata, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+
 from django.apps import apps
 from django.shortcuts import render
 from ratemanager.forms import exportRBForm
@@ -50,7 +52,10 @@ def exportRB(request):
                 data.append(toIn)
             else:
                 model = apps.get_model("systemtables", x.replace(' ', '').lower())
-                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
+                if model.__name__ == 'State':
+                    data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')).StateName)
+                else:
+                    data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
 
         pd.Series(index=export_details,
                   data=data
@@ -83,7 +88,10 @@ def exportTemplate(request, pk):
             data.append(toIn)
         else:
             model = apps.get_model("systemtables", x.replace(' ', '').lower())
-            data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
+            if model.__name__ == 'State':
+                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')).StateName)
+            else:
+                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
 
     pd.Series(index=export_details,
               data=data

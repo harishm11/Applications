@@ -34,7 +34,9 @@ urlpatterns = [
     # path('createTemplate/', createTemplate.createTemplate, name="createTemplate"),
     path('listExhibits/<str:pk>/', createTemplate.listExhibits, name="listExhibits"),
     path('addExhibit2Template/', createTemplate.addExhibit2Template, name="addExhibit2Template"),
+
     path('editExhibitTemplate/<str:pk>/', createTemplate.editExhibitTemplate, name="editExhibitTemplate"),
+    # Delete an Exhibit from the given template.
     path('deleteExhibitTemplate/<str:pk>/', createTemplate.deleteExhibitTemplate, name="deleteExhibitTemplate"),
     path('EditCoverages/', views.EditCoverages, name="EditCoverages"),
     # view rb template
@@ -53,4 +55,7 @@ urlpatterns = [
     # Template (checkpoint started building flows)
     path('template/', template.template, name="template"),
     path('projectIdAndDateInput/', template.projectIdAndDateInput, name="projectIdAndDateInput"),
+
+    # Delete Template
+    path('deleteTemplate/<str:rbID>/', template.deleteTemplate, name="deleteTemplate"),
 ]

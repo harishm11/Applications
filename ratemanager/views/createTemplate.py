@@ -1,7 +1,9 @@
-from ratemanager.forms import editExhibitForm, addExhibitForm, selectExhibitListsForm
+from ratemanager.forms import editExhibitForm, addExhibitForm, selectExhibitListsForm, selectExhibitListsFormExistingRB
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
-from ratemanager.models import RatebookMetadata, RatebookTemplate, RatingExhibits
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+from ratemanager.models.ratingexhibits import RatingExhibits
 from django.contrib import messages
 
 
@@ -111,10 +113,18 @@ def selectFromAllExhibitsList(request, id):
         form = selectExhibitListsForm(request.POST)
         choices = RatingExhibits.objects.all()
         form.fields['toAddExhibits'].queryset = choices
+        initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
+        form.fields['toAddExhibits'].initial = initial
+
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:
-                RatebookTemplate.objects.get_or_create(RatebookID=id.split('_')[0], RatebookExhibit=i)
+                newObj, _ = RatebookTemplate.objects.get_or_create(RatebookID=id.split('_')[0], RatebookExhibit=i)
+                sourceExhibit = RatebookTemplate.objects.all().filter(RatebookExhibit=i).first()
+                for i in sourceExhibit.ExhibitVariables.all():
+                    newObj.ExhibitVariables.add(i)
+                for i in sourceExhibit.ExhibitCoverages.all():
+                    newObj.ExhibitCoverages.add(i)
         return redirect('ratemanager:listExhibits', id)
 
 
@@ -122,19 +132,39 @@ def selectFromExistingRbExhibitsList(request, id):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
-    form = selectExhibitListsForm()
-    cloneFromRBid = request.POST.get('toCloneRB')
+    cloneFromRBid = request.POST.get('toCloneRB') or id
     rbID = cloneFromRBid.split('_')[0]
 
-    choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
-    form.fields['toAddExhibits'].choices = [(choice.id, choice.RatebookExhibit) for choice in choices]
-    return render(request, 'ratemanager/selectExhibitsOptions.html',
-                  {
-                        'form': form,
-                        'options': options,
-                        'appLabel': appLabel,
-                        'title': 'Add Exhibits'
-                    })
+    if request.method == 'GET':
+        form = selectExhibitListsFormExistingRB(rbID=rbID)
+        newRbID = request.session['NewRBid']
+        initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=newRbID))
+        form.fields['toAddExhibits'].initial = initial
+        return render(request, 'ratemanager/selectExhibitsOptions.html',
+                      {
+                            'form': form,
+                            'options': options,
+                            'appLabel': appLabel,
+                            'title': 'Add Exhibits'
+                        })
+
+    if request.method == 'POST':
+        newRbID = request.session['NewRBid']
+        form = selectExhibitListsFormExistingRB(data=request.POST, rbID=rbID)
+
+        if form.is_valid():
+            form_data = form.cleaned_data
+            for i in form_data['toAddExhibits']:
+                newObj, _ = RatebookTemplate.objects.get_or_create(RatebookID=newRbID.split('_')[0], RatebookExhibit=i)
+                sourceExhibit = RatebookTemplate.objects.all().filter(RatebookExhibit=i).first()
+                for i in sourceExhibit.ExhibitVariables.all():
+                    newObj.ExhibitVariables.add(i)
+                for i in sourceExhibit.ExhibitCoverages.all():
+                    newObj.ExhibitCoverages.add(i)
+            return redirect('ratemanager:selectFromAllExhibitsList', newRbID)
+        else:
+            messages.add_message(request, messages.SUCCESS, form.errors)
+            return redirect('ratemanager:selectFromExistingRbExhibitsList', cloneFromRBid)
 
 
 def listExhibits(request, pk):
@@ -157,7 +187,7 @@ def listExhibits(request, pk):
 
 
 def deleteExhibitTemplate(request, pk):
-    # delete the exhibit-rbid relationship from ratebooktemplate table
+    # delete the exhibit-rbid relationship from RatebookTemplate table
     RatebookTemplate.objects.get(pk=pk).delete()
     messages.add_message(request, messages.SUCCESS, "Exhibit Deleted Successfully")
     return redirect('ratemanager:listExhibits', request.session['currentlyEditingRatebook'])

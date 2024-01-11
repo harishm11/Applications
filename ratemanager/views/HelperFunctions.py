@@ -3,7 +3,11 @@ import re
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
-from ratemanager.models import RatebookMetadata, RatingFactors, RatingExhibits, RatingVariables, RatebookTemplate
+from ratemanager.models.ratebookmetadata import RatebookMetadata
+from ratemanager.models.ratebooktemplate import RatebookTemplate
+from ratemanager.models.ratingfactors import RatingFactors
+from ratemanager.models.ratingexhibits import RatingExhibits
+from ratemanager.models.ratingvariables import RatingVariables
 from myproj.settings import BASE_DIR
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
@@ -14,7 +18,6 @@ import sqlalchemy as sa
 from myproj.settings import DATABASES
 from difflib import get_close_matches
 import ratemanager.views.configs as configs
-from django.apps import apps
 
 coverage = apps.get_model('systemtables', 'coverage')
 
@@ -364,7 +367,7 @@ def transformRB(xl_url=None, df_sheets=None):
     for i in set(df_sheets.keys()) - set(df_out["Exhibit"].unique()):
         if i not in excludeList:
             msgs.append("Unable to transform {} table.".format(i))
-    map_covs_and_vars(df_out)
+    # map_covs_and_vars(df_out)
     # df_out.to_excel('./uploads/check_transform.xlsx')
     return df_out, msgs
 
@@ -884,12 +887,12 @@ def updateRatingExhibits(tdf, rbid, uploadURL):
     for i in ExList:
         TempRec = RatebookTemplate()
         TempRec.RatebookID = rbid.split('_')[0]  # remove version from rbid
-        ExhibitObj, _ = RatingExhibits.objects.get_or_create(Exhibit=i)
+        ExhibitObj, _ = RatingExhibits.objects.get_or_create(Exhibit=i, DisplayName=' '.join(camel_case_split(i)))
         TempRec.RatebookExhibit = ExhibitObj
         df = tdf[tdf["Exhibit"] == i]
         TempRec.save()
         for i in df['Coverage'].unique().tolist():
-            cov, _ = coverage.objects.get_or_create(CoverageCode=i)
+            cov, _ = coverage.objects.get_or_create(CoverageCode=configs.cov_mapping.get(i, i), CoverageName=i)
             # add the Coverage to the current Template
             TempRec.ExhibitCoverages.add(cov)
 

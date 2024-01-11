@@ -16,14 +16,14 @@
 {% block maincontent %}
 
 <div class="container">
-<h5>Template</h5>
 
 <!-- Create Intent Form -->
 <form method="post"
       id="rbMetadataForm"
-      action="/ratemanager/template/">
+      action="/ratemanager/template/"
+      class="form-control">
       {% csrf_token %}
-
+<!--
 <div class="form">
   <div class="row justify-content-center">
     <div class="radio text-center col-md-6">
@@ -44,23 +44,13 @@
     </div>
   </div>
 </div>
+-->
+
 <br>
 
 <!-- Current ratebook details form -->
-<table class="table table-responsive table-borderless table-sm w-75 mx-auto">
-  {% for field in createTemplateForm %}
-    {%if forloop.counter|divisibleby:"2" %}
-      <td>
-        <b>{{field.label}}</b>:&emsp;{{field}}
-      </td>
-    </tr>
-    {%else%}
-    <tr>
-      <td>
-        <b>{{field.label}}</b>:&emsp;{{field}}
-      </td>
-    {%endif%}
-  {%endfor%}
+<table class="table table-responsive">
+  {{ createTemplateForm.as_table }}
 </table>
 
 <div class="row justify-content-around">
@@ -74,8 +64,8 @@
   <input
       type="submit"
       name="submit"
-      value="Next"
-      class="btn btn-sm btn-primary col-md-1"
+      value="Create a new ratebook"
+      class="btn btn-sm btn-primary col-md-2"
       action="/ratemanager/template/"
     />
   </div>

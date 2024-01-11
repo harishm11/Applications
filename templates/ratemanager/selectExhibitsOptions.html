@@ -3,10 +3,19 @@
 {% block sidebarcontent %} 
   {% include 'ratemanager/sidebar.html' %} 
 {% endblock  %}
+{% block messagecontent %}
+{% if messages %}
+<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 <div class="container">
-<h6> Select from All Exhibits List </h6>
+<h6> Select from Exhibits List </h6>
 <form method="post">
       {% csrf_token %}
   <div class="w-75 mx-auto">
@@ -27,7 +36,7 @@
       type="submit"
       name="submit"
       class="btn btn-sm btn-primary col-md-2"
-      value="Submit"
+      value="Next"
       >
       </div>
   </div>

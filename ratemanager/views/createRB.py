@@ -1,7 +1,7 @@
 import traceback
 import pandas as pd
 from django.shortcuts import render
-from ratemanager.models import RatebookMetadata
+from ratemanager.models.ratebookmetadata import RatebookMetadata
 from django.utils.html import format_html
 import ratemanager.views.HelperFunctions as helperfuncs
 from django.utils import timezone
@@ -79,6 +79,10 @@ def loadNewRBtoDB(request):
         if RatebookMetadata.objects.filter(**identityRateDetails).count() == 0:
             rbObj, loaded_to_dbBooks = RatebookMetadata.objects.get_or_create(
                 **rate_details)
+        elif RatebookMetadata.objects.get(**identityRateDetails).RatebookChangeType \
+                in ['Initial', 'Initial Draft']:
+            rbObj = RatebookMetadata.objects.get(**identityRateDetails)
+            rbObj.RatebookChangeType = 'Rates Loaded'
         else:
             msgs.append('Another Ratebook with similar details already exists\
                         You may want to use Update.')
@@ -91,10 +95,14 @@ def loadNewRBtoDB(request):
                     xl_url=request.session['upload_url'])
                 msgs.extend(errors)
 
-                # update the rating exhibits and rating variables
+                # add the rating exhibits and rating variables to their respective tables
                 helperfuncs.updateRatingExhibits(
                     df, rbid=rbObj.id, uploadURL=request.session["upload_url"]
                 )
+
+                # Map the Cov and RateVars from Display Names to internal representation
+                helperfuncs.map_covs_and_vars(df)
+
                 df['Ratebook_id'] = rbObj.id
                 df['RatebookVersion'] = rate_details['RatebookVersion']
                 df['RatebookID'] = rate_details['RatebookID']

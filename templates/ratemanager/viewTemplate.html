@@ -6,6 +6,9 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
+<button id="expand-all">Expand All</button>
+<button id="hide-all">Hide All</button>
+
 {% for exhibit, data in TempleteObjectHeirarchy.items %}
 <details>
   <summary>{{ exhibit }}</summary>
@@ -23,5 +26,20 @@
 
 </details>
 {% endfor %}
+
+  <script>
+    const expandAllButton = document.getElementById('expand-all');
+    const hideAllButton = document.getElementById('hide-all');
+
+    expandAllButton.addEventListener('click', () => {
+      const detailsElements = document.querySelectorAll('details');
+      detailsElements.forEach(el => el.open = true);
+    });
+
+    hideAllButton.addEventListener('click', () => {
+      const detailsElements = document.querySelectorAll('details');
+      detailsElements.forEach(el => el.open = false);
+    });
+  </script>
 
 {% endblock %}
