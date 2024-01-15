@@ -26,7 +26,7 @@ def template(request):
             identityDetails = helperfuncs.extractIdentityDetails(form_data)
             searchResults = RatebookMetadata.objects.filter(
                     **identityDetails)
-            if request.POST['submit'] == 'Create a new ratebook':
+            if request.POST['submit'] == 'Create a new Ratebook/Template':
                 return redirect('ratemanager:projectIdAndDateInput')
             if searchResults.count() > 0 or request.POST['submit'] == 'Search':
 
