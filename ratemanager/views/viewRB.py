@@ -170,11 +170,14 @@ def viewTemplate(request, rbID):
     if RatebookTemplate.objects.filter(RatebookID=rbID).exists():
         ExhibitObjs = RatebookTemplate.objects.filter(RatebookID=rbID)
     TempleteObjectHeirarchy = dict()
-    for i in ExhibitObjs:
-        currentExhibitHeirarchy = dict()
-        currentExhibitHeirarchy['Rating Variables'] = i.ExhibitVariables.all()
-        currentExhibitHeirarchy['Coverages'] = i.ExhibitCoverages.all()
-        TempleteObjectHeirarchy[i.RatebookExhibit.Exhibit] = currentExhibitHeirarchy
+    if ExhibitObjs is not None:
+        for i in ExhibitObjs:
+            currentExhibitHeirarchy = dict()
+            currentExhibitHeirarchy['Rating Variables'] = i.ExhibitVariables.all()
+            currentExhibitHeirarchy['Coverages'] = i.ExhibitCoverages.all()
+            TempleteObjectHeirarchy[i.RatebookExhibit.Exhibit] = currentExhibitHeirarchy
+    else:
+        TempleteObjectHeirarchy = None
     return render(request, 'ratemanager/viewTemplate.html',
                   {
                     'TempleteObjectHeirarchy': TempleteObjectHeirarchy,
