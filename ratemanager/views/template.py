@@ -13,6 +13,8 @@ def template(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
+    searchResultTableHeaders = [field for field in RatebookMetadata._meta.fields]
+
     if request.method == 'POST':
         ratebook_details = request.POST.copy()
         # save the Form data to session before validation and main action
@@ -51,7 +53,8 @@ def template(request):
                                 'options': options,
                                 'appLabel': appLabel,
                                 'title': 'Template',
-                                'searchResults': searchResults
+                                'searchResults': searchResults,
+                                'searchResultTableHeaders': searchResultTableHeaders
                                 })
         else:
             messages.add_message(request, messages.ERROR,

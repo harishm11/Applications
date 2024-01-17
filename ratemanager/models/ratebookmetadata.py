@@ -5,6 +5,23 @@ from systemtables.models import \
     policysubtype
 
 
+def setForeignKeysVerboseNames(self):
+    self.fields['LineofBusiness'].verbose_name = lineofbusiness.LineOfBusiness._meta.get_field(
+        'LobName').verbose_name
+    self.fields['State'].verbose_name = state.State._meta.get_field(
+        'StateCode').verbose_name
+    self.fields['Carrier'].verbose_name = carrier.Carrier._meta.get_field(
+        'CarrierName').verbose_name
+    self.fields['UWCompany'].verbose_name = uwcompany.Uwcompany._meta.get_field(
+        'CompanyName').verbose_name
+    self.fields['ProductCode'].verbose_name = productcode.ProductCode._meta.get_field(
+        'ProductCd').verbose_name
+    self.fields['PolicyType'].verbose_name = policytype.PolicyType._meta.get_field(
+        'PolicyTypeName').verbose_name
+    self.fields['PolicySubType'].verbose_name = policysubtype.PolicySubType._meta.get_field(
+        'PolicySubTypeName').verbose_name
+
+
 class RatebookMetadata(models.Model):
     id = models.CharField(
         max_length=50,
@@ -18,7 +35,8 @@ class RatebookMetadata(models.Model):
         max_length=50,
         blank=True,
         null=False,
-        default=None
+        default=None,
+        verbose_name='ID'
     )
     Carrier = models.ForeignKey(
         carrier.Carrier,
@@ -60,7 +78,7 @@ class RatebookMetadata(models.Model):
         blank=True,
         null=False,
         default=None,
-        verbose_name='project ID'
+        verbose_name='Project ID'
     )
     ProjectDescription = models.CharField(
         max_length=500,
@@ -72,31 +90,31 @@ class RatebookMetadata(models.Model):
     RatebookVersion = models.FloatField(
         null=False,
         default=None,
-        verbose_name='Ratebook Version'
+        verbose_name='Version'
     )
     RatebookName = models.CharField(
         max_length=100,
         null=False,
         default=None,
-        verbose_name='Ratebook Name'
+        verbose_name='Name'
     )
     RatebookRevisionType = models.CharField(
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Ratebook Revision Type'
+        verbose_name='Revision Type'
     )
     RatebookStatusType = models.CharField(
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Ratebook Status Type'
+        verbose_name='Status Type'
     )
     RatebookChangeType = models.CharField(
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Ratebook Change Type'
+        verbose_name='Change Type'
     )
     NewBusinessEffectiveDate = models.DateField(
         null=False,
@@ -149,18 +167,24 @@ class RatebookMetadata(models.Model):
         null=True,
         verbose_name='Environment'
     )
-    is_deleted = models.BooleanField(
+    isDeleted = models.BooleanField(
         null=True,
         default=False,
         verbose_name='Delete Status'
     )
-    on_hold = models.BooleanField(
+    onHold = models.BooleanField(
         null=True,
         default=False,
         verbose_name='Hold Status'
+    )
+    retrofitReq = models.BooleanField(
+        null=True,
+        default=False,
+        verbose_name='Retrofit Required?'
     )
 
     def save(self, *args, **kwargs):
         self.RatebookName = str(self.State) + '_' + str(self.ProductCode)
         self.id = self.RatebookID + '_' + str(self.RatebookVersion)
+        setForeignKeysVerboseNames(self)
         super(RatebookMetadata, self).save(*args, **kwargs)
