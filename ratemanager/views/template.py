@@ -13,8 +13,10 @@ def template(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
-    searchResultTableHeaders = [field for field in RatebookMetadata._meta.fields]
-
+    # Left overs 'id', 'Environment', 'isDeleted', 'onHold', 'retrofitReq', 'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode',
+    searchResultTableHeadersNamesOrder = ['RatebookName', 'RatebookID',  'ProjectID', 'ProjectDescription', 'RatebookVersion', 'RatebookRevisionType', 'RatebookStatusType', 'RatebookChangeType', 'NewBusinessEffectiveDate', 'NewBusinessExpiryDate', 'RenewalEffectiveDate', 'RenewalExpiryDate', 'ActivationDate', 'ActivationTime', 'MigrationDate', 'MigrationTime', 'CreationDateTime']
+    fieldsDict = {x.name: x for x in RatebookMetadata._meta.fields}
+    searchResultTableHeaders = [fieldsDict[field] for field in searchResultTableHeadersNamesOrder]
     if request.method == 'POST':
         ratebook_details = request.POST.copy()
         # save the Form data to session before validation and main action
