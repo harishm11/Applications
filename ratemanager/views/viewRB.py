@@ -175,7 +175,7 @@ def viewTemplate(request, rbID):
             currentExhibitHeirarchy = dict()
             currentExhibitHeirarchy['Rating Variables'] = i.ExhibitVariables.all()
             currentExhibitHeirarchy['Coverages'] = i.ExhibitCoverages.all()
-            TempleteObjectHeirarchy[i.RatebookExhibit.Exhibit] = currentExhibitHeirarchy
+            TempleteObjectHeirarchy[(i.id, i.RatebookExhibit.Exhibit)] = currentExhibitHeirarchy
     else:
         TempleteObjectHeirarchy = None
     return render(request, 'ratemanager/viewTemplate.html',

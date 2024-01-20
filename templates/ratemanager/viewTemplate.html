@@ -21,10 +21,12 @@
   <hr>
 
 {% if TempleteObjectHeirarchy is not None %}
-
+<table class="table table-sm table-condensed cell-border">
   {% for exhibit, data in TempleteObjectHeirarchy.items %}
+  <tr>
+  <td>
   <details>
-    <summary>{{ exhibit }}</summary>
+    <summary>{{ exhibit.1 }}</summary>
       {% for field, list in data.items %}
       <ul>
           <details>
@@ -38,8 +40,19 @@
       {% endfor %}
 
   </details>
+  </td>
+  <td>
+    <a 
+    href=""
+    hx-get="/ratemanager/previewExhibit/{{ exhibit.0 }}/" 
+    hx-target="#preview-popup" 
+    hx-trigger="click"
+    data-bs-toggle="modal"
+    data-bs-target="#preview-popup"> Preview </a>
+  </td>
+  </tr>
   {% endfor %}
-
+</table>
     <script>
       const expandAllButton = document.getElementById('expand-all');
       const hideAllButton = document.getElementById('hide-all');
@@ -57,4 +70,15 @@
 {% else %}
     No Exhibits have been added to this Template yet.
 {% endif %}
+<!-- Popup Preview -->
+<div id="preview-popup"
+    class="modal modal-blur fade"
+    style="display: none"
+    aria-hidden="false"
+    tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
+</div>
 {% endblock %}

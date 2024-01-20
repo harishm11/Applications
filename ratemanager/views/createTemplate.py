@@ -125,6 +125,9 @@ def selectFromAllExhibitsList(request, id):
                     newObj.ExhibitVariables.add(i)
                 for i in sourceExhibit.ExhibitCoverages.all():
                     newObj.ExhibitCoverages.add(i)
+            for i in RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]):
+                if i.RatebookExhibit not in form_data['toAddExhibits']:
+                    i.delete()
         return redirect('ratemanager:listExhibits', id)
 
 
