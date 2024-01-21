@@ -291,13 +291,14 @@ class projectIdAndDateInputForm(forms.ModelForm):
             labels[i] = ' '.join(helperfuncs.camel_case_split(i))
 
         widgets = {
-            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
-            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
-            'ProjectDescription': forms.Textarea(attrs={"rows": "2"})
+            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any', 'class': 'form-control form-control-sm'}),
+            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any', 'class': 'form-control form-control-sm'}),
+            'ProjectDescription': forms.Textarea(attrs={"rows": "2", 'class': 'form-control form-control-sm'}),
+            'ProjectID': forms.Textarea(attrs={"rows": "1", 'class': 'form-control form-control-sm'})
         }
 
 

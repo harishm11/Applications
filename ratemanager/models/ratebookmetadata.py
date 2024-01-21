@@ -186,5 +186,5 @@ class RatebookMetadata(models.Model):
     def save(self, *args, **kwargs):
         self.RatebookName = str(self.State) + '_' + str(self.ProductCode)
         self.id = self.RatebookID + '_' + str(self.RatebookVersion)
-        setForeignKeysVerboseNames(self)
+        # setForeignKeysVerboseNames(self)
         super(RatebookMetadata, self).save(*args, **kwargs)
