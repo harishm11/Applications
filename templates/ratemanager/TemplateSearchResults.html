@@ -1,7 +1,8 @@
 {% load dynamicdatatable_tags %}
 
-Search Results:
-<div class="container table-responsive">          
+<center>
+<div id="results" class="container table-responsive">
+  <b>Search Results:</b>
   <table id="example" class="table table-sm table-condensed table-bordered text-center">
     <thead>
       <tr>
@@ -9,6 +10,7 @@ Search Results:
         <th>Modify</th>
         <th>Delete</th>
         <th>Download</th>
+        <th>Clone</th>
         {% with searchResultTableHeaders|first as obj %}
         {% for field in searchResultTableHeaders %}
         <th>{{ field.verbose_name }}</th>
@@ -40,6 +42,11 @@ Search Results:
           ><i class="fa fa-download"></i
           ></a>
         </td>
+        <td>
+          <a title="Clone" href="{% url 'ratemanager:projectIdAndDateInput' %}"
+          ><i class="fa fa-download"></i
+          ></a>
+        </td>
         {% for field in searchResultTableHeaders %} 
           <td>{{ obj|get_attribute:field.name }}</td>
         {% endfor %}
@@ -48,3 +55,4 @@ Search Results:
     </tbody>
   </table>
 </div>
+</center>

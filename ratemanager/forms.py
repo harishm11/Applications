@@ -259,17 +259,17 @@ class createTemplateForm(forms.ModelForm):
             labels[i] = RatebookMetadata._meta.get_field(i).verbose_name
 
         widgets = {
-            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
-            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'})
+            'State': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'Carrier': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'LineofBusiness': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'UWCompany': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'PolicyType': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'PolicySubType': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'ProductCode': forms.Select(attrs={'class': 'form-control form-control-sm'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         setVerboseNamesAsLabels(self)
 
 

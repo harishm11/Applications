@@ -13,72 +13,73 @@ def template(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
-    # Left overs 'id', 'Environment', 'isDeleted', 'onHold', 'retrofitReq', 'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode',
-    searchResultTableHeadersNamesOrder = ['RatebookName', 'RatebookID',  'ProjectID', 'ProjectDescription', 'RatebookVersion', 'RatebookRevisionType', 'RatebookStatusType', 'RatebookChangeType', 'NewBusinessEffectiveDate', 'NewBusinessExpiryDate', 'RenewalEffectiveDate', 'RenewalExpiryDate', 'ActivationDate', 'ActivationTime', 'MigrationDate', 'MigrationTime', 'CreationDateTime']
+    # Left overs 'id', 'Environment', 'isDeleted', 'onHold', 'retrofitReq', 'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode', 'NewBusinessExpiryDate', 'RenewalExpiryDate',
+    searchResultTableHeadersNamesOrder = ['RatebookName', 'RatebookID',  'ProjectID', 'ProjectDescription', 'RatebookVersion', 'RatebookRevisionType', 'RatebookStatusType', 'RatebookChangeType', 'NewBusinessEffectiveDate',  'RenewalEffectiveDate',  'ActivationDate', 'ActivationTime', 'MigrationDate', 'MigrationTime', 'CreationDateTime']
     fieldsDict = {x.name: x for x in RatebookMetadata._meta.fields}
     searchResultTableHeaders = [fieldsDict[field] for field in searchResultTableHeadersNamesOrder]
+
+    form = createTemplateForm()
+
+    # save the Form data to session before validation and main action
     if request.method == 'POST':
         ratebook_details = request.POST.copy()
-        # save the Form data to session before validation and main action
         request.session['TemplateFormData'] = ratebook_details
         form = createTemplateForm(ratebook_details)
-        if form.is_valid():
-            # save the cleaned Form data to session
-            form_data = form.cleaned_data
 
-            # check for existing template/Ratebook in production and if found show that it already exists.
-            identityDetails = helperfuncs.extractIdentityDetails(form_data)
-            searchResults = RatebookMetadata.objects.filter(
-                    **identityDetails)
-            if request.POST['submit'] == 'Create a new Ratebook/Template':
-                return redirect('ratemanager:projectIdAndDateInput')
-            if searchResults.count() > 0 or request.POST['submit'] == 'Search':
+    # Required for GET requests
+    if request.method == 'GET' and request.session.get('TemplateFormData'):
+        form = createTemplateForm(
+            request.session['TemplateFormData']
+        )
 
-                # check for matching drafts if found show the draft.
-                if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
-                    messages.add_message(
-                        request, messages.INFO, RATE_MANAGER['MES_0001'])
-                elif searchResults.count() > 0:
-                    messages.add_message(
-                        request, messages.INFO, RATE_MANAGER['MES_0002'])
-                else:
-                    messages.add_message(
-                        request, messages.INFO, RATE_MANAGER['MES_0003'])
+    # Mostly the form will only be valid if it is a POST request
+    if form.is_valid():
+        # save the cleaned Form data to session
+        form_data = form.cleaned_data
 
-                searchResults.order_by(
-                    'RatebookID', 'RatebookStatusType', '-RatebookVersion'
-                ).distinct('RatebookID', 'RatebookStatusType')
+        # check for existing template/Ratebook in production and if found show that it already exists.
+        identityDetails = helperfuncs.extractIdentityDetails(form_data)
+        searchResults = RatebookMetadata.objects.filter(
+                **identityDetails)
+        if 'Create a new Ratebook/Template' == request.POST.get('submit'):
+            return redirect('ratemanager:projectIdAndDateInput')
+        if searchResults.count() > 0 or request.POST['submit'] == 'Search':
 
-                return render(request, 'ratemanager/Template.html',
-                              {
-                                'createTemplateForm': form,
-                                'options': options,
-                                'appLabel': appLabel,
-                                'title': 'Template',
-                                'searchResults': searchResults,
-                                'searchResultTableHeaders': searchResultTableHeaders
-                                })
-        else:
-            messages.add_message(request, messages.ERROR,
-                                 "Form invalid, Try Again")
-            return redirect('ratemanager:template')
+            # check for matching drafts if found show the draft.
+            if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
+                messages.add_message(
+                    request, messages.INFO, RATE_MANAGER['MES_0001'])
+            elif searchResults.count() > 0:
+                messages.add_message(
+                    request, messages.INFO, RATE_MANAGER['MES_0002'])
+            else:
+                messages.add_message(
+                    request, messages.INFO, RATE_MANAGER['MES_0003'])
 
-    if request.method == 'GET':
-        initial = {}
-        if request.session.get('TemplateFormData'):
-            createTemplateFormPrefilled = createTemplateForm(
-                initial=request.session['TemplateFormData']
-            )
-        else:
-            createTemplateFormPrefilled = createTemplateForm(initial=initial)
+            searchResults.order_by(
+                'RatebookID', 'RatebookStatusType', '-RatebookVersion'
+            ).distinct('RatebookID', 'RatebookStatusType')
 
+            return render(request, 'ratemanager/Template.html',
+                          {
+                            'createTemplateForm': form,
+                            'options': options,
+                            'appLabel': appLabel,
+                            'title': 'Template',
+                            'searchResults': searchResults,
+                            'searchResultTableHeaders': searchResultTableHeaders
+                            })
+    else:
+        messages.add_message(request, messages.ERROR,
+                             RATE_MANAGER['MES_0006'])
+        print(form.data)
         return render(request, 'ratemanager/Template.html',
                       {
-                          'createTemplateForm': createTemplateFormPrefilled,
-                          'options': options,
-                          'appLabel': appLabel,
-                          'title': 'Template',
-                      })
+                        'createTemplateForm': form,
+                        'options': options,
+                        'appLabel': appLabel,
+                        'title': 'Template',
+                        })
 
 
 def projectIdAndDateInput(request):
