@@ -96,12 +96,17 @@ def projectIdAndDateInput(request):
             'MigrationTime': timezone.now()
         }
         form = projectIdAndDateInputForm(initial=initial)
+        searchOptions = createTemplateForm(
+                data=request.session['TemplateFormData'])
+        if searchOptions.is_valid():
+            searchOptionsData = searchOptions.cleaned_data
         return render(request, 'ratemanager/ProjectIdAndDateInput.html',
                       {
                           'options': options,
                           'appLabel': appLabel,
                           'form': form,
-                          'title': 'Project ID & Dates'
+                          'title': 'Project ID & Dates',
+                          'searchOptionsData': searchOptionsData
                       })
 
     if request.method == 'POST':

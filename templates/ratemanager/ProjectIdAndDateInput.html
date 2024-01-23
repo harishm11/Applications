@@ -13,6 +13,12 @@
 {% load crispy_forms_tags %}
 {% block maincontent %}
 <div class="container">
+  <div class="text-center">
+  {% for key, value in searchOptionsData.items %}
+    {{ value }} |&ensp;
+  {% endfor %}
+  </div>
+  <hr>
 <form class="form"
       method="post">
     {% csrf_token %}
