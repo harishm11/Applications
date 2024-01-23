@@ -278,13 +278,11 @@ class projectIdAndDateInputForm(forms.ModelForm):
         model = RatebookMetadata
 
         fields = ([
-                    'ProjectID', 'ProjectDescription',
                     'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
-                    'MigrationDate', 'MigrationTime',
-                    'ActivationDate', 'ActivationTime',
+                    'ProjectID', 'ProjectDescription',
                     ])
 
-        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
+        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate','MigrationDate', 'MigrationTime', 'ActivationDate', 'ActivationTime',])
 
         labels = dict()
         for i in fields:

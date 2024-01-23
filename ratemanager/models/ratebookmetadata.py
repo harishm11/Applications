@@ -137,22 +137,22 @@ class RatebookMetadata(models.Model):
         verbose_name='Renewal Expiry Date'
     )
     ActivationDate = models.DateField(
-        null=False,
+        null=True,
         default=None,
         verbose_name='Activation Date'
     )
     ActivationTime = models.TimeField(
-        null=False,
+        null=True,
         default=None,
         verbose_name='Activation Time'
     )
     MigrationDate = models.DateField(
-        null=False,
+        null=True,
         default=None,
         verbose_name='Migration Date'
     )
     MigrationTime = models.TimeField(
-        null=False,
+        null=True,
         default=None,
         verbose_name='Migration Time'
     )
