@@ -10,7 +10,7 @@
         <th>Modify</th>
         <th>Delete</th>
         <th>Download</th>
-        <th>Clone</th>
+        <th>Create</th>
         {% with searchResultTableHeaders|first as obj %}
         {% for field in searchResultTableHeaders %}
         <th>{{ field.verbose_name }}</th>
@@ -43,8 +43,8 @@
           ></a>
         </td>
         <td>
-          <a title="Clone" href="{% url 'ratemanager:projectIdAndDateInput' %}"
-          ><i class="fa fa-clone"></i
+          <a title="Create" href="{% url 'ratemanager:projectIdAndDateInput' %}?rbID={{ obj.RatebookID }}"
+          ><i class="fa fa-plus"></i
           ></a>
         </td>
         {% for field in searchResultTableHeaders %} 

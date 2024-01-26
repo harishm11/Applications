@@ -15,7 +15,11 @@
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 <div class="container">
-<h6> Select from Exhibits List </h6>
+  {% if 'selectFromAllExhibitsList' in request.path %}
+    <h6> Select Exhibits to add (showing options from all the exhibits) </h6>
+  {% elif 'selectFromExistingRbExhibitsList' in request.path %}
+    <h6> Select the Exhibits to add (showing options from previously selected ratebook)</h6>
+  {% endif %}
 <form method="post">
       {% csrf_token %}
   <div class="w-75 mx-auto">

@@ -95,6 +95,7 @@ def projectIdAndDateInput(request):
             'MigrationDate': timezone.now().date(),
             'MigrationTime': timezone.now()
         }
+        rbID = request.GET.get('rbID')
         form = projectIdAndDateInputForm(initial=initial)
         searchOptions = createTemplateForm(
                 data=request.session['TemplateFormData'])
@@ -106,7 +107,8 @@ def projectIdAndDateInput(request):
                           'appLabel': appLabel,
                           'form': form,
                           'title': 'Project ID & Dates',
-                          'searchOptionsData': searchOptionsData
+                          'searchOptionsData': searchOptionsData,
+                          'rbID': rbID
                       })
 
     if request.method == 'POST':
@@ -150,11 +152,16 @@ def projectIdAndDateInput(request):
             form_data['RatebookVersion'] = 0.0
             obj = RatebookMetadata.objects.create(**form_data)
             request.session['NewRBid'] = obj.id
-            if request.POST['CreateFrom'] == 'clone':
+            if request.POST.get('CreateFrom') == 'clone':
                 return redirect('ratemanager:cloneOptions', prodCode=request.session['TemplateFormData']['ProductCode'])
-            elif request.POST['CreateFrom'] == 'fromScratch':
+            elif request.POST.get('CreateFrom') == 'fromScratch':
                 request.session['CreatedTemplateMetadata'] = obj.id
                 return redirect('ratemanager:selectFromAllExhibitsList', id=obj.id)
+            elif request.POST.get('rbID'):
+                return redirect(
+                    'ratemanager:selectFromExistingRbExhibitsList',
+                    id=request.POST.get('rbID')
+                    )
 
         else:
             messages.add_message(request, messages.ERROR,
@@ -173,8 +180,6 @@ def deleteTemplate(request, rbID):
     Deletes all the template entries and
     also the Rb metadata entry if the status is in Initial draft
     '''
-    options = helperfuncs.SIDEBAR_OPTIONS
-    appLabel = 'ratemanager'
 
     RatebookTemplate.objects.all().filter(RatebookID=rbID).delete()
     RatebookMetadata.objects.filter(
@@ -182,18 +187,5 @@ def deleteTemplate(request, rbID):
         RatebookStatusType='Initial Draft'
         ).delete()
     messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
-    initial = {}
-    if request.session.get('TemplateFormData'):
-        createTemplateFormPrefilled = createTemplateForm(
-            initial=request.session['TemplateFormData']
-            )
-    else:
-        createTemplateFormPrefilled = createTemplateForm(initial=initial)
 
-    return render(request, 'ratemanager/Template.html',
-                  {
-                    'createTemplateForm': createTemplateFormPrefilled,
-                    'options': options,
-                    'appLabel': appLabel,
-                    'title': 'Template',
-                    })
+    return redirect('ratemanager:template')
