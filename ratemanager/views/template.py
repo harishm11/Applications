@@ -72,7 +72,6 @@ def template(request):
     else:
         messages.add_message(request, messages.ERROR,
                              RATE_MANAGER['MES_0006'])
-        print(form.data)
         return render(request, 'ratemanager/Template.html',
                       {
                         'createTemplateForm': form,
