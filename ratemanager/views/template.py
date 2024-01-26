@@ -43,7 +43,7 @@ def template(request):
                 **identityDetails)
         if 'Create a new Ratebook/Template' == request.POST.get('submit'):
             return redirect('ratemanager:projectIdAndDateInput')
-        if searchResults.count() > 0 or request.POST['submit'] == 'Search':
+        if searchResults.count() > 0 or request.POST.get('submit') == 'Search':
 
             # check for matching drafts if found show the draft.
             if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
@@ -60,15 +60,15 @@ def template(request):
                 'RatebookID', 'RatebookStatusType', '-RatebookVersion'
             ).distinct('RatebookID', 'RatebookStatusType')
 
-            return render(request, 'ratemanager/Template.html',
-                          {
-                            'createTemplateForm': form,
-                            'options': options,
-                            'appLabel': appLabel,
-                            'title': 'Template',
-                            'searchResults': searchResults,
-                            'searchResultTableHeaders': searchResultTableHeaders
-                            })
+        return render(request, 'ratemanager/Template.html',
+                      {
+                        'createTemplateForm': form,
+                        'options': options,
+                        'appLabel': appLabel,
+                        'title': 'Template',
+                        'searchResults': searchResults,
+                        'searchResultTableHeaders': searchResultTableHeaders
+                        })
     else:
         messages.add_message(request, messages.ERROR,
                              RATE_MANAGER['MES_0006'])

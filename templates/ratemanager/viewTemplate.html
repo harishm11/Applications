@@ -5,6 +5,14 @@
 {% endblock  %}
 {% load crispy_forms_tags %}
 {% block maincontent %} 
+<div class="text-center">
+  {{ rbID }} |&ensp;
+  {% for key, value in selectedData.items %}
+    {{ value }} |&ensp;
+  {% endfor %}
+
+<hr>
+
 <button
   type="button"
   name="back"
@@ -17,8 +25,9 @@
 <button 
   class="btn btn-sm btn-primary"
   id="hide-all">Hide All</button>
+</div> 
 
-  <hr>
+<br>
 
 {% if TempleteObjectHeirarchy is not None %}
 <table class="table table-sm table-condensed cell-border">

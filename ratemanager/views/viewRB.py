@@ -3,7 +3,7 @@ from django.shortcuts import render
 from ratemanager.models.ratebookmetadata import RatebookMetadata
 from ratemanager.models.ratebooktemplate import RatebookTemplate
 
-from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate
+from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate, createTemplateForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import ratemanager.views.HelperFunctions as helperfuncs
 from datetime import datetime
@@ -166,6 +166,10 @@ def viewTemplate(request, rbID):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
+    selectedData = createTemplateForm(
+                data=request.session['TemplateFormData'])
+    if selectedData.is_valid():
+        selectedData = selectedData.cleaned_data
     ExhibitObjs = None
     if RatebookTemplate.objects.filter(RatebookID=rbID).exists():
         ExhibitObjs = RatebookTemplate.objects.filter(RatebookID=rbID)
@@ -182,5 +186,7 @@ def viewTemplate(request, rbID):
                   {
                     'TempleteObjectHeirarchy': TempleteObjectHeirarchy,
                     'options': options,
-                    'appLabel': appLabel
+                    'appLabel': appLabel,
+                    'selectedData': selectedData,
+                    'rbID': rbID
                     })
