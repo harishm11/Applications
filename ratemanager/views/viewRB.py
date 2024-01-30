@@ -166,10 +166,17 @@ def viewTemplate(request, rbID):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
+    def fetchDisplayData(searchOptions):
+        cd = searchOptions.cleaned_data
+        searchOptionsData = {
+            searchOptions.fields[key].label: cd[key]
+            for key in ('State', 'PolicyType', 'PolicySubType', 'ProductCode')
+            }
+        return searchOptionsData
     selectedData = createTemplateForm(
                 data=request.session['TemplateFormData'])
     if selectedData.is_valid():
-        selectedData = selectedData.cleaned_data
+        selectedData = fetchDisplayData(selectedData)
     ExhibitObjs = None
     if RatebookTemplate.objects.filter(RatebookID=rbID).exists():
         ExhibitObjs = RatebookTemplate.objects.filter(RatebookID=rbID)

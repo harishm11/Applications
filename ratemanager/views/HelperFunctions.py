@@ -907,6 +907,8 @@ def extractIdentityDetails(dictionary: dict) -> dict:
     identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
                     'PolicyType', 'PolicySubType', 'ProductCode')
     identityRateDetails = {key: dictionary.get(key) for key in identityKeys}
+    if not any(identityRateDetails.values()):
+        identityRateDetails = {key+'_id': dictionary.get(key+'_id') for key in identityKeys}
     return identityRateDetails
 
 
@@ -952,3 +954,15 @@ def clone_object(obj, attrs={}):
                 for child in children:
                     clone_object(child, attrs)
     return clone
+
+
+def checkTemplateCreateButtonEnable(obj):
+    if configs.ENVIRONMENT_HIERARCHY.get(obj.Environment) == 0:
+        return False
+    else:
+        identDetails = extractIdentityDetails(obj.__dict__)
+        sortedSearcResults = RatebookMetadata.objects.filter(**identDetails) \
+            .order_by('-RatebookID', '-RatebookVersion')
+        if obj.id == sortedSearcResults.first().id:
+            return True
+    return False

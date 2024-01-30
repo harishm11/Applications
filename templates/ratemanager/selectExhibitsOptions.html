@@ -5,11 +5,9 @@
 {% endblock  %}
 {% block messagecontent %}
 {% if messages %}
-<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
     {% for message in messages %}
     <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
     {% endfor %}
-</div>
 {% endif %}
 {% endblock %}
 {% load crispy_forms_tags %}
@@ -32,14 +30,14 @@
       <button
       type="button"
       name="back"
-      class="btn btn-sm btn-secondary col-md-2"
+      class="btn btn-sm btn-secondary col-md-auto"
       onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
       >Back</button>
     
       <input
       type="submit"
       name="submit"
-      class="btn btn-sm btn-primary col-md-2"
+      class="btn btn-sm btn-primary col-md-auto"
       value="Next"
       >
       </div>

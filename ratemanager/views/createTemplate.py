@@ -180,6 +180,7 @@ def listExhibits(request, pk):
 
     return render(request, 'ratemanager/listExhibits.html',
                   {
+                    'title': 'List Exhibits in Template',
                     'options': options,
                     'appLabel': appLabel,
                     'ExhibitObjs': ExhibitObjs,

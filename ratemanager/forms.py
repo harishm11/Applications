@@ -224,23 +224,6 @@ class ViewRBFormWithDate(ViewRBForm):
     )
 
 
-class mainActionForm(forms.Form):
-    CHOICES = (
-        ('view', 'View'),
-        ('new', 'New'),
-        ('modify', 'Modify'),
-        ('delete', 'Delete'),
-        ('download', 'Download')
-        )
-
-    MainAction = forms.TypedChoiceField(
-        label='Create Intent: ',
-        choices=CHOICES,
-        required=True,
-        widget=forms.RadioSelect(),
-        )
-
-
 class createTemplateForm(forms.ModelForm):
     class Meta:
         model = RatebookMetadata
@@ -279,14 +262,14 @@ class projectIdAndDateInputForm(forms.ModelForm):
 
         fields = ([
                     'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
-                    'ProjectID', 'ProjectDescription',
+                    'ProjectDescription', 'RatebookChangeType'
                     ])
 
-        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate','MigrationDate', 'MigrationTime', 'ActivationDate', 'ActivationTime',])
+        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate','MigrationDate', 'MigrationTime', 'ActivationDate', 'ActivationTime', 'ProjectID',])
 
         labels = dict()
         for i in fields:
-            labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+            labels[i] = RatebookMetadata._meta.get_field(i).verbose_name
 
         widgets = {
             'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
@@ -296,7 +279,8 @@ class projectIdAndDateInputForm(forms.ModelForm):
             'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
             'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any', 'class': 'form-control form-control-sm'}),
             'ProjectDescription': forms.Textarea(attrs={"rows": "2", 'class': 'form-control form-control-sm'}),
-            'ProjectID': forms.Textarea(attrs={"rows": "1", 'class': 'form-control form-control-sm'})
+            'ProjectID': forms.Textarea(attrs={"rows": "1", 'class': 'form-control form-control-sm'}),
+            'RatebookChangeType': forms.Select(attrs={'class': 'form-control form-control-sm'}),
         }
 
 

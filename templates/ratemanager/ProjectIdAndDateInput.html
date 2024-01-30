@@ -13,9 +13,9 @@
 {% load crispy_forms_tags %}
 {% block maincontent %}
 <div class="container">
-  <div class="text-center">
+  <div class="alert alert-info text-left">
   {% for key, value in searchOptionsData.items %}
-    {{ value }} |&ensp;
+    {{ key }} - {{ value }}; &ensp;
   {% endfor %}
   </div>
   <hr>
@@ -23,17 +23,22 @@
       method="post">
     {% csrf_token %}
     <div class="form-group">
-    <table class="table table-sm table-responsive w-auto mx-auto table-borderless">
+    <table class="table table-sm table-responsive table-borderless w-auto align-middle">
     {{ form.as_table }}
-    </table>
-    </div>
-    <!-- Ask if clone from existing or create from scratch -->
+    
     {% if rbID %}
     <input value="{{ rbID }}" name="rbID" hidden>
+    {{ ChangeTypeForm.as_table }}
+    </table>
+    </div>
     {% else %}
+    <tr>
+      <td>
     <div id="createFromOptionsForm">
-      <div class="row justify-content-center">
-        Choose your starting point:
+      <div class="row justify-content-left">
+        <b>Choose your starting point:</b>
+      </td>
+      <td>
         <div class="radio text-center col-md-auto">
           <input 
           class="form-check-input"
@@ -59,9 +64,13 @@
         </div>
       </div>
     </div>
+    </td>
+    </tr>
+      </table>
+    </div>
     <br>
     {% endif %}
-    <div class="row justify-content-around">
+    <div>
         <button
         type="button"
         name="back"

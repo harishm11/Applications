@@ -7,14 +7,18 @@ from ratemanager.models.ratebooktemplate import RatebookTemplate
 from django.contrib import messages
 from django.utils import timezone
 from myproj.messages import RATE_MANAGER
+from ratemanager.views.configs import ENVIRONMENT_HIERARCHY
 
 
 def template(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
-    # Left overs 'id', 'Environment', 'isDeleted', 'onHold', 'retrofitReq', 'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode', 'NewBusinessExpiryDate', 'RenewalExpiryDate',
-    searchResultTableHeadersNamesOrder = ['RatebookName', 'RatebookID',  'ProjectID', 'ProjectDescription', 'RatebookVersion', 'RatebookRevisionType', 'RatebookStatusType', 'RatebookChangeType', 'NewBusinessEffectiveDate',  'RenewalEffectiveDate',  'ActivationDate', 'ActivationTime', 'MigrationDate', 'MigrationTime', 'CreationDateTime']
+    # Left overs 'id', 'Environment', 'isDeleted', 'onHold', 'retrofitReq', 'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode', 'NewBusinessExpiryDate', 'RenewalExpiryDate', 'CreationDateTime'
+    searchResultTableHeadersNamesOrder = ['RatebookName', 'RatebookID',
+                                          'RatebookVersion',  'RatebookStatusType',
+                                          'NewBusinessEffectiveDate',  'RenewalEffectiveDate',
+                                          ]
     fieldsDict = {x.name: x for x in RatebookMetadata._meta.fields}
     searchResultTableHeaders = [fieldsDict[field] for field in searchResultTableHeadersNamesOrder]
 
@@ -40,7 +44,7 @@ def template(request):
         # check for existing template/Ratebook in production and if found show that it already exists.
         identityDetails = helperfuncs.extractIdentityDetails(form_data)
         searchResults = RatebookMetadata.objects.filter(
-                **identityDetails)
+                **identityDetails).order_by('-RatebookID')
         if 'Create a new Ratebook/Template' == request.POST.get('submit'):
             return redirect('ratemanager:projectIdAndDateInput')
         if searchResults.count() > 0 or request.POST.get('submit') == 'Search':
@@ -67,7 +71,8 @@ def template(request):
                         'appLabel': appLabel,
                         'title': 'Template',
                         'searchResults': searchResults,
-                        'searchResultTableHeaders': searchResultTableHeaders
+                        'searchResultTableHeaders': searchResultTableHeaders,
+                        'ENVIRONMENT_HIERARCHY': ENVIRONMENT_HIERARCHY
                         })
     else:
         messages.add_message(request, messages.ERROR,
@@ -85,6 +90,14 @@ def projectIdAndDateInput(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
+    def fetchDisplayData(searchOptions):
+        cd = searchOptions.cleaned_data
+        searchOptionsData = {
+            searchOptions.fields[key].label: cd[key]
+            for key in ('State', 'PolicyType', 'PolicySubType', 'ProductCode')
+            }
+        return searchOptionsData
+
     if request.method == 'GET':
         initial = {
             'NewBusinessEffectiveDate': timezone.now().date(),
@@ -99,7 +112,7 @@ def projectIdAndDateInput(request):
         searchOptions = createTemplateForm(
                 data=request.session['TemplateFormData'])
         if searchOptions.is_valid():
-            searchOptionsData = searchOptions.cleaned_data
+            searchOptionsData = fetchDisplayData(searchOptions)
         return render(request, 'ratemanager/ProjectIdAndDateInput.html',
                       {
                           'options': options,
@@ -107,39 +120,20 @@ def projectIdAndDateInput(request):
                           'form': form,
                           'title': 'Project ID & Dates',
                           'searchOptionsData': searchOptionsData,
-                          'rbID': rbID
+                          'rbID': rbID,
                       })
 
     if request.method == 'POST':
+        # save the forms data to RB meta data table
+        searchOptions = createTemplateForm(
+            data=request.session['TemplateFormData'])
+        if searchOptions.is_valid():
+            searchOptionsData = fetchDisplayData(searchOptions)
         form = projectIdAndDateInputForm(request.POST)
+        rbID = request.POST.get('rbID')
         if form.is_valid():
             # check for valid Project ID
             form_data = form.cleaned_data
-            form_data['ProjectID'] = form_data['ProjectID'].strip()
-            if not form_data['ProjectID']:
-                messages.add_message(
-                    request, messages.ERROR, 'Please assign a valid Project ID.')
-                return render(request, 'ratemanager/ProjectIdAndDateInput.html',
-                              {
-                                  'options': options,
-                                  'appLabel': appLabel,
-                                  'form': form,
-                                  'title': 'Project ID & Dates'
-                              })
-            if RatebookMetadata.objects.filter(ProjectID=form_data['ProjectID']).count() > 0:
-                messages.add_message(
-                    request, messages.ERROR, 'ProjectID already exists, use different one.')
-                return render(request, 'ratemanager/ProjectIdAndDateInput.html',
-                              {
-                                  'options': options,
-                                  'appLabel': appLabel,
-                                  'form': form,
-                                  'title': 'Project ID & Dates'
-                              })
-            # save the forms data to RB meta data table
-            searchOptions = createTemplateForm(
-                data=request.session['TemplateFormData'])
-            searchOptions.is_valid()
             form_data.update(
                 searchOptions.cleaned_data
             )
@@ -188,3 +182,17 @@ def deleteTemplate(request, rbID):
     messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
 
     return redirect('ratemanager:template')
+
+
+def moreTemplateDetailsPopup(request, RBpk):
+    obj = RatebookMetadata.objects.get(pk=RBpk)
+    moreSearchTableHeadersNames = [
+        'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode', 'NewBusinessEffectiveDate',  'RenewalEffectiveDate', 'NewBusinessExpiryDate', 'RenewalExpiryDate', 'CreationDateTime', 'RatebookStatusType',
+        'RatebookRevisionType', 'RatebookChangeType', 'ActivationDate', 'ActivationTime',
+        'MigrationDate', 'MigrationTime', 'ProjectDescription', 'Environment',
+        'isDeleted', 'onHold', ]
+    fieldsDict = {x.name: x for x in RatebookMetadata._meta.fields}
+    moreSearchTableHeaders = [fieldsDict[field] for field in moreSearchTableHeadersNames]
+    return render(request, 'ratemanager/moreDetailsSearchResults.html',
+                  {'moreSearchTableHeaders': moreSearchTableHeaders,
+                   'obj': obj})

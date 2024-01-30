@@ -1,4 +1,5 @@
 from django.db import models
+from ratemanager.views.configs import ENVIRONMENT_HIERARCHY
 from systemtables.models import \
     state, carrier, lineofbusiness, \
     uwcompany, productcode, policytype, \
@@ -41,51 +42,58 @@ class RatebookMetadata(models.Model):
     Carrier = models.ForeignKey(
         carrier.Carrier,
         on_delete=models.CASCADE,
-        default=None
+        default=None,
+        verbose_name='Carrier'
     )
     State = models.ForeignKey(
         state.State,
         on_delete=models.CASCADE,
-        default=None
+        default=None,
+        verbose_name='State'
     )
     LineofBusiness = models.ForeignKey(
         lineofbusiness.LineOfBusiness,
         on_delete=models.CASCADE,
-        default=None
+        default=None,
+        verbose_name='L.O.B'
     )
     UWCompany = models.ForeignKey(
         uwcompany.Uwcompany,
         on_delete=models.CASCADE,
-        default=None
+        default=None,
+        verbose_name='Company'
     )
     PolicyType = models.ForeignKey(
         policytype.PolicyType,
         on_delete=models.CASCADE,
-        default=None
+        default=None,
+        verbose_name='Policy Type'
     )
     PolicySubType = models.ForeignKey(
         policysubtype.PolicySubType,
         on_delete=models.CASCADE,
-        default=None
+        default=None,
+        verbose_name='Policy Sub Type'
     )
     ProductCode = models.ForeignKey(
         productcode.ProductCode,
         on_delete=models.CASCADE,
-        default=None
-    )
-    ProjectID = models.CharField(
-        max_length=50,
-        blank=True,
-        null=False,
         default=None,
-        verbose_name='Project ID'
+        verbose_name='Product Code'
     )
+    # ProjectID = models.CharField(
+    #     max_length=50,
+    #     blank=True,
+    #     null=False,
+    #     default=None,
+    #     verbose_name='Project ID'
+    # )
     ProjectDescription = models.CharField(
         max_length=500,
         blank=True,
         null=True,
         default=None,
-        verbose_name='Project Description'
+        verbose_name='Description'
     )
     RatebookVersion = models.FloatField(
         null=False,
@@ -108,23 +116,35 @@ class RatebookMetadata(models.Model):
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Status Type'
+        verbose_name='Status Type',
+        choices=(
+            ('draft', 'Draft'),
+            ('review', 'Review'),
+            ('approved', 'Final/Approved')
+        )
     )
     RatebookChangeType = models.CharField(
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Change Type'
+        verbose_name='Change Type',
+        choices=(
+                ('initial', 'Initial'),
+                ('major', 'Major'),
+                ('rateCorrection', 'Rate Correction'),
+                ('rateRevision', 'Rate Revision'),
+                ('others', 'Others')
+                )
     )
     NewBusinessEffectiveDate = models.DateField(
         null=False,
         default=None,
-        verbose_name='New Business Effective Date'
+        verbose_name='NB Effective Date'
     )
     NewBusinessExpiryDate = models.DateField(
         null=True,
         default=None,
-        verbose_name='New Business Expiry Date'
+        verbose_name='NB Expiry Date'
     )
     RenewalEffectiveDate = models.DateField(
         null=False,
@@ -163,9 +183,10 @@ class RatebookMetadata(models.Model):
     )
     Environment = models.CharField(
         max_length=50,
-        default='Rate Development',
+        default='Draft',
         null=True,
-        verbose_name='Environment'
+        verbose_name='Environment',
+        choices=((key, key) for key in ENVIRONMENT_HIERARCHY)
     )
     isDeleted = models.BooleanField(
         null=True,
@@ -177,10 +198,16 @@ class RatebookMetadata(models.Model):
         default=False,
         verbose_name='Hold Status'
     )
-    retrofitReq = models.BooleanField(
+    LockStatus = models.BooleanField(
         null=True,
         default=False,
-        verbose_name='Retrofit Required?'
+        verbose_name='Lock Status'
+    )
+    LockReason = models.CharField(
+        max_length=255,
+        null=True,
+        default=None,
+        verbose_name='Reason for Locking'
     )
 
     def save(self, *args, **kwargs):

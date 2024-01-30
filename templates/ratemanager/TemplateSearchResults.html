@@ -1,8 +1,6 @@
-{% load dynamicdatatable_tags %}
+{% load dynamicdatatable_tags %}{% load templateSearchResults_tags %}
 
-<center>
 <div id="results" class="container table-responsive">
-  <b>Search Results:</b>
   <table id="example" class="table table-sm table-condensed table-bordered text-center">
     <thead>
       <tr>
@@ -16,6 +14,7 @@
         <th>{{ field.verbose_name }}</th>
         {% endfor %}
         {% endwith %}
+        <th>More details</th>
       </tr>
     </thead>
     <tbody>
@@ -28,14 +27,18 @@
           ></a>
         </td>
         <td>
+          {% if obj.Environment != 'Production' %}
           <a title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
           ><i class="fa fa-edit"></i
           ></a>
+          {% endif %}
         </td>
         <td>
+          {% if obj.Environment != 'Production' %}
           <a title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
           ><i class="fa fa-trash"></i
           ></a> 
+          {% endif %}
         </td>
         <td>
           <a title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
@@ -43,16 +46,40 @@
           ></a>
         </td>
         <td>
+          {% if obj|checkTemplateCreateEnable %}
           <a title="Create" href="{% url 'ratemanager:projectIdAndDateInput' %}?rbID={{ obj.RatebookID }}"
           ><i class="fa fa-plus"></i
           ></a>
+          {% endif %}
         </td>
         {% for field in searchResultTableHeaders %} 
           <td>{{ obj|get_attribute:field.name }}</td>
         {% endfor %}
+        <td>
+          <a title="
+          {% for field in moreSearchTableHeaders %} 
+          <b>{{ field.verbose_name }}</b>: {{ obj|get_attribute:field.name }}<br>
+          {% endfor %}" href=""
+          hx-get="/ratemanager/moreTemplateDetailsPopup/{{ obj.id }}/" 
+          hx-target="#preview-popup" 
+          hx-trigger="click"
+          data-bs-toggle="modal"
+          data-bs-target="#preview-popup"
+          ><i class="fa fa-info-circle"></i
+          ></a>
+        </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
+  <!-- Popup Preview -->
+<div id="preview-popup"
+      class="modal modal-blur fade"
+      style="display: none"
+      aria-hidden="false"
+      tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content"></div>
+  </div>
 </div>
-</center>
+</div>

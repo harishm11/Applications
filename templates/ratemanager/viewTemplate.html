@@ -1,15 +1,16 @@
 {% extends 'body.html' %} {% load static %}
-{% block title %} Create Ratebook {% endblock %}
+{% block title %} View Template {% endblock %}
 {% block sidebarcontent %} 
   {% include 'ratemanager/sidebar.html' %} 
 {% endblock  %}
 {% load crispy_forms_tags %}
-{% block maincontent %} 
-<div class="text-center">
-  {{ rbID }} |&ensp;
+{% block maincontent %}
+
+<div class="alert alert-info text-center">
   {% for key, value in selectedData.items %}
-    {{ value }} |&ensp;
+  {{ key }}: {{ value }}; &ensp;
   {% endfor %}
+  RatebookID: {{ rbID }}
 
 <hr>
 
@@ -24,7 +25,7 @@
   id="expand-all">Expand All</button>
 <button 
   class="btn btn-sm btn-primary"
-  id="hide-all">Hide All</button>
+  id="hide-all">Collapse All</button>
 </div> 
 
 <br>
@@ -62,20 +63,6 @@
   </tr>
   {% endfor %}
 </table>
-    <script>
-      const expandAllButton = document.getElementById('expand-all');
-      const hideAllButton = document.getElementById('hide-all');
-
-      expandAllButton.addEventListener('click', () => {
-        const detailsElements = document.querySelectorAll('details');
-        detailsElements.forEach(el => el.open = true);
-      });
-
-      hideAllButton.addEventListener('click', () => {
-        const detailsElements = document.querySelectorAll('details');
-        detailsElements.forEach(el => el.open = false);
-      });
-    </script>
 {% else %}
     No Exhibits have been added to this Template yet.
 {% endif %}
@@ -90,4 +77,21 @@
     </div>
 </div>
 </div>
+{%block js%}
+
+<script>
+  const expandAllButton = document.getElementById('expand-all');
+  const hideAllButton = document.getElementById('hide-all');
+
+  expandAllButton.addEventListener('click', () => {
+    const detailsElements = document.querySelectorAll('details');
+    detailsElements.forEach(el => el.open = true);
+  });
+
+  hideAllButton.addEventListener('click', () => {
+    const detailsElements = document.querySelectorAll('details');
+    detailsElements.forEach(el => el.open = false);
+  });
+</script>
+{%endblock%}
 {% endblock %}

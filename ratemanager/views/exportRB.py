@@ -87,11 +87,15 @@ def exportTemplate(request, pk):
         if toIn:
             data.append(toIn)
         else:
-            model = apps.get_model("systemtables", x.replace(' ', '').lower())
-            if model.__name__ == 'State':
-                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')).StateName)
-            else:
-                data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
+            try:
+                model = apps.get_model("systemtables", x.replace(' ', '').lower())
+                if model.__name__ == 'State':
+                    data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')).StateName)
+                else:
+                    data.append(model.objects.get(pk=rbMeta.get(x.replace(' ', '')+'_id')))
+            except LookupError:
+                data.append(None)
+                continue
 
     pd.Series(index=export_details,
               data=data
