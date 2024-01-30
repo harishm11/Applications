@@ -6,7 +6,7 @@ RATE_MANAGER = {
     'MES_0002': 'Another Ratebook with the same details already exists.',
     'MES_0003': 'No Ratebook with entered details found.',
     'MES_0004': 'Invalid Form Data.',
-    'MES_0005': 'ProjectID already exists, use different one.',
+    'MES_0005': 'Similar Ratebook Template already exists, use different one.',
     'MES_0006': 'Please fill up all the Search Criteria before searching.'
 }
 

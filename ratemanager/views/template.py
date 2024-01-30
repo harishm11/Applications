@@ -132,29 +132,36 @@ def projectIdAndDateInput(request):
         form = projectIdAndDateInputForm(request.POST)
         rbID = request.POST.get('rbID')
         if form.is_valid():
-            # check for valid Project ID
             form_data = form.cleaned_data
             form_data.update(
                 searchOptions.cleaned_data
             )
             form_data['RatebookRevisionType'] = 'Initial Draft'
-            form_data['RatebookStatusType'] = 'Initial Draft'
-            form_data['RatebookChangeType'] = 'Initial Draft'
-            form_data['CreationDateTime'] = timezone.now()
-            form_data['RatebookID'] = helperfuncs.generateRatebookID()
-            form_data['RatebookVersion'] = 0.0
-            obj = RatebookMetadata.objects.create(**form_data)
-            request.session['NewRBid'] = obj.id
-            if request.POST.get('CreateFrom') == 'clone':
-                return redirect('ratemanager:cloneOptions', prodCode=request.session['TemplateFormData']['ProductCode'])
-            elif request.POST.get('CreateFrom') == 'fromScratch':
-                request.session['CreatedTemplateMetadata'] = obj.id
-                return redirect('ratemanager:selectFromAllExhibitsList', id=obj.id)
-            elif request.POST.get('rbID'):
-                return redirect(
-                    'ratemanager:selectFromExistingRbExhibitsList',
-                    id=request.POST.get('rbID')
-                    )
+            form_data['RatebookStatusType'] = 'Draft'
+            form_data['RatebookChangeType'] = 'Initial'
+            created = False
+            if not RatebookMetadata.objects.filter(**form_data):
+                form_data['CreationDateTime'] = timezone.now()
+                form_data['RatebookID'] = helperfuncs.generateRatebookID()
+                form_data['RatebookVersion'] = 0.0
+                obj = RatebookMetadata.objects.create(**form_data)
+                created = True
+            if created is True:
+                request.session['NewRBid'] = obj.id
+                if request.POST.get('CreateFrom') == 'clone':
+                    return redirect('ratemanager:cloneOptions', prodCode=request.session['TemplateFormData']['ProductCode'])
+                elif request.POST.get('CreateFrom') == 'fromScratch':
+                    request.session['CreatedTemplateMetadata'] = obj.id
+                    return redirect('ratemanager:selectFromAllExhibitsList', id=obj.id)
+                elif request.POST.get('rbID'):
+                    return redirect(
+                        'ratemanager:selectFromExistingRbExhibitsList',
+                        id=request.POST.get('rbID')
+                        )
+            else:
+                messages.add_message(request, messages.ERROR,
+                                     RATE_MANAGER['MES_0005'])
+                return redirect('.')
 
         else:
             messages.add_message(request, messages.ERROR,
@@ -174,13 +181,13 @@ def deleteTemplate(request, rbID):
     also the Rb metadata entry if the status is in Initial draft
     '''
 
-    RatebookTemplate.objects.all().filter(RatebookID=rbID).delete()
-    RatebookMetadata.objects.filter(
-        RatebookID=rbID,
-        RatebookStatusType='Initial Draft'
-        ).delete()
-    messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
-
+    RatebookTemplate.objects.filter(RatebookID=rbID).delete()
+    RatebookMetadata.objects.filter(RatebookID=rbID).delete()
+    if not RatebookTemplate.objects.filter(RatebookID=rbID) and \
+       not RatebookMetadata.objects.filter(RatebookID=rbID):
+        messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
+    else:
+        messages.add_message(request, level=messages.ERROR, message="Unable to delete the template.")
     return redirect('ratemanager:template')
 
 

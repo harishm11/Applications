@@ -58,7 +58,7 @@
         <td>
           <a title="
           {% for field in moreSearchTableHeaders %} 
-          <b>{{ field.verbose_name }}</b>: {{ obj|get_attribute:field.name }}<br>
+          {{ field.verbose_name }}: {{ obj|get_attribute:field.name }}
           {% endfor %}" href=""
           hx-get="/ratemanager/moreTemplateDetailsPopup/{{ obj.id }}/" 
           hx-target="#preview-popup" 

@@ -313,7 +313,7 @@ class addExhibitForm(forms.ModelForm):
     class Meta:
         # fields from RatebookTemplate model
         model = RatingExhibits
-        fields = (['Exhibit'])
+        fields = (['Exhibit', 'DisplayName'])
         labels = {
             'Exhibit': 'Exhibit Name'
         }
