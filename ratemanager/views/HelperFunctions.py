@@ -962,7 +962,6 @@ def checkTemplateCreateButtonEnable(obj):
     else:
         identDetails = extractIdentityDetails(obj.__dict__)
         sortedSearcResults = RatebookMetadata.objects.filter(**identDetails) \
-            .order_by('-RatebookID', '-RatebookVersion')
+            .order_by('-RatebookID', '-RatebookVersion').exclude(Environment='Draft')
         if obj.id == sortedSearcResults.first().id:
             return True
-    return False
