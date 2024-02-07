@@ -180,6 +180,10 @@ def deleteTemplate(request, rbID):
     Deletes all the template entries and
     also the Rb metadata entry if the status is in Initial draft
     '''
+    found = RatebookMetadata.objects.filter(RatebookID=rbID)
+    if found and found.first().Environment == 'Production':
+        messages.add_message(request, level=messages.ERROR, message="Unable to delete the template already in Production")
+        return redirect('ratemanager:template')
 
     RatebookTemplate.objects.filter(RatebookID=rbID).delete()
     RatebookMetadata.objects.filter(RatebookID=rbID).delete()

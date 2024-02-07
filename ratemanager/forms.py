@@ -327,7 +327,7 @@ class selectExhibitListsForm(forms.ModelForm):
         queryset=None,
         widget=FilteredSelectMultiple("Exhibits", False),
         label='Select Exhibits to Add to the Template',
-        required=True
+        required=False
         )
 
     class Media:

@@ -97,6 +97,10 @@ def selectFromAllExhibitsList(request, id):
         form = selectExhibitListsForm()
         choices = RatingExhibits.objects.all()
         form.fields['toAddExhibits'].queryset = choices
+        found = RatebookMetadata.objects.filter(RatebookID=id.split('_')[0])
+        if found and found.first().Environment == 'Production':
+            messages.add_message(request, level=messages.ERROR, message="Unable to delete the template already in Production.")
+            return redirect('ratemanager:template')
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
         form.fields['toAddExhibits'].initial = initial
 
@@ -141,6 +145,10 @@ def selectFromExistingRbExhibitsList(request, id):
     if request.method == 'GET':
         form = selectExhibitListsFormExistingRB(rbID=rbID)
         newRbID = request.session['NewRBid']
+        found = RatebookMetadata.objects.filter(RatebookID=id.split('_')[0])
+        if found and found.first().Environment == 'Production':
+            messages.add_message(request, level=messages.ERROR, message="Unable to delete the template already in Production.")
+            return redirect('ratemanager:template')
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=newRbID))
         form.fields['toAddExhibits'].initial = initial
         return render(request, 'ratemanager/selectExhibitsOptions.html',
