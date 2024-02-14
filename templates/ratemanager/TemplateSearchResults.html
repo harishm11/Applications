@@ -1,14 +1,13 @@
 {% load dynamicdatatable_tags %}{% load templateSearchResults_tags %}
 
-<div id="results" class="container table-responsive">
-  <table id="example" class="table table-sm table-condensed table-bordered text-center">
+<div id="results">
+  <table id="example" 
+  class="table table-sm table-condensed 
+          table-bordered text-center 
+          align-middle table-hover">
     <thead>
       <tr>
-        <th>View</th>
-        <th>Modify</th>
-        <th>Delete</th>
-        <th>Download</th>
-        <th>Create</th>
+        <th>Menu</th>
         {% with searchResultTableHeaders|first as obj %}
         {% for field in searchResultTableHeaders %}
         <th>{{ field.verbose_name }}</th>
@@ -20,38 +19,49 @@
     <tbody>
     {% for obj in searchResults %}
       <tr>
+        <!-- Dropdown Menu td -->
         <td>
-          
-          <a title="View" href="{% url 'ratemanager:viewTemplate' obj.RatebookID %}"
-          ><i class="fa fa-eye"></i
-          ></a>
+          <div class="dropdown">
+            <button type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" title="View" 
+              href="{% url 'ratemanager:viewTemplate' obj.RatebookID %}"
+              ><i class="fa fa-eye"></i>&nbsp;View</a>
+            </li>            
+
+            <li>
+              {% if obj.Environment != 'Production' %}
+              <a class="dropdown-item" title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
+              ><i class="fa fa-edit"></i>&nbsp;Modify</a>
+              {% endif %}
+            </li>
+
+            <li>
+              {% if obj.Environment != 'Production' %}
+              <a class="dropdown-item" title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
+              ><i class="fa fa-trash"></i>&nbsp;Delete</a> 
+              {% endif %}
+            </li>
+
+            <li>
+              <a class="dropdown-item" title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
+              ><i class="fa fa-download">&nbsp;Download</i></a>
+            </li>
+
+            <li>
+              {% if obj|checkTemplateCreateEnable %}
+              <a class="dropdown-item" title="Create" href="{% url 'ratemanager:projectIdAndDateInput' %}?rbID={{ obj.RatebookID }}"
+              ><i class="fa fa-plus"></i>&nbsp;Create</a>
+              {% endif %}
+            </li>
+          </ul>
+        </div>
         </td>
-        <td>
-          {% if obj.Environment != 'Production' %}
-          <a title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
-          ><i class="fa fa-edit"></i
-          ></a>
-          {% endif %}
-        </td>
-        <td>
-          {% if obj.Environment != 'Production' %}
-          <a title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
-          ><i class="fa fa-trash"></i
-          ></a> 
-          {% endif %}
-        </td>
-        <td>
-          <a title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
-          ><i class="fa fa-download"></i
-          ></a>
-        </td>
-        <td>
-          {% if obj|checkTemplateCreateEnable %}
-          <a title="Create" href="{% url 'ratemanager:projectIdAndDateInput' %}?rbID={{ obj.RatebookID }}"
-          ><i class="fa fa-plus"></i
-          ></a>
-          {% endif %}
-        </td>
+
+        <!-- Non Menu row items -->
         {% for field in searchResultTableHeaders %} 
           <td>{{ obj|get_attribute:field.name }}</td>
         {% endfor %}

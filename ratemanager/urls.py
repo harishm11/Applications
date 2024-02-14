@@ -2,7 +2,7 @@
 from django.urls import path, re_path
 from ratemanager.views import exportRB, viewRB, \
     views, createRB, updateRB, compareRB, \
-    createTemplate, cloneRB, template
+    createTemplate, cloneRB, template, rates
 from django import views as django_views
 
 app_name = 'ratemanager'
@@ -58,4 +58,13 @@ urlpatterns = [
     path('moreTemplateDetailsPopup/<str:RBpk>/', template.moreTemplateDetailsPopup, name="moreTemplateDetailsPopup"),
     # Delete Template
     path('deleteTemplate/<str:rbID>/', template.deleteTemplate, name="deleteTemplate"),
+
+
+    # New UI
+    path('rates/', rates.rates, name='rates'),
+    path('ratemanager/rates/ratebook', rates.ratebook, name='ratebook'),
+    path('ratemanager/rates/upload', rates.upload, name='ratesUpload'),
+    path('ratemanager/rates/migrate/', rates.migrate, name='ratesMigrate'),
+    path('ratemanager/rates/review/', rates.review, name='ratesReview'),
+    path('ratemanager/rates/compare/', rates.compare, name='ratesCompare'),
 ]

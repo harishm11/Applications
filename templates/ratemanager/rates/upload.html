@@ -1,0 +1,16 @@
+{% extends 'ratemanager/rates/ratesBase.html' %}
+{% block tabContent %}
+<div class="container">
+    <br>
+    <div class="form-group">
+        <form>
+            <table class="table table-sm table-responsive align-middle">
+            {{ ratesUploadForm.as_table }}
+            </table>
+            <input style="display: block; margin : 0 auto;" 
+            class="btn btn-primary btn-sm" 
+            type="submit" value="Upload">
+        </form>
+    </div>
+</div>
+{% endblock %}

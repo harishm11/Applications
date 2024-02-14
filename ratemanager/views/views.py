@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 import os
 import pandas as pd
 from myproj.settings import BASE_DIR
-import ratemanager.views.HelperFunctions as helperfuncs
+# import ratemanager.views.HelperFunctions as helperfuncs
 from django.forms import modelformset_factory
 from django.apps import apps
 
@@ -13,9 +13,10 @@ coverage = apps.get_model('systemtables', 'coverage')
 
 
 def rateManager(request):
-    options = helperfuncs.SIDEBAR_OPTIONS
-    appLabel = 'ratemanager'
-    return render(request, 'ratemanager/home.html', locals())
+    # options = helperfuncs.SIDEBAR_OPTIONS
+    # appLabel = 'ratemanager'
+    # return render(request, 'ratemanager/home.html', locals())
+    return redirect('ratemanager:rates')
 
 
 def exhibitlist(request):

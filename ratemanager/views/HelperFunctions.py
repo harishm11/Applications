@@ -21,7 +21,7 @@ import ratemanager.views.configs as configs
 
 coverage = apps.get_model('systemtables', 'coverage')
 
-SIDEBAR_OPTIONS = ["template", "createRB", "viewRB", "updateRB",
+SIDEBAR_OPTIONS = ['rates', "template", "createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
                    "viewTemplateOptions", 'EditCoverages']
 pd.options.mode.copy_on_write = True

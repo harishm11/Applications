@@ -349,3 +349,15 @@ class selectExhibitListsFormExistingRB(selectExhibitListsForm):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
         self.fields['toAddExhibits'].queryset = RatingExhibits.objects.filter(ratebooktemplate__in=choices)
+
+
+class searchCriteriaForm(createTemplateForm):
+    pass
+
+
+class ratesUploadForm(forms.Form):
+    file = forms.FileField(
+        label="Select the Excel file to upload:",
+        help_text="Download the template Excel file from the Ratebook tab and upload it with the rates filled-in.",
+        widget=forms.FileInput(attrs={'class': 'form-control form-control-sm'})
+    )
