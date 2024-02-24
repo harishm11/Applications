@@ -62,9 +62,10 @@ urlpatterns = [
 
     # New UI
     path('rates/', rates.rates, name='rates'),
-    path('ratemanager/rates/ratebook', rates.ratebook, name='ratebook'),
-    path('ratemanager/rates/upload', rates.upload, name='ratesUpload'),
-    path('ratemanager/rates/migrate/', rates.migrate, name='ratesMigrate'),
-    path('ratemanager/rates/review/', rates.review, name='ratesReview'),
-    path('ratemanager/rates/compare/', rates.compare, name='ratesCompare'),
+    path('rates/ratebook/', rates.ratebook, name='ratebook'),
+    path('rates/upload/', rates.upload, name='ratesUpload'),
+    path('rates/migrate/', rates.migrate, name='ratesMigrate'),
+    path('rates/review/', rates.review, name='ratesReview'),
+    path('rates/review/<str:pk>/', rates.reviewAndHistory, name='reviewAndHistory'),
+    path('rates/compare/', rates.compare, name='ratesCompare'),
 ]

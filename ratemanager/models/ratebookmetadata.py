@@ -110,30 +110,30 @@ class RatebookMetadata(models.Model):
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Revision Type'
+        verbose_name='Last Revision Type'
     )
     RatebookStatusType = models.CharField(
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Status Type',
+        verbose_name='Current Status',
         choices=(
-            ('draft', 'Draft'),
-            ('review', 'Review'),
-            ('approved', 'Final/Approved')
+            ('Draft', 'Draft'),
+            ('Review', 'Review'),
+            ('Approved', 'Approved')
         )
     )
     RatebookChangeType = models.CharField(
         max_length=50,
         null=False,
         default=None,
-        verbose_name='Change Type',
+        verbose_name='Last Change Type',
         choices=(
-                ('initial', 'Initial'),
-                ('major', 'Major'),
-                ('rateCorrection', 'Rate Correction'),
-                ('rateRevision', 'Rate Revision'),
-                ('others', 'Others')
+                ('Initial', 'Initial'),
+                ('Major', 'Major'),
+                ('RateCorrection', 'Rate Correction'),
+                ('RateRevision', 'Rate Revision'),
+                ('Others', 'Others')
                 )
     )
     NewBusinessEffectiveDate = models.DateField(
@@ -215,3 +215,11 @@ class RatebookMetadata(models.Model):
         self.id = self.RatebookID + '_' + str(self.RatebookVersion)
         # setForeignKeysVerboseNames(self)
         super(RatebookMetadata, self).save(*args, **kwargs)
+
+
+class EnvironmentHierarchy(models.Model):
+    Hierarchy = models.IntegerField()
+    Environment = models.CharField(max_length=30)
+
+    def __str__(self) -> str:
+        return self.Environment

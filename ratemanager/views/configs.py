@@ -37,7 +37,7 @@ ratevars = [
         'YearsDrivingExperience',
         'StudentAwayInd',
         'VehUseCode',
-        'HouseholdCompostion',
+        'HouseholdComposition',
         'FrequencyBand',
         'SeverityBand',
         'MultiPolicy',
@@ -51,7 +51,7 @@ ratevars = [
         'VehicleAge2',
         'Limit1',
         'Limit2',
-        'Mielage1',
+        'Mileage1',
         'Mileage2']
 
 
@@ -68,7 +68,9 @@ export_details = [
     'Activation Date',
     'Activation Time',
     'Migration Date',
-    'Migration Time'
+    'Migration Time',
+    'Ratebook ID',
+    'Ratebook Version'
 ]
 
 NO_OF_RATING_VARIABLES = 8

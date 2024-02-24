@@ -1,56 +1,5 @@
 {% extends 'ratemanager/rates/ratesBase.html' %}
 
 {% block tabContent %}
-<div class="container py-0">
-
-<!-- Search Criteria Form -->
-<form method="post"
-      id="rbMetadataForm"
-      action="{% url 'ratemanager:ratebook' %}"
-      >
-      {% csrf_token %}
-
-    <div class="form-group">
-      <table class="table table-sm table-responsive w-auto align-middle">
-        {{ searchCriteriaForm.as_table }}
-      </table>
-    </div>
-
-    <!-- Search Button -->
-    <input
-      type="submit"
-      name="submit"
-      value="Search"
-      class="btn btn-sm btn-primary"
-      action="/ratemanager/template/"
-      />
-</form>
-
-<!-- Search Results -->
-<b>Search Results:</b><br>
-{% if searchResults %}
-  {% include 'ratemanager/rates/SearchResults.html' %}
-{% else %}
-  No matching data found.
-  <!-- <input
-    form="rbMetadataForm"
-    type="submit"
-    name="submit"
-    value="Create a new Ratebook/Template"
-    class="btn btn-sm btn-primary"
-    action="/ratemanager/template/"
-  /> -->
-{% endif %}
-
-</div>
-{% endblock %}
-
-<!-- JS to hide search results on search criteria change in front end. -->
-{% block js%}
-<script>
-  $('#rbMetadataForm select').on('change',  function () {
-    var hiddenDiv = document.getElementById("results");
-    hiddenDiv.setAttribute("hidden", true);
-  })
-</script>
+  {% include 'ratemanager/rates/searchAndResults.html' %}
 {% endblock %}

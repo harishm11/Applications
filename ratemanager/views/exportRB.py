@@ -48,7 +48,7 @@ def exportRB(request):
         data = []
         for x in export_details:
             toIn = rbMeta.get(x.replace(' ', ''))
-            if toIn:
+            if toIn is not None:
                 data.append(toIn)
             else:
                 model = apps.get_model("systemtables", x.replace(' ', '').lower())
@@ -84,7 +84,7 @@ def exportTemplate(request, pk):
     data = []
     for x in export_details:
         toIn = rbMeta.get(x.replace(' ', ''))
-        if toIn:
+        if toIn is not None:
             data.append(toIn)
         else:
             try:
@@ -96,7 +96,7 @@ def exportTemplate(request, pk):
             except LookupError:
                 data.append(None)
                 continue
-
+    # print(rbMeta, data)
     pd.Series(index=export_details,
               data=data
               ).to_excel(writer, sheet_name='Ratebook Details', index=True, header=None)
@@ -112,5 +112,6 @@ def exportTemplate(request, pk):
 
     writer.close()
     xl.seek(0)
-    filename = '_'.join(list(map(str, [rbMeta['RatebookID'], rbMeta['RatebookName'], '.xlsx'])))
+    filename = '_'.join(list(map(str, [rbMeta['RatebookName'], rbMeta['id'],]))) +\
+               '.xlsx'
     return FileResponse(xl, filename=filename, as_attachment=True)

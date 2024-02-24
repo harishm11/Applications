@@ -1,13 +1,13 @@
 from django import forms
 from django.apps import apps
 from datetime import datetime
+from ratemanager.models import comments
 
 from ratemanager.models.ratebookmetadata import RatebookMetadata
 from ratemanager.models.ratebooktemplate import RatebookTemplate
 from ratemanager.models.ratingfactors import RatingFactors
 from ratemanager.models.ratingexhibits import RatingExhibits
 
-import ratemanager.views.HelperFunctions as helperfuncs
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
 
@@ -305,7 +305,7 @@ class editExhibitForm(forms.ModelForm):
                    'ExhibitCoverages': forms.CheckboxSelectMultiple()}
         labels = dict()
         for i in fields:
-            labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+            labels[i] = ' '.join(i)
         labels['RatebookExhibit'] = 'Exhibit Name'
 
 
@@ -361,3 +361,14 @@ class ratesUploadForm(forms.Form):
         help_text="Download the template Excel file from the Ratebook tab and upload it with the rates filled-in.",
         widget=forms.FileInput(attrs={'class': 'form-control form-control-sm'})
     )
+
+
+class ratesReviewForm(forms.ModelForm):
+    class Meta:
+        model = comments.Notes
+        fields = ('Note',)
+        widgets = {'Note': forms.Textarea(
+            attrs={
+                "rows": "3",
+                'class': 'form-control form-control-sm'}),
+                }
