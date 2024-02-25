@@ -174,7 +174,7 @@ def viewTemplate(request, rbID):
             }
         return searchOptionsData
     selectedData = createTemplateForm(
-                data=request.session['TemplateFormData'])
+                data=request.session['PreviousSearchCriteria'])
     if selectedData.is_valid():
         selectedData = fetchDisplayData(selectedData)
     ExhibitObjs = None

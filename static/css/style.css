@@ -16,14 +16,14 @@ body {
 }
 
 .header {
-  height: 100px;
+  height: 50px;
   background-color:  var(--hf1-color);
   font-size: var(--font-size);
   font-family:  var(--font-family);
 }
 
 .footer {
-  height: 100px;
+  height: 33px;
   background-color:   var(--hf1-color);
   margin-top: auto;
   font-size: var(--font-size);
