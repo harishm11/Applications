@@ -1,0 +1,20 @@
+{% load dynamicdatatable_tags %}
+
+<div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">More details for 
+            {{ obj.RatebookName }}; {{ obj.RatebookID }}; {{ obj.RatebookVersion }}
+        </h6>
+      </div>
+      <div class="container table-responsive modal-body">
+        {% for field in moreSearchTableHeaders %} 
+            <b>{{ field.verbose_name }}</b>: {{ obj|get_attribute:field.name }}<br>
+        {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  

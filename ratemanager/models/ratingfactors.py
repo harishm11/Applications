@@ -55,19 +55,19 @@ class RatingFactors (models.Model):
         default=None
     )
     ActivationDate = models.DateField(
-        null=False,
+        null=True,
         default=None
     )
     ActivationTime = models.TimeField(
-        null=False,
+        null=True,
         default=None
     )
     MigrationDate = models.DateField(
-        null=False,
+        null=True,
         default=None
     )
     MigrationTime = models.TimeField(
-        null=False,
+        null=True,
         default=None
     )
     CreationDateTime = models.DateTimeField(

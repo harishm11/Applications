@@ -5,17 +5,14 @@
 {% endblock  %}
 {% block messagecontent %}
 {% if messages %}
-<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
     {% for message in messages %}
     <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
     {% endfor %}
-</div>
 {% endif %}
 {% endblock %}
 {% load crispy_forms_tags %}
 {% block maincontent %} 
 
-<h6> Template Exhibits List </h6>
 <p>Showing for {{ rbname }}; ID: {{ rbid }}; Version: {{ rbver }};</p> 
 <hr>
 <div class="container">
@@ -23,24 +20,24 @@
   <button
   type="button"
   name="back"
-  class="btn btn-sm btn-secondary col-md-2"
+  class="btn btn-sm btn-secondary col-md-auto"
   onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
   >Back</button>
 
   <button 
   type="button" 
-  class="btn btn-sm btn-primary col-md-2" 
+  class="btn btn-sm btn-primary col-md-auto" 
   onclick="window.location.href='/ratemanager/addExhibit2Template/';">
   Add an Exhibit
   </button>
 
-  <form class="col-md-2" method="post" action="/ratemanager/exportTemplate/{{ rbid }}/">
+  <form class="col-md-auto" method="post" action="/ratemanager/exportTemplate/{{ rbid }}/">
     {% csrf_token %}
   <input
       type="submit"
       name="submit"
       value="Download the Template"
-      class="btn btn-sm btn-primary"
+      class="btn btn-sm btn-primary col-md-auto"
       method="post"
       action="/ratemanager/exportTemplate/{{ rbid }}/"
     /></form>
@@ -48,7 +45,7 @@
     <button
     type="button"
     name="next"
-    class="btn btn-sm btn-primary col-md-2"
+    class="btn btn-sm btn-primary col-md-auto"
     onclick="window.location.href='/ratemanager/createRB/';"
     >Next</button>
 

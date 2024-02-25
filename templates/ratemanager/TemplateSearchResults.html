@@ -1,73 +1,95 @@
-Search Results:
-<div class="container table-responsive">          
-  <table id="example" class="table table-sm table-condensed table-bordered text-center">
+{% load dynamicdatatable_tags %}{% load templateSearchResults_tags %}
+
+<div id="results">
+  <table id="example" 
+  class="table table-sm table-condensed 
+          table-bordered text-center 
+          align-middle table-hover">
     <thead>
       <tr>
-        <th>Actions</th>
-        <th>Ratebook Name</th>
-        <th>Ratebook ID</th>
-        <th>Ratebook Version</th>
-        <th>New Business Effective Date</th>
-        <th>Renewal Effective Date</th>
-        <th>Migration Date</th>
-        <th>Migration Time</th>
-        <th>Activation Date</th>
-        <th>Activation Time</th>
-        <th>Ratebook Revision Type</th>
-        <th>Ratebook Status Type</th>
-        <th>Ratebook Change Type</th>
-        <th>Carrier</th>
-        <th>State</th>
-        <th>Line of Business</th>
-        <th>UW Company</th>
-        <th>Policy Type</th>
-        <th>Policy SubType</th>
-        <th>Product Code</th>
+        <th>Menu</th>
+        {% with searchResultTableHeaders|first as obj %}
+        {% for field in searchResultTableHeaders %}
+        <th>{{ field.verbose_name }}</th>
+        {% endfor %}
+        {% endwith %}
+        <th>More details</th>
       </tr>
     </thead>
     <tbody>
     {% for obj in searchResults %}
       <tr>
+        <!-- Dropdown Menu td -->
         <td>
-          
-          <a title="View" href="{% url 'ratemanager:viewTemplate' obj.RatebookID %}"
-          ><i class="fa fa-eye"></i
-          ></a>
-          &emsp;          
-          <a title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
-          ><i class="fa fa-edit"></i
-          ></a>
-          &emsp;
-          <a title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
-          ><i class="fa fa-trash"></i
-          ></a> 
-          &emsp;
-          <a title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
-          ><i class="fa fa-download"></i
-          ></a>
-      
+          <div class="dropdown">
+            <button class="btn btn-sm btn-link" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" title="View" 
+              href="{% url 'ratemanager:viewTemplate' obj.RatebookID %}"
+              ><i class="fa fa-eye"></i>&nbsp;View</a>
+            </li>            
+
+            <li>
+              {% if obj.Environment != 'Production' %}
+              <a class="dropdown-item" title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
+              ><i class="fa fa-edit"></i>&nbsp;Modify</a>
+              {% endif %}
+            </li>
+
+            <li>
+              {% if obj.Environment != 'Production' %}
+              <a class="dropdown-item" title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
+              ><i class="fa fa-trash"></i>&nbsp;Delete</a> 
+              {% endif %}
+            </li>
+
+            <li>
+              <a class="dropdown-item" title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
+              ><i class="fa fa-download">&nbsp;Download</i></a>
+            </li>
+
+            <li>
+              {% if obj|checkTemplateCreateEnable %}
+              <a class="dropdown-item" title="Create" href="{% url 'ratemanager:projectIdAndDateInput' %}?rbID={{ obj.RatebookID }}"
+              ><i class="fa fa-plus"></i>&nbsp;Create</a>
+              {% endif %}
+            </li>
+          </ul>
+        </div>
         </td>
-        <td>{{obj.RatebookName}}</td>
-        <td>{{obj.RatebookID}}</td>
-        <td>{{obj.RatebookVersion|floatformat:1}}</td>
-        <td>{{obj.NewBusinessEffectiveDate}}</td>
-        <td>{{obj.RenewalEffectiveDate}}</td>
-        <td>{{obj.MigrationDate}}</td>
-        <td>{{obj.MigrationTime}}</td>
-        <td>{{obj.ActivationDate}}</td>
-        <td>{{obj.ActivationTime}}</td>
-        <td>{{obj.RatebookRevisionType}}</td>
-        <td>{{obj.RatebookStatusType}}</td>
-        <td>{{obj.RatebookChangeType}}</td>
-        <td>{{obj.Carrier}}</td>
-        <td>{{obj.State}}</td>
-        <td>{{obj.LineofBusiness}}</td>
-        <td>{{obj.UWCompany}}</td>
-        <td>{{obj.PolicyType}}</td>
-        <td>{{obj.PolicySubType}}</td>
-        <td>{{obj.ProductCode}}</td>
+
+        <!-- Non Menu row items -->
+        {% for field in searchResultTableHeaders %} 
+          <td>{{ obj|get_attribute:field.name }}</td>
+        {% endfor %}
+        <td>
+          <a title="
+          {% for field in moreSearchTableHeaders %} 
+          {{ field.verbose_name }}: {{ obj|get_attribute:field.name }}
+          {% endfor %}" href=""
+          hx-get="/ratemanager/moreTemplateDetailsPopup/{{ obj.id }}/" 
+          hx-target="#preview-popup" 
+          hx-trigger="click"
+          data-bs-toggle="modal"
+          data-bs-target="#preview-popup"
+          ><i class="fa fa-info-circle"></i
+          ></a>
+        </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
+  <!-- Popup Preview -->
+<div id="preview-popup"
+      class="modal modal-blur fade"
+      style="display: none"
+      aria-hidden="false"
+      tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content"></div>
+  </div>
+</div>
 </div>

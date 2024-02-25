@@ -37,7 +37,7 @@ ratevars = [
         'YearsDrivingExperience',
         'StudentAwayInd',
         'VehUseCode',
-        'HouseholdCompostion',
+        'HouseholdComposition',
         'FrequencyBand',
         'SeverityBand',
         'MultiPolicy',
@@ -51,7 +51,7 @@ ratevars = [
         'VehicleAge2',
         'Limit1',
         'Limit2',
-        'Mielage1',
+        'Mileage1',
         'Mileage2']
 
 
@@ -68,7 +68,24 @@ export_details = [
     'Activation Date',
     'Activation Time',
     'Migration Date',
-    'Migration Time'
+    'Migration Time',
+    'Ratebook ID',
+    'Ratebook Version'
 ]
 
 NO_OF_RATING_VARIABLES = 8
+
+
+ENVIRONMENT_HIERARCHY = {
+                        'Draft': 0,
+                        'Review': 1,
+                        'Final/Approved': 2,
+                        'Ready for Upload': 3,
+                        'Development': 4,
+                        'Integration': 5,
+                        'UAT': 6,
+                        'Regression': 7,
+                        'Pre-Production': 8,
+                        'Production Like': 9,
+                        'Production': 10
+                        }

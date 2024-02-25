@@ -5,30 +5,41 @@
 {% endblock  %}
 {% block messagecontent %}
 {% if messages %}
-<div class="alert alert-primary p-1" style="color: blue; font-size: 14px; display: inline-block; text-align: center;">
   {% for message in messages %}
   <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
   {% endfor %}
-</div>
 {% endif %}
 {% endblock %}
 {% load crispy_forms_tags %}
 {% block maincontent %}
 <div class="container">
-    <h5>Project ID and other details</h5>
+  <div class="alert alert-info text-left">
+  {% for key, value in searchOptionsData.items %}
+    {{ key }} - {{ value }}; &ensp;
+  {% endfor %}
+  </div>
+  <hr>
 <form class="form"
       method="post">
     {% csrf_token %}
-    <table class="table table-sm table-responsive w-50 mx-auto table-borderless">
+    <div class="form-group">
+    <table class="table table-sm table-responsive table-borderless w-auto align-middle">
     {{ form.as_table }}
+    
+    {% if rbID %}
+    <input value="{{ rbID }}" name="rbID" hidden>
+    {{ ChangeTypeForm.as_table }}
     </table>
-
-    <!-- Ask if clone from existing or create from scratch -->
-
+    </div>
+    {% else %}
+    <tr>
+      <td>
     <div id="createFromOptionsForm">
-      <div class="row justify-content-center">
-        Choose your starting point:
-        <div class="radio text-center col-md-6">
+      <div class="row justify-content-left">
+        <b>Choose your starting point:</b>
+      </td>
+      <td>
+        <div class="radio text-center col-md-auto">
           <input 
           class="form-check-input"
           onchange="//this.form.submit();"
@@ -37,6 +48,7 @@
           value="fromScratch"
           required="required"
           id="fromScratch"
+          checked
           >
           <label for="fromScratch">Create template from scratch</label>
           &emsp;
@@ -52,13 +64,17 @@
         </div>
       </div>
     </div>
+    </td>
+    </tr>
+      </table>
+    </div>
     <br>
-
-    <div class="row justify-content-around">
+    {% endif %}
+    <div>
         <button
         type="button"
         name="back"
-        class="btn btn-sm btn-secondary col-md-1"
+        class="btn btn-sm btn-secondary col-md-auto"
         onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
         >Back</button>
 
@@ -66,9 +82,10 @@
             type="submit"
             name="submit"
             value="Next"
-            class="btn btn-sm btn-primary col-md-1"
+            class="btn btn-sm btn-primary col-md-auto"
           />
         </div>
+
 </form>
 </div>
 {% endblock %}
