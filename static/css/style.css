@@ -1,5 +1,5 @@
 :root {
-  --font-size: 14px; 
+  --font-size: 12px; 
   --font-family: Georgia, 'Times New Roman', Times, serif;
   --hf1-color:#f1f1f8;
   --hf2-color:#fcfcfc;
@@ -10,20 +10,19 @@
 body {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 99.5vh;
   margin: 0;
- 
 }
 
 .header {
-  height: 100px;
+  height: 80px;
   background-color:  var(--hf1-color);
   font-size: var(--font-size);
   font-family:  var(--font-family);
 }
 
 .footer {
-  height: 100px;
+  height: 30px;
   background-color:   var(--hf1-color);
   margin-top: auto;
   font-size: var(--font-size);
@@ -36,7 +35,7 @@ body {
 
 .sidebar {
   padding-top: 3px;
-  height: calc(100vh - 200px);
+  height: calc(102vh - 130px);
   overflow-y: auto;
   border: 1px solid var(--brdr-color);
   font-size: var(--font-size);
@@ -45,7 +44,7 @@ body {
 
 .main {
   padding-top: 3px;
-  height: calc(100vh - 200px);
+  height: calc(102vh - 130px);
   overflow-y: auto;
   border: 1px solid var(--brdr-color);
   font-size: var(--font-size);
@@ -110,4 +109,15 @@ a {
           
           display: inline-block;
           text-align: center;
+}
+
+
+
+.login-form-inline {
+  display: flex;
+  align-items: center;
+}
+
+.login-form-inline.nav-link {
+  margin-left: 10px; /* Adjust the margin as needed */
 }

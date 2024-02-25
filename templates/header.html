@@ -71,24 +71,24 @@
             </li>
  <!-- {% endif %} -->
           </ul>
-        <form  role="search">
-    {% if request.user.is_authenticated %} 
-       
-       Welcome, {{ request.user.username }}
-       {% if request.user.is_superuser %}
-            <a class="nav-link px-2" href="/admin">Admin</a>
-        {% endif %}
-        <div>
-           <!--   {% with group_count=request.user.groups.all|length %}
-          {% if group_count > 1 %} -->
-            <a class="nav-link px-2" href="/switchrole">Switch Role</a>
-      <!--    {% endif %}
-        {% endwith %} -->
-          <a class="nav-link px-2" href="/logout">Logout</a>
-        </div>
-    {% else %}
-        <a class="nav-link px-2" href="/login">Login</a>
-    {% endif %}
-</form>
+        <form class="login-form-inline">
+          {% if request.user.is_authenticated %} 
+        
+            Welcome, {{ request.user.username }} | 
+              {% if request.user.is_superuser %}
+                  <a class="nav-link px-2" href="/admin">Admin</a>
+              {% endif %}
+            
+                <!--   {% with group_count=request.user.groups.all|length %}
+                {% if group_count > 1 %} -->
+                  <a class="nav-link px-2" href="/switchrole">Switch Role</a>
+            <!--    {% endif %}
+              {% endwith %} -->
+               | <a class="nav-link px-2" href="/logout">Logout</a>
+      
+          {% else %}
+              <a class="nav-link px-2" href="/login">Login</a>
+          {% endif %}
+      </form>
     </nav>
     
