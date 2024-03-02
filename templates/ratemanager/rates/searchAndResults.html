@@ -1,0 +1,72 @@
+{% load static %}
+<div class="container py-0">
+
+    <!-- Search Criteria Form -->
+    <form method="post"
+          id="rbMetadataForm"
+          action="{{ request.path }}"
+          method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <table class="table table-borderless table-sm table-responsive w-auto align-middle">
+          {{ searchCriteriaForm.as_table }}
+        </table>
+      </div>
+
+      <!-- Search Button -->
+      <input
+        type="submit"
+        name="submit"
+        value="Search"
+        class="btn btn-sm btn-primary"
+        action="/ratemanager/template/"
+        />
+    </form>
+
+    <!-- Search Results -->
+    <b>Search Results:</b><br>
+    {% block searchResults %}
+    {% if searchResults %}
+      {% include 'ratemanager/TemplateSearchResults.html' %}
+    {% else %}
+      No matching data found.
+      <input
+        form="rbMetadataForm"
+        type="submit"
+        name="submit"
+        value="Create a new Ratebook/Template"
+        class="btn btn-sm btn-primary"
+        action="/ratemanager/template/"
+      />
+    {% endif %}
+    <nav aria-label="Page navigation" id="page-navigation">
+      <ul class="pagination pagination-sm">
+         {% if searchResults.has_previous %}
+         <li class="page-item"><a class="page-link" href="?page={{searchResults.previous_page_number}}#page-navigation">Previous</a></li>
+         {% endif %}
+         {% for num in searchResults.paginator.page_range %}
+         {% if searchResults.number == num %}
+         <li class="page-item active"><a class="page-link" href="?page={{num}}#page-navigation">{{ num }}</a></li>
+         {% else %}
+         <li class="page-item"><a class="page-link" href="?page={{num}}#page-navigation">{{ num }}</a></li>
+         {% endif %}
+         {% endfor %}
+         {% if searchResults.has_next %}
+         <li class="page-item"><a class="page-link" href="?page={{searchResults.next_page_number}}#page-navigation">Next</a></li>
+         {% endif %}
+      </ul>
+    </nav>
+    {% endblock %}
+    
+</div>
+    
+<!-- JS to hide search results on search criteria change in front end. -->
+{% block js%}
+<script src ="{% static 'js/add_dataTable.js' %}" type="text/javascript"></script>
+<script>
+    $('#rbMetadataForm select').on('change',  function () {
+    var hiddenDiv = document.getElementById("results");
+    hiddenDiv.setAttribute("hidden", true);
+    })
+</script>
+{% endblock js %}

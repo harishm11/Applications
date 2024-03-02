@@ -3,7 +3,7 @@ from django.shortcuts import render
 from ratemanager.models.ratebookmetadata import RatebookMetadata
 from ratemanager.models.ratebooktemplate import RatebookTemplate
 
-from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate
+from ratemanager.forms import ViewRBForm, ViewRBFormWithDate, SelectExhibitForm, SelectExhibitFormWithDate, createTemplateForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import ratemanager.views.HelperFunctions as helperfuncs
 from datetime import datetime
@@ -166,18 +166,34 @@ def viewTemplate(request, rbID):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
 
+    def fetchDisplayData(searchOptions):
+        cd = searchOptions.cleaned_data
+        searchOptionsData = {
+            searchOptions.fields[key].label: cd[key]
+            for key in ('State', 'PolicyType', 'PolicySubType', 'ProductCode')
+            }
+        return searchOptionsData
+    selectedData = createTemplateForm(
+                data=request.session['PreviousSearchCriteria'])
+    if selectedData.is_valid():
+        selectedData = fetchDisplayData(selectedData)
     ExhibitObjs = None
     if RatebookTemplate.objects.filter(RatebookID=rbID).exists():
         ExhibitObjs = RatebookTemplate.objects.filter(RatebookID=rbID)
     TempleteObjectHeirarchy = dict()
-    for i in ExhibitObjs:
-        currentExhibitHeirarchy = dict()
-        currentExhibitHeirarchy['Rating Variables'] = i.ExhibitVariables.all()
-        currentExhibitHeirarchy['Coverages'] = i.ExhibitCoverages.all()
-        TempleteObjectHeirarchy[i.RatebookExhibit.Exhibit] = currentExhibitHeirarchy
+    if ExhibitObjs is not None:
+        for i in ExhibitObjs:
+            currentExhibitHeirarchy = dict()
+            currentExhibitHeirarchy['Rating Variables'] = i.ExhibitVariables.all()
+            currentExhibitHeirarchy['Coverages'] = i.ExhibitCoverages.all()
+            TempleteObjectHeirarchy[(i.id, i.RatebookExhibit.Exhibit)] = currentExhibitHeirarchy
+    else:
+        TempleteObjectHeirarchy = None
     return render(request, 'ratemanager/viewTemplate.html',
                   {
                     'TempleteObjectHeirarchy': TempleteObjectHeirarchy,
                     'options': options,
-                    'appLabel': appLabel
+                    'appLabel': appLabel,
+                    'selectedData': selectedData,
+                    'rbID': rbID
                     })

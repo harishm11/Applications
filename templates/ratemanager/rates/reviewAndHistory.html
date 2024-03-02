@@ -1,0 +1,41 @@
+{% extends 'ratemanager/rates/ratesBase.html' %}
+
+{% block tabContent %}
+
+<div class="container">
+    <form method="post"
+    action="{{ request.path }}">
+    {% csrf_token %}
+    <table class='table table-sm table-responsive w-auto align-middle'>
+        {{ form.as_table }}
+    </table>
+        <a
+        href="{% url 'ratemanager:ratesReview' %}"
+        type="button"
+        name="back"
+        class="btn btn-sm btn-secondary"
+        >Back</a>
+        {% if previousEnv is not None %}
+        <button
+        type="submit"
+        name="submit"
+        value="{{previousEnv}}"
+        class="btn btn-sm btn-primary"
+        >Move back to "{{previousEnv}}" Status</button>
+        {% endif %}
+        {% if nextEnv is not None %}
+        <button
+        type="submit"
+        name="submit"
+        value="{{nextEnv}}"
+        class="btn btn-sm btn-primary"
+        >Move ahead to "{{nextEnv}}" Status</button>
+        {% endif %}
+    </form>
+</div>
+<div class="container">
+<b>Review History:</b><hr>
+    {% include 'ratemanager/searchResultsTable.html' %}
+</div>
+
+{% endblock %}

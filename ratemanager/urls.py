@@ -2,7 +2,7 @@
 from django.urls import path, re_path
 from ratemanager.views import exportRB, viewRB, \
     views, createRB, updateRB, compareRB, \
-    createTemplate, cloneRB, template
+    createTemplate, cloneRB, template, rates
 from django import views as django_views
 
 app_name = 'ratemanager'
@@ -55,7 +55,17 @@ urlpatterns = [
     # Template (checkpoint started building flows)
     path('template/', template.template, name="template"),
     path('projectIdAndDateInput/', template.projectIdAndDateInput, name="projectIdAndDateInput"),
-
+    path('moreTemplateDetailsPopup/<str:RBpk>/', template.moreTemplateDetailsPopup, name="moreTemplateDetailsPopup"),
     # Delete Template
     path('deleteTemplate/<str:rbID>/', template.deleteTemplate, name="deleteTemplate"),
+
+
+    # New UI
+    path('rates/', rates.rates, name='rates'),
+    path('rates/ratebook/', rates.ratebook, name='ratebook'),
+    path('rates/upload/', rates.upload, name='ratesUpload'),
+    path('rates/migrate/', rates.migrate, name='ratesMigrate'),
+    path('rates/review/', rates.review, name='ratesReview'),
+    path('rates/review/<str:pk>/', rates.reviewAndHistory, name='reviewAndHistory'),
+    path('rates/compare/', rates.compare, name='ratesCompare'),
 ]

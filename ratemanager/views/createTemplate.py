@@ -5,6 +5,7 @@ from ratemanager.models.ratebookmetadata import RatebookMetadata
 from ratemanager.models.ratebooktemplate import RatebookTemplate
 from ratemanager.models.ratingexhibits import RatingExhibits
 from django.contrib import messages
+from django.utils.html import format_html
 
 
 def editExhibitTemplate(request, pk):
@@ -97,6 +98,10 @@ def selectFromAllExhibitsList(request, id):
         form = selectExhibitListsForm()
         choices = RatingExhibits.objects.all()
         form.fields['toAddExhibits'].queryset = choices
+        found = RatebookMetadata.objects.filter(RatebookID=id.split('_')[0])
+        if found and found.first().Environment == 'Production':
+            messages.add_message(request, level=messages.ERROR, message="Unable to delete the template already in Production.")
+            return redirect('ratemanager:template')
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
         form.fields['toAddExhibits'].initial = initial
 
@@ -125,6 +130,9 @@ def selectFromAllExhibitsList(request, id):
                     newObj.ExhibitVariables.add(i)
                 for i in sourceExhibit.ExhibitCoverages.all():
                     newObj.ExhibitCoverages.add(i)
+            for i in RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]):
+                if i.RatebookExhibit not in form_data['toAddExhibits']:
+                    i.delete()
         return redirect('ratemanager:listExhibits', id)
 
 
@@ -138,6 +146,10 @@ def selectFromExistingRbExhibitsList(request, id):
     if request.method == 'GET':
         form = selectExhibitListsFormExistingRB(rbID=rbID)
         newRbID = request.session['NewRBid']
+        found = RatebookMetadata.objects.filter(RatebookID=id.split('_')[0])
+        if found and found.first().Environment == 'Production':
+            messages.add_message(request, level=messages.ERROR, message="Unable to delete the template already in Production.")
+            return redirect('ratemanager:template')
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=newRbID))
         form.fields['toAddExhibits'].initial = initial
         return render(request, 'ratemanager/selectExhibitsOptions.html',
@@ -177,6 +189,7 @@ def listExhibits(request, pk):
 
     return render(request, 'ratemanager/listExhibits.html',
                   {
+                    'title': 'List Exhibits in Template',
                     'options': options,
                     'appLabel': appLabel,
                     'ExhibitObjs': ExhibitObjs,
@@ -195,10 +208,22 @@ def deleteExhibitTemplate(request, pk):
 
 def previewExhibit(request, Exhibit_id):
     ExhibitObj = RatebookTemplate.objects.get(pk=Exhibit_id)
-
+    filteredExhibits = helperfuncs.fetchRatebookSpecificVersion(
+        rbID=ExhibitObj.RatebookID,
+        rbVersion=RatebookMetadata.objects.filter(
+            RatebookID=ExhibitObj.RatebookID
+            ).order_by('-RatebookVersion').first().RatebookVersion
+            ).order_by('Coverage', 'Exhibit').filter(
+                Exhibit=ExhibitObj.RatebookExhibit.Exhibit
+                )
+    df = helperfuncs.convert2Df(filteredExhibits)
+    idf = helperfuncs.inverseTransform(df)
+    idf = idf.fillna('')
+    dfHTML = format_html(idf.to_html(table_id='example', index=False))
     return render(request, 'ratemanager/previewExhibit.html',
                   {
                     'ExhibitObj': ExhibitObj,
+                    'dfHTML': dfHTML
                     })
 
 

@@ -1,0 +1,26 @@
+{% load dynamicdatatable_tags %}{% load templateSearchResults_tags %}
+
+<div id="results">
+  <table id="searchResults" 
+  class="table table-sm table-condensed text-center 
+          align-middle table-hover cell-border">
+    <thead>
+      <tr>
+        {% with searchResultTableHeaders|first as obj %}
+        {% for field in searchResultTableHeaders %}
+        <th>{{ field.verbose_name }}</th>
+        {% endfor %}
+        {% endwith %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for obj in searchResults %}
+      <tr onclick="window.location='/ratemanager/rates/review/{{obj.id}}/'">
+        {% for field in searchResultTableHeaders %} 
+          <td>{{ obj|get_attribute:field.name }}</td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -1,13 +1,13 @@
 from django import forms
 from django.apps import apps
 from datetime import datetime
+from ratemanager.models import comments
 
 from ratemanager.models.ratebookmetadata import RatebookMetadata
 from ratemanager.models.ratebooktemplate import RatebookTemplate
 from ratemanager.models.ratingfactors import RatingFactors
 from ratemanager.models.ratingexhibits import RatingExhibits
 
-import ratemanager.views.HelperFunctions as helperfuncs
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
 
@@ -224,23 +224,6 @@ class ViewRBFormWithDate(ViewRBForm):
     )
 
 
-class mainActionForm(forms.Form):
-    CHOICES = (
-        ('view', 'View'),
-        ('new', 'New'),
-        ('modify', 'Modify'),
-        ('delete', 'Delete'),
-        ('download', 'Download')
-        )
-
-    MainAction = forms.TypedChoiceField(
-        label='Create Intent: ',
-        choices=CHOICES,
-        required=True,
-        widget=forms.RadioSelect(),
-        )
-
-
 class createTemplateForm(forms.ModelForm):
     class Meta:
         model = RatebookMetadata
@@ -259,17 +242,17 @@ class createTemplateForm(forms.ModelForm):
             labels[i] = RatebookMetadata._meta.get_field(i).verbose_name
 
         widgets = {
-            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
-            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'})
+            'State': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'Carrier': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'LineofBusiness': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'UWCompany': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'PolicyType': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'PolicySubType': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'ProductCode': forms.Select(attrs={'class': 'form-control form-control-sm'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         setVerboseNamesAsLabels(self)
 
 
@@ -278,26 +261,26 @@ class projectIdAndDateInputForm(forms.ModelForm):
         model = RatebookMetadata
 
         fields = ([
-                    'ProjectID', 'ProjectDescription',
                     'NewBusinessEffectiveDate', 'RenewalEffectiveDate',
-                    'MigrationDate', 'MigrationTime',
-                    'ActivationDate', 'ActivationTime',
+                    'ProjectDescription', 'RatebookChangeType'
                     ])
 
-        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate'])
+        # exclude = (['RatebookName', 'RenewalExpiryDate', 'NewBusinessExpiryDate','MigrationDate', 'MigrationTime', 'ActivationDate', 'ActivationTime', 'ProjectID',])
 
         labels = dict()
         for i in fields:
-            labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+            labels[i] = RatebookMetadata._meta.get_field(i).verbose_name
 
         widgets = {
-            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
-            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any'}),
-            'ProjectDescription': forms.Textarea(attrs={"rows": "2"})
+            'NewBusinessEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'RenewalEffectiveDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'ActivationDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'ActivationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any', 'class': 'form-control form-control-sm'}),
+            'MigrationDate': forms.widgets.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'MigrationTime': forms.widgets.TimeInput(attrs={'type': 'time', 'step': 'any', 'class': 'form-control form-control-sm'}),
+            'ProjectDescription': forms.Textarea(attrs={"rows": "2", 'class': 'form-control form-control-sm'}),
+            'ProjectID': forms.Textarea(attrs={"rows": "1", 'class': 'form-control form-control-sm'}),
+            'RatebookChangeType': forms.Select(attrs={'class': 'form-control form-control-sm'}),
         }
 
 
@@ -322,7 +305,7 @@ class editExhibitForm(forms.ModelForm):
                    'ExhibitCoverages': forms.CheckboxSelectMultiple()}
         labels = dict()
         for i in fields:
-            labels[i] = ' '.join(helperfuncs.camel_case_split(i))
+            labels[i] = ' '.join(i)
         labels['RatebookExhibit'] = 'Exhibit Name'
 
 
@@ -330,7 +313,7 @@ class addExhibitForm(forms.ModelForm):
     class Meta:
         # fields from RatebookTemplate model
         model = RatingExhibits
-        fields = (['Exhibit'])
+        fields = (['Exhibit', 'DisplayName'])
         labels = {
             'Exhibit': 'Exhibit Name'
         }
@@ -344,7 +327,7 @@ class selectExhibitListsForm(forms.ModelForm):
         queryset=None,
         widget=FilteredSelectMultiple("Exhibits", False),
         label='Select Exhibits to Add to the Template',
-        required=True
+        required=False
         )
 
     class Media:
@@ -366,3 +349,26 @@ class selectExhibitListsFormExistingRB(selectExhibitListsForm):
         super(forms.ModelForm, self).__init__(*args, **kwargs)
         choices = RatebookTemplate.objects.all().filter(RatebookID=rbID)
         self.fields['toAddExhibits'].queryset = RatingExhibits.objects.filter(ratebooktemplate__in=choices)
+
+
+class searchCriteriaForm(createTemplateForm):
+    pass
+
+
+class ratesUploadForm(forms.Form):
+    file = forms.FileField(
+        label="Select the Excel file to upload:",
+        help_text="Download the template Excel file from the Ratebook tab and upload it with the rates filled-in.",
+        widget=forms.FileInput(attrs={'class': 'form-control form-control-sm'})
+    )
+
+
+class ratesReviewForm(forms.ModelForm):
+    class Meta:
+        model = comments.Notes
+        fields = ('Note',)
+        widgets = {'Note': forms.Textarea(
+            attrs={
+                "rows": "3",
+                'class': 'form-control form-control-sm'}),
+                }

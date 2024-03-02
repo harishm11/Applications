@@ -1,8 +1,11 @@
 import os
 import re
+from django.shortcuts import redirect
+from django.contrib import messages
 import pandas as pd
 from datetime import datetime
 from django.apps import apps
+from ratemanager.forms import searchCriteriaForm
 from ratemanager.models.ratebookmetadata import RatebookMetadata
 from ratemanager.models.ratebooktemplate import RatebookTemplate
 from ratemanager.models.ratingfactors import RatingFactors
@@ -16,12 +19,14 @@ from copy import deepcopy
 import openpyxl
 import sqlalchemy as sa
 from myproj.settings import DATABASES
+from ratemanager.views.configs import ENVIRONMENT_HIERARCHY
+from myproj.messages import RATE_MANAGER
 from difflib import get_close_matches
 import ratemanager.views.configs as configs
 
 coverage = apps.get_model('systemtables', 'coverage')
 
-SIDEBAR_OPTIONS = ["template", "createRB", "viewRB", "updateRB",
+SIDEBAR_OPTIONS = ['rates', "template", "createRB", "viewRB", "updateRB",
                    "viewRBbyDate", "viewRBbyVersion",
                    "viewTemplateOptions", 'EditCoverages']
 pd.options.mode.copy_on_write = True
@@ -907,6 +912,8 @@ def extractIdentityDetails(dictionary: dict) -> dict:
     identityKeys = ('Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType',
                     'PolicyType', 'PolicySubType', 'ProductCode')
     identityRateDetails = {key: dictionary.get(key) for key in identityKeys}
+    if not any(identityRateDetails.values()):
+        identityRateDetails = {key+'_id': dictionary.get(key+'_id') for key in identityKeys}
     return identityRateDetails
 
 
@@ -952,3 +959,82 @@ def clone_object(obj, attrs={}):
                 for child in children:
                     clone_object(child, attrs)
     return clone
+
+
+def checkTemplateCreateButtonEnable(obj):
+    if configs.ENVIRONMENT_HIERARCHY.get(obj.Environment) == 0:
+        return False
+    else:
+        identDetails = extractIdentityDetails(obj.__dict__)
+        sortedSearcResults = RatebookMetadata.objects.filter(**identDetails) \
+            .order_by('-RatebookID', '-RatebookVersion').exclude(Environment='Draft')
+        if obj.id == sortedSearcResults.first().id:
+            return True
+
+
+def searchCriteriaProcessor(request):
+    ''' returns 'searchCriteriaForm': form,
+                'searchResults': searchResults,
+                'searchResultTableHeaders': searchResultTableHeaders,
+                'ENVIRONMENT_HIERARCHY': ENVIRONMENT_HIERARCHY'''
+    searchResults = None
+    # Left overs 'id', 'Environment', 'isDeleted', 'onHold', 'retrofitReq', 'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode', 'NewBusinessExpiryDate', 'RenewalExpiryDate', 'CreationDateTime'
+    searchResultTableHeadersNamesOrder = [
+        'RatebookName', 'RatebookID', 'RatebookVersion', 'RatebookStatusType', 'NewBusinessEffectiveDate',  'RenewalEffectiveDate',
+        ]
+    fieldsDict = {x.name: x for x in RatebookMetadata._meta.fields}
+    searchResultTableHeaders = [fieldsDict[field] for field in searchResultTableHeadersNamesOrder]
+
+    form = searchCriteriaForm()
+
+    # save the Form data to session before validation and main action
+    if request.method == 'POST':
+        ratebook_details = request.POST.copy()
+        request.session['PreviousSearchCriteria'] = ratebook_details
+        form = searchCriteriaForm(ratebook_details)
+
+    # Required for GET requests
+    if request.method == 'GET' and request.session.get('PreviousSearchCriteria'):
+        form = searchCriteriaForm(
+            request.session['PreviousSearchCriteria']
+        )
+
+    # Mostly the form will only be valid if it is a POST request
+    if form.is_valid():
+        # save the cleaned Form data to session
+        form_data = form.cleaned_data
+
+        # check for existing template/Ratebook in production and if found show that it already exists.
+        identityDetails = extractIdentityDetails(form_data)
+        searchResults = RatebookMetadata.objects.filter(
+                **identityDetails).order_by('-RatebookID')
+        if 'Create a new Ratebook/Template' == request.POST.get('submit'):
+            return redirect('ratemanager:projectIdAndDateInput')
+        if searchResults.count() > 0 or request.POST.get('submit') == 'Search':
+
+            # check for matching drafts if found show the draft.
+            if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
+                messages.add_message(
+                    request, messages.INFO, RATE_MANAGER['MES_0001'])
+            elif searchResults.count() > 0:
+                messages.add_message(
+                    request, messages.INFO, RATE_MANAGER['MES_0002'])
+            else:
+                messages.add_message(
+                    request, messages.INFO, RATE_MANAGER['MES_0003'])
+
+            searchResults.order_by(
+                'RatebookID', 'RatebookStatusType', '-RatebookVersion'
+            )
+
+    context = {
+                'searchCriteriaForm': form,
+                'searchResults': searchResults,
+                'searchResultTableHeaders': searchResultTableHeaders,
+                'ENVIRONMENT_HIERARCHY': ENVIRONMENT_HIERARCHY
+                }
+    return context
+
+
+def validateUpload(extractedRBDetails):
+    return True

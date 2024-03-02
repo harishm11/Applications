@@ -1,0 +1,81 @@
+{% extends 'body.html' %} {% load static %}
+{% block title %} {{ title }} {% endblock %}
+{% block sidebarcontent %} 
+  {% include 'ratemanager/sidebar.html' %} 
+{% endblock  %}
+{% block messagecontent %} {% endblock %}
+{% load crispy_forms_tags %}
+{% block maincontent %}
+<div class="fixed-top bg-white" style="position: sticky;">
+  <nav class="navbar navbar-expand-sm">
+    <ul class="navbar-nav">
+      <li class="nav-item
+          {% if 'ratebook' in request.path%}active {% endif%} mx-3">
+        <a
+          class="nav-link"
+          href="{% url 'ratemanager:ratebook' %}"
+        >
+          Ratebook
+        </a>
+      </li>
+      <li class="nav-item
+          {% if 'compare' in request.path%}active {% endif%} mx-3">
+        <a
+          class="nav-link"
+          href="{% url 'ratemanager:ratesCompare' %}"
+        >
+          Compare
+        </a>
+      </li>
+
+      <li class="nav-item
+          {% if 'migrate' in request.path%}active {% endif%} mx-3">
+        <a
+          class="nav-link"
+          href="{% url 'ratemanager:ratesMigrate' %}"
+        >
+          Migrate
+        </a>
+      </li>   
+
+    <li class="nav-item
+        {% if 'upload' in request.path%}active {% endif%} mx-3">
+        <a
+          class="nav-link"
+          href="{% url 'ratemanager:ratesUpload' %}"
+        >
+          Upload
+        </a>
+      </li>
+
+      <li class="nav-item
+          {% if 'review' in request.path%}active {% endif%} mx-3">
+        <a
+          class="nav-link"
+          href="{% url 'ratemanager:ratesReview' %}"
+        >
+          Review
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+{% if messages %}
+  {% if request.user.is_authenticated %}
+    <div class="center-div mesage_text">
+        {% for message in messages %}
+            <li 
+              {% if message.tags %} 
+                class="{{ message.tags }}" 
+              {% endif %}> {{ message }}
+            </li>
+        {% endfor %}
+      <br />
+    </div>
+  {%else%}
+    <div class="mesage_text">Please Login to access this</div>
+  {% endif %}
+{% endif %}
+
+{% block tabContent %} {% endblock %}
+{% endblock %}
