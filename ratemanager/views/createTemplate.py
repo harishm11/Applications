@@ -5,6 +5,7 @@ from ratemanager.models.ratebookmetadata import RatebookMetadata
 from ratemanager.models.ratebooktemplate import RatebookTemplate
 from ratemanager.models.ratingexhibits import RatingExhibits
 from django.contrib import messages
+from django.utils.html import format_html
 
 
 def editExhibitTemplate(request, pk):
@@ -207,10 +208,22 @@ def deleteExhibitTemplate(request, pk):
 
 def previewExhibit(request, Exhibit_id):
     ExhibitObj = RatebookTemplate.objects.get(pk=Exhibit_id)
-
+    filteredExhibits = helperfuncs.fetchRatebookSpecificVersion(
+        rbID=ExhibitObj.RatebookID,
+        rbVersion=RatebookMetadata.objects.filter(
+            RatebookID=ExhibitObj.RatebookID
+            ).order_by('-RatebookVersion').first().RatebookVersion
+            ).order_by('Coverage', 'Exhibit').filter(
+                Exhibit=ExhibitObj.RatebookExhibit.Exhibit
+                )
+    df = helperfuncs.convert2Df(filteredExhibits)
+    idf = helperfuncs.inverseTransform(df)
+    idf = idf.fillna('')
+    dfHTML = format_html(idf.to_html(table_id='example', index=False))
     return render(request, 'ratemanager/previewExhibit.html',
                   {
                     'ExhibitObj': ExhibitObj,
+                    'dfHTML': dfHTML
                     })
 
 

@@ -6,14 +6,15 @@ import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.forms import ratesReviewForm, ratesUploadForm
 import pandas as pd
 from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-def saveNote(request, RbID):
+def saveNote(request, pk):
     form = ratesReviewForm(data=request.POST)
     if form.is_valid:
         noteObj = form.save(commit=False)
         noteObj.User = request.user
-        noteObj.Ratebook = RatebookMetadata.objects.get(pk=RbID)
+        noteObj.Ratebook = RatebookMetadata.objects.get(pk=pk)
         noteObj.Category = 'Review'
         noteObj.CreationDateTime = timezone.now()
         noteObj.save()
@@ -38,10 +39,19 @@ def ratebook(request):
     title = 'Rates - Rate books'
 
     context = helperfuncs.searchCriteriaProcessor(request)
+    page_number = request.GET.get('page')
+    paginator = Paginator(context['searchResults'], 5)
+    try:
+        searchResults = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        searchResults = paginator.page(1)
+    except EmptyPage:
+        searchResults = paginator.page(paginator.num_pages)
     context.update({
         'options': options,
         'appLabel': appLabel,
         'title': title,
+        'searchResults': searchResults
         })
     return render(request, 'ratemanager/rates/rateBooks.html', context)
 
@@ -91,7 +101,7 @@ def upload(request):
                 df[key] = rbMetaObjDict[key]
 
         helperfuncs.loadtoRatingFactors(df)
-        saveNote(request, RbID=rbMetaObjDict.RatebookID)
+        saveNote(request, pk=currentRbMetaObj.pk)
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -140,7 +150,7 @@ def reviewAndHistory(request, pk):
     if request.method == 'GET':
         form = ratesReviewForm()
     else:
-        saveNote(request, RbID=obj.RatebookID)
+        saveNote(request, pk=obj.pk)
         obj.RatebookStatusType = request.POST.get('submit')
         obj.save()
         messages.add_message(

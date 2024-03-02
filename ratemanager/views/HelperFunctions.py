@@ -973,6 +973,10 @@ def checkTemplateCreateButtonEnable(obj):
 
 
 def searchCriteriaProcessor(request):
+    ''' returns 'searchCriteriaForm': form,
+                'searchResults': searchResults,
+                'searchResultTableHeaders': searchResultTableHeaders,
+                'ENVIRONMENT_HIERARCHY': ENVIRONMENT_HIERARCHY'''
     searchResults = None
     # Left overs 'id', 'Environment', 'isDeleted', 'onHold', 'retrofitReq', 'Carrier', 'State', 'LineofBusiness', 'UWCompany', 'PolicyType', 'PolicySubType', 'ProductCode', 'NewBusinessExpiryDate', 'RenewalExpiryDate', 'CreationDateTime'
     searchResultTableHeadersNamesOrder = [
