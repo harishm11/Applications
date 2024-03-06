@@ -40,7 +40,7 @@ def ratebook(request):
 
     context = helperfuncs.searchCriteriaProcessor(request)
     page_number = request.GET.get('page')
-    paginator = Paginator(context['searchResults'], 5)
+    paginator = Paginator(context['searchResults'], 10)
     try:
         searchResults = paginator.get_page(page_number)
     except PageNotAnInteger:
