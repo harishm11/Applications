@@ -29,8 +29,8 @@ def setVerboseNamesAsLabels(self):
         'LobName').verbose_name
     self.fields['State'].label = state._meta.get_field(
         'StateCode').verbose_name
-    self.fields['Carrier'].label = carrier._meta.get_field(
-        'CarrierName').verbose_name
+    # self.fields['Carrier'].label = carrier._meta.get_field(
+    #     'CarrierName').verbose_name
     self.fields['UWCompany'].label = uwCompany._meta.get_field(
         'CompanyName').verbose_name
     self.fields['ProductCode'].label = productCode._meta.get_field(
@@ -229,8 +229,8 @@ class createTemplateForm(forms.ModelForm):
         model = RatebookMetadata
 
         fields = ([
-            'State', 'Carrier', 'LineofBusiness',
-            'UWCompany', 'PolicyType', 'PolicySubType',
+            'UWCompany', 'State', 'LineofBusiness',
+            'PolicyType', 'PolicySubType',
             'ProductCode'
         ])
 

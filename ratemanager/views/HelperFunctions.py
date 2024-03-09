@@ -1006,6 +1006,7 @@ def searchCriteriaProcessor(request):
 
         # check for existing template/Ratebook in production and if found show that it already exists.
         identityDetails = extractIdentityDetails(form_data)
+        identityDetails.pop('Carrier')
         searchResults = RatebookMetadata.objects.filter(
                 **identityDetails).order_by('-RatebookID')
         if 'Create a new Ratebook/Template' == request.POST.get('submit'):
@@ -1013,7 +1014,7 @@ def searchCriteriaProcessor(request):
         if searchResults.count() > 0 or request.POST.get('submit') == 'Search':
 
             # check for matching drafts if found show the draft.
-            if searchResults.filter(RatebookStatusType='Initial Draft').count() > 0:
+            if searchResults.filter(RatebookStatusType='Draft').count() > 0:
                 messages.add_message(
                     request, messages.INFO, RATE_MANAGER['MES_0001'])
             elif searchResults.count() > 0:
@@ -1038,3 +1039,7 @@ def searchCriteriaProcessor(request):
 
 def validateUpload(extractedRBDetails):
     return True
+
+
+def transformUsingTemplateData(df, exhibitName):
+    pass

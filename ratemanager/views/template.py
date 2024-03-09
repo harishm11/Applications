@@ -110,7 +110,7 @@ def projectIdAndDateInput(request):
         rbID = request.GET.get('rbID')
         form = projectIdAndDateInputForm(initial=initial)
         searchOptions = createTemplateForm(
-                data=request.session['TemplateFormData'])
+                data=request.session.get('TemplateFormData') or request.session.get('PreviousSearchCriteria'))
         if searchOptions.is_valid():
             searchOptionsData = fetchDisplayData(searchOptions)
         return render(request, 'ratemanager/ProjectIdAndDateInput.html',
