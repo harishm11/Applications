@@ -1041,5 +1041,80 @@ def validateUpload(extractedRBDetails):
     return True
 
 
-def transformUsingTemplateData(df, exhibitName):
-    pass
+def transformUsingTemplateData(rbID, df, exhibitName):
+    pd.options.mode.copy_on_write = True
+
+    template = RatebookTemplate.objects.filter(
+        RatebookID=rbID, RatebookExhibit__Exhibit=exhibitName
+        )
+
+    # coverages = template.first().ExhibitCoverages.all()
+    rateVariables = [var.DisplayName for var in template.first().ExhibitVariables.all()]
+
+    newdf = pd.DataFrame()
+
+    def handle_ranges(df_in):
+        df_in[str(i)+'1'] = pd.NA
+        df_in[str(i)+'2'] = pd.NA
+        for index, val in df_in[i].items():
+            has_separator, separator = find_separator(val)
+            if has_separator:
+                df_in.loc[index, str(
+                    i)+'1'], df_in.loc[index, str(i)+'2'] = val.split(separator)
+            else:
+                df_in.loc[index, str(i)+'1'] = val
+        df_in.drop([i], axis=1, inplace=True)
+        rateVariables.remove(i)
+        rateVariables.extend([str(i)+'1', str(i)+'2'])
+
+    df = df.melt(id_vars=rateVariables)
+    df.rename(columns={'variable': 'Coverage',
+                       'value': 'Factor'}, inplace=True)
+    for i in df.columns:
+        if check_range(df[i]):
+            handle_ranges(df[i])
+    newdf = create_rate_vars_cols(df, rateVariables)
+    newdf['Exhibit'] = exhibitName
+
+    return newdf
+
+
+def transformRBTemplate(rbID=None, xl_url=None, df_sheets=None):
+    """Function to transform the excel file to required form
+    to be able to load into postgres database."""
+
+    msgs = []
+    if xl_url:
+        df_sheets = pd.read_excel(xl_url, sheet_name=None)
+
+    df_dict = dict()
+    df_out = pd.DataFrame(columns=["Exhibit", "Coverage", "Factor"])
+
+    for sheet_name, df in df_sheets.items():
+        if sheet_name not in excludeList:
+            df_dict[sheet_name] = transformUsingTemplateData(
+                rbID=rbID, exhibitName=sheet_name, df=df)
+            df_dict[sheet_name]['TableCategory'] = get_table_category(
+                sheet_name)
+            df_dict[sheet_name] = df_dict[sheet_name].astype(object)
+            try:
+                df_out = df_out.merge(df_dict[sheet_name], how='outer')
+            except Exception as err:
+                print("Unable to transform {} table due to {}".format(
+                    sheet_name, err))
+
+    numRatingVars = configs.NO_OF_RATING_VARIABLES
+    for i in range(1, numRatingVars+1):
+        if 'RatingVarName' + str(i) not in df_out.columns:
+            df_out['RatingVarName' + str(i)] = None
+            df_out['RatingVarValue' + str(i)] = None
+
+    df_out = df_out[df_out.columns.sort_values().to_list()]
+    df_out = df_out.astype(str).astype(object).where(pd.notnull(df_out), None)
+
+    for i in set(df_sheets.keys()) - set(df_out["Exhibit"].unique()):
+        if i not in excludeList:
+            msgs.append("Unable to transform {} table.".format(i))
+    # map_covs_and_vars(df_out)
+    # df_out.to_excel('./uploads/check_transform.xlsx')
+    return df_out, msgs

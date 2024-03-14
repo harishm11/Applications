@@ -20,10 +20,12 @@
           <td>{{ obj|get_attribute:field.name }}</td>
         {% endfor %}
       </tr>
-      {% if not searchResults %}
-        No data found
-      {% endif %}
     {% endfor %}
+    <tr>
+    {% if not searchResults %}
+        <td colspan="1000%">No data found</td>
+    {% endif %}
+    </tr>
     </tbody>
   </table>
 </div>
