@@ -111,7 +111,7 @@ class CreateModelForm(forms.Form):
         return model
 
     def get_previous_migration(self, appLabel):
-        migration_dir = f"COnfiguration/{appLabel}/migrations"
+        migration_dir = f"Configuration/{appLabel}/migrations"
         migration_files = os.listdir(migration_dir)
         migration_files = filter(lambda f: f.endswith('.py'), migration_files)
         migration_files = sorted(migration_files)
