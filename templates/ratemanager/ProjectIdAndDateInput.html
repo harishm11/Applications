@@ -71,12 +71,12 @@
     <br>
     {% endif %}
     <div>
-        <button
+        <a
         type="button"
         name="back"
         class="btn btn-sm btn-secondary col-md-auto"
-        onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
-        >Back</button>
+        href="{% url 'ratemanager:ratebook' %}"
+        >Back</a>
 
         <input
             type="submit"

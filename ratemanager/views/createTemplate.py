@@ -100,8 +100,8 @@ def selectFromAllExhibitsList(request, id):
         form.fields['toAddExhibits'].queryset = choices
         found = RatebookMetadata.objects.filter(RatebookID=id.split('_')[0])
         if found and found.first().Environment == 'Production':
-            messages.add_message(request, level=messages.ERROR, message="Unable to delete the template already in Production.")
-            return redirect('ratemanager:template')
+            messages.add_message(request, level=messages.ERROR, message="Unable to Edit the template already in Production.")
+            return redirect('ratemanager:ratebook')
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]))
         form.fields['toAddExhibits'].initial = initial
 
@@ -124,12 +124,12 @@ def selectFromAllExhibitsList(request, id):
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:
-                newObj, _ = RatebookTemplate.objects.get_or_create(RatebookID=id.split('_')[0], RatebookExhibit=i)
                 sourceExhibit = RatebookTemplate.objects.all().filter(RatebookExhibit=i).first()
-                for i in sourceExhibit.ExhibitVariables.all():
-                    newObj.ExhibitVariables.add(i)
-                for i in sourceExhibit.ExhibitCoverages.all():
-                    newObj.ExhibitCoverages.add(i)
+                newObj, _ = RatebookTemplate.objects.get_or_create(RatebookID=id.split('_')[0], RatebookExhibit=i)
+                for j in sourceExhibit.ExhibitVariables.all():
+                    newObj.ExhibitVariables.add(j)
+                for j in sourceExhibit.ExhibitCoverages.all():
+                    newObj.ExhibitCoverages.add(j)
             for i in RatebookTemplate.objects.filter(RatebookID=id.split('_')[0]):
                 if i.RatebookExhibit not in form_data['toAddExhibits']:
                     i.delete()
@@ -146,10 +146,10 @@ def selectFromExistingRbExhibitsList(request, id):
     if request.method == 'GET':
         form = selectExhibitListsFormExistingRB(rbID=rbID)
         newRbID = request.session['NewRBid']
-        found = RatebookMetadata.objects.filter(RatebookID=id.split('_')[0])
+        found = RatebookMetadata.objects.filter(RatebookID=newRbID.split('_')[0])
         if found and found.first().Environment == 'Production':
-            messages.add_message(request, level=messages.ERROR, message="Unable to delete the template already in Production.")
-            return redirect('ratemanager:template')
+            messages.add_message(request, level=messages.ERROR, message="Unable to edit the template already in Production.")
+            return redirect('ratemanager:ratebook')
         initial = RatingExhibits.objects.filter(ratebooktemplate__in=RatebookTemplate.objects.filter(RatebookID=newRbID))
         form.fields['toAddExhibits'].initial = initial
         return render(request, 'ratemanager/selectExhibitsOptions.html',
@@ -167,12 +167,15 @@ def selectFromExistingRbExhibitsList(request, id):
         if form.is_valid():
             form_data = form.cleaned_data
             for i in form_data['toAddExhibits']:
-                newObj, _ = RatebookTemplate.objects.get_or_create(RatebookID=newRbID.split('_')[0], RatebookExhibit=i)
-                sourceExhibit = RatebookTemplate.objects.all().filter(RatebookExhibit=i).first()
-                for i in sourceExhibit.ExhibitVariables.all():
-                    newObj.ExhibitVariables.add(i)
-                for i in sourceExhibit.ExhibitCoverages.all():
-                    newObj.ExhibitCoverages.add(i)
+                sourceExhibit = RatebookTemplate.objects.all().filter(
+                    RatebookID=rbID.split('_')[0],
+                    RatebookExhibit=i).first()
+                newObj, _ = RatebookTemplate.objects.get_or_create(
+                    RatebookID=newRbID.split('_')[0], RatebookExhibit=i)
+                for j in sourceExhibit.ExhibitVariables.all():
+                    newObj.ExhibitVariables.add(j)
+                for j in sourceExhibit.ExhibitCoverages.all():
+                    newObj.ExhibitCoverages.add(j)
             return redirect('ratemanager:selectFromAllExhibitsList', newRbID)
         else:
             messages.add_message(request, messages.SUCCESS, form.errors)
@@ -216,10 +219,13 @@ def previewExhibit(request, Exhibit_id):
             ).order_by('Coverage', 'Exhibit').filter(
                 Exhibit=ExhibitObj.RatebookExhibit.Exhibit
                 )
-    df = helperfuncs.convert2Df(filteredExhibits)
-    idf = helperfuncs.inverseTransform(df)
-    idf = idf.fillna('')
-    dfHTML = format_html(idf.to_html(table_id='example', index=False))
+    if filteredExhibits:
+        df = helperfuncs.convert2Df(filteredExhibits)
+        idf = helperfuncs.inverseTransform(df)
+        idf = idf.fillna('')
+        dfHTML = format_html(idf.to_html(table_id='example', index=False))
+    else:
+        dfHTML = format_html("<h1>No Data Found</h1>")
     return render(request, 'ratemanager/previewExhibit.html',
                   {
                     'ExhibitObj': ExhibitObj,

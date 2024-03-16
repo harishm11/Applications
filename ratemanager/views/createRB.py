@@ -61,11 +61,12 @@ def loadNewRBtoDB(request):
     try:
         loaded_to_dbBooks = False
         rbObj = None
-        rate_details['ProjectID'] = 'Test'
         rate_details['RatebookRevisionType'] = 'Initial'
-        rate_details['RatebookStatusType'] = 'In Production'
+        rate_details['RatebookStatusType'] = 'Production'
+        rate_details['Environment'] = 'Production'
         rate_details['RatebookChangeType'] = 'Initial'
         rate_details['CreationDateTime'] = timezone.now().strftime('%m-%d-%Y')
+        rate_details['creator'] = request.user
         rate_details = helperfuncs.fetchForeignFields(rate_details)
         rate_details = helperfuncs.applyDateConversion(rate_details)
 
