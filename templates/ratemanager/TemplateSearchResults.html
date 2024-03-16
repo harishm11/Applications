@@ -25,37 +25,49 @@
               <i class="fa fa-ellipsis-v"></i>
             </button>
             <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item" title="View" 
-              href="{% url 'ratemanager:viewTemplate' obj.RatebookID %}"
-              ><i class="fa fa-eye"></i>&nbsp;View</a>
-            </li>            
 
-            <li>
-              {% if obj.Environment != 'Production' %}
-              <a class="dropdown-item" title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
-              ><i class="fa fa-edit"></i>&nbsp;Modify</a>
-              {% endif %}
-            </li>
-
-            <li>
-              {% if obj.Environment != 'Production' %}
-              <a class="dropdown-item" title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
-              ><i class="fa fa-trash"></i>&nbsp;Delete</a> 
-              {% endif %}
-            </li>
-
-            <li>
-              <a class="dropdown-item" title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
-              ><i class="fa fa-download">&nbsp;Download</i></a>
-            </li>
-
+            {% if perms.ratemanager.add_ratebookmetadata %}
             <li>
               {% if obj|checkTemplateCreateEnable %}
               <a class="dropdown-item" title="Create" href="{% url 'ratemanager:projectIdAndDateInput' %}?rbID={{ obj.RatebookID }}"
               ><i class="fa fa-plus"></i>&nbsp;Create</a>
               {% endif %}
             </li>
+            {% endif %}
+
+            {% if perms.ratemanager.view_ratebookmetadata %}
+            <li>
+              <a class="dropdown-item" title="View" 
+              href="{% url 'ratemanager:viewTemplate' obj.RatebookID %}"
+              ><i class="fa fa-eye"></i>&nbsp;View</a>
+            </li>
+            {% endif %}
+
+            {% if perms.ratemanager.change_ratebookmetadata %}
+            <li>
+              {% if obj.Environment != 'Production' %}
+              <a class="dropdown-item" title="Modify" href="{% url 'ratemanager:selectFromAllExhibitsList' obj.id %}"
+              ><i class="fa fa-edit"></i>&nbsp;Modify</a>
+              {% endif %}
+            </li>
+            {% endif %}
+
+            {% if perms.ratemanager.delete_ratebookmetadata %}
+            <li>
+              {% if obj.Environment != 'Production' %}
+              <a class="dropdown-item" title="Delete" href="{% url 'ratemanager:deleteTemplate' obj.RatebookID %}"
+              ><i class="fa fa-trash"></i>&nbsp;Delete</a> 
+              {% endif %}
+            </li>
+            {% endif %}
+
+            {% if perms.ratemanager.Download %}
+            <li>
+              <a class="dropdown-item" title="Download" href="{% url 'ratemanager:exportTemplate' obj.RatebookID %}"
+              ><i class="fa fa-download">&nbsp;Download</i></a>
+            </li>
+            {% endif %}
+
           </ul>
         </div>
         </td>

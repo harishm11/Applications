@@ -80,3 +80,13 @@ class RatingFactors (models.Model):
         null=False,
         default=None
     )
+
+    class Meta:
+        permissions = [
+            ('SearchRateBook', 'Can search RateBook/Template'),
+            ('Compare', 'Can compare Ratebooks/Template'),
+            ('Migrate', 'Can migrate Ratebook/Template'),
+            ('Upload', 'Can upload a Ratebook/Template'),
+            ('Approver', 'Can Approve a Ratebook/Template'),
+            ('Download', 'Can Download a Ratebook/Template')
+        ]

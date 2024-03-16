@@ -9,6 +9,8 @@
 <div class="fixed-top bg-white" style="position: sticky;">
   <nav class="navbar navbar-expand-sm">
     <ul class="navbar-nav">
+
+      {% if perms.ratemanager.SearchRateBook %}
       <li class="nav-item
           {% if 'ratebook' in request.path%}active {% endif%} mx-3">
         <a
@@ -18,6 +20,9 @@
           Ratebook
         </a>
       </li>
+      {% endif %}
+
+      {% if perms.ratemanager.Compare %}
       <li class="nav-item
           {% if 'compare' in request.path%}active {% endif%} mx-3">
         <a
@@ -27,7 +32,9 @@
           Compare
         </a>
       </li>
+      {% endif %}
 
+      {% if perms.ratemanager.Migrate %}
       <li class="nav-item
           {% if 'migrate' in request.path%}active {% endif%} mx-3">
         <a
@@ -37,7 +44,9 @@
           Migrate
         </a>
       </li>   
+      {% endif %}
 
+      {% if perms.ratemanager.Upload %}
     <li class="nav-item
         {% if 'upload' in request.path%}active {% endif%} mx-3">
         <a
@@ -47,7 +56,9 @@
           Upload
         </a>
       </li>
+      {% endif %}
 
+      {% if perms.ratemanager.Approver %}
       <li class="nav-item
           {% if 'review' in request.path%}active {% endif%} mx-3">
         <a
@@ -57,6 +68,7 @@
           Review
         </a>
       </li>
+      {% endif %}
     </ul>
   </nav>
 </div>

@@ -249,6 +249,16 @@ class RatebookMetadata(models.Model):
         # setForeignKeysVerboseNames(self)
         super(RatebookMetadata, self).save(*args, **kwargs)
 
+    class Meta:
+        permissions = [
+            ('SearchRateBook', 'Can search RateBook'),
+            ('Compare', 'Can compare Ratebooks'),
+            ('Migrate', 'Can migrate Ratebook'),
+            ('Upload', 'Can upload a Ratebook'),
+            ('Approver', 'Can Approve a Ratebook'),
+            ('Download', 'Can Download a Ratebook')
+        ]
+
 
 class EnvironmentHierarchy(models.Model):
     Hierarchy = models.IntegerField()

@@ -7,6 +7,7 @@ from ratemanager.forms import ratesReviewForm, ratesUploadForm
 import pandas as pd
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import permission_required
 
 
 def saveNote(request, pk):
@@ -33,6 +34,7 @@ def rates(request):
                   })
 
 
+@permission_required('ratemanager.SearchRateBook', raise_exception=True)
 def ratebook(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
@@ -62,6 +64,7 @@ def ratebook(request):
     return render(request, 'ratemanager/rates/rateBooks.html', context)
 
 
+@permission_required('ratemanager.Upload', raise_exception=True)
 def upload(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
@@ -136,6 +139,7 @@ def migrate(request):
                   })
 
 
+@permission_required('ratemanager.Approver', raise_exception=True)
 def review(request):
     options = helperfuncs.SIDEBAR_OPTIONS
     appLabel = 'ratemanager'
@@ -153,6 +157,7 @@ def review(request):
     return render(request, 'ratemanager/rates/review.html', context)
 
 
+@permission_required('ratemanager.Approver', raise_exception=True)
 def reviewAndHistory(request, pk):
     obj = RatebookMetadata.objects.get(pk=pk)
     if request.method == 'GET':
