@@ -1,4 +1,4 @@
-from ratemanager.forms import createTemplateForm, projectIdAndDateInputForm
+from ratemanager.forms import createTemplateForm, projectIdAndDateInputForm, searchCriteriaForm
 from django.shortcuts import render, redirect
 import ratemanager.views.HelperFunctions as helperfuncs
 from ratemanager.models.ratebookmetadata import RatebookMetadata
@@ -110,7 +110,7 @@ def projectIdAndDateInput(request):
         rbID = request.GET.get('rbID')
         form = projectIdAndDateInputForm(initial=initial)
         searchOptions = createTemplateForm(
-                data=request.session['TemplateFormData'])
+                data=request.session.get('TemplateFormData') or request.session.get('PreviousSearchCriteria'))
         if searchOptions.is_valid():
             searchOptionsData = fetchDisplayData(searchOptions)
         return render(request, 'ratemanager/ProjectIdAndDateInput.html',
@@ -125,10 +125,14 @@ def projectIdAndDateInput(request):
 
     if request.method == 'POST':
         # save the forms data to RB meta data table
-        searchOptions = createTemplateForm(
-            data=request.session['TemplateFormData'])
+        searchOptions = searchCriteriaForm((
+                request.session.get('PreviousSearchCriteria') or
+                request.session.get('TemplateFormData')
+                ))
         if searchOptions.is_valid():
             searchOptionsData = fetchDisplayData(searchOptions)
+        else:
+            messages.add_message(request, messages.ERROR, searchOptions.errors)
         form = projectIdAndDateInputForm(request.POST)
         rbID = request.POST.get('rbID')
         if form.is_valid():
@@ -142,8 +146,12 @@ def projectIdAndDateInput(request):
             created = False
             if not RatebookMetadata.objects.filter(**form_data):
                 form_data['CreationDateTime'] = timezone.now()
+                form_data['ActivationDate'] = timezone.now() + timezone.timedelta(180)
+                form_data['MigrationDate'] = timezone.now() + timezone.timedelta(180)
                 form_data['RatebookID'] = helperfuncs.generateRatebookID()
                 form_data['RatebookVersion'] = 0.0
+                form_data['Carrier'] = form_data['UWCompany'].Carrier
+                form_data['creator'] = request.user
                 obj = RatebookMetadata.objects.create(**form_data)
                 created = True
             if created is True:
@@ -192,7 +200,7 @@ def deleteTemplate(request, rbID):
         messages.add_message(request, level=messages.INFO, message="Successfully deleted the template.")
     else:
         messages.add_message(request, level=messages.ERROR, message="Unable to delete the template.")
-    return redirect('ratemanager:template')
+    return redirect('ratemanager:ratebook')
 
 
 def moreTemplateDetailsPopup(request, RBpk):

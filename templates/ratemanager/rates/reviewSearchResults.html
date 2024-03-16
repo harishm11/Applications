@@ -21,6 +21,11 @@
         {% endfor %}
       </tr>
     {% endfor %}
+    <tr>
+    {% if not searchResults %}
+        <td colspan="1000%">No data found</td>
+    {% endif %}
+    </tr>
     </tbody>
   </table>
 </div>

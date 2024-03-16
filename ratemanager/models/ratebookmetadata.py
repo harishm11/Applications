@@ -1,9 +1,11 @@
+# from email.policy import default
 from django.db import models
 from ratemanager.views.configs import ENVIRONMENT_HIERARCHY
 from systemtables.models import \
     state, carrier, lineofbusiness, \
     uwcompany, productcode, policytype, \
     policysubtype
+from django.contrib.auth.models import User
 
 
 def setForeignKeysVerboseNames(self):
@@ -209,6 +211,37 @@ class RatebookMetadata(models.Model):
         default=None,
         verbose_name='Reason for Locking'
     )
+
+    creator = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='creator',
+        default=None
+        )
+
+    uploader = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='uploader',
+        default=None,
+        null=True
+        )
+
+    reviewer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviewer',
+        default=None,
+        null=True
+        )
+
+    migrator = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='migrator',
+        default=None,
+        null=True
+        )
 
     def save(self, *args, **kwargs):
         self.RatebookName = str(self.State) + '_' + str(self.ProductCode)

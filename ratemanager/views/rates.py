@@ -39,14 +39,20 @@ def ratebook(request):
     title = 'Rates - Rate books'
 
     context = helperfuncs.searchCriteriaProcessor(request)
-    page_number = request.GET.get('page')
-    paginator = Paginator(context['searchResults'], 5)
-    try:
-        searchResults = paginator.get_page(page_number)
-    except PageNotAnInteger:
-        searchResults = paginator.page(1)
-    except EmptyPage:
-        searchResults = paginator.page(paginator.num_pages)
+
+    if request.POST.get('submit') == "Create a new Ratebook":
+        return redirect('ratemanager:projectIdAndDateInput')
+    if context.get('searchResults') is not None:
+        page_number = request.GET.get('page') or 1
+        paginator = Paginator(context.get('searchResults'), 10)
+        try:
+            searchResults = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            searchResults = paginator.page(1)
+        except EmptyPage:
+            searchResults = paginator.page(paginator.num_pages)
+    else:
+        searchResults = None
     context.update({
         'options': options,
         'appLabel': appLabel,
@@ -81,7 +87,7 @@ def upload(request):
             return redirect('.')
 
         # Transform the data.
-        df, errors = helperfuncs.transformRB(xl_url=uploadedFilePath)
+        df, errors = helperfuncs.transformRBTemplate(rbID=extractedRBDetails['RatebookID'], xl_url=uploadedFilePath)
         messages.add_message(request, messages.INFO, errors)
 
         # Fetch the Metadata Record
@@ -136,11 +142,13 @@ def review(request):
     title = 'Rates-Review'
 
     context = helperfuncs.searchCriteriaProcessor(request)
+    searchResults = context.get('searchResults')
+    searchResults = searchResults.exclude(Environment='Production') if searchResults is not None else None
     context.update({
         'options': options,
         'appLabel': appLabel,
         'title': title,
-        'searchResults': context['searchResults'].exclude(Environment='Production')
+        'searchResults': searchResults
         })
     return render(request, 'ratemanager/rates/review.html', context)
 
@@ -152,6 +160,7 @@ def reviewAndHistory(request, pk):
     else:
         saveNote(request, pk=obj.pk)
         obj.RatebookStatusType = request.POST.get('submit')
+        obj.Environment = request.POST.get('submit')
         obj.save()
         messages.add_message(
             request=request,
